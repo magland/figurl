@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+
+import figurl
+
+if __name__ == '__main__':
+    figurl.start_backend_cli()
