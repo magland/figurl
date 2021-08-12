@@ -6,4 +6,4 @@ projectAuthorEmail: jmagland@flatironinstitute.org
 projectDescription: Web views of figures generated from Python
 projectUrl: https://github.com/magland/figurl
 projectBugTrackerUrl: https://github.com/magland/figurl/issues
-pythonPackageDir: ./src/python
+pythonPackageDir: ./python

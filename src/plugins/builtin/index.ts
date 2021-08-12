@@ -1,6 +1,6 @@
 import { FigurlPlugin } from "figurl/types"
-import VegaLitePlugin from "./altair/ts/VegaLitePlugin"
-import BoxLayoutPlugin from "./boxlayout/ts/BoxLayoutPlugin"
+import VegaLitePlugin from "./VegaLite/VegaLitePlugin"
+import BoxLayoutPlugin from "./BoxLayout/BoxLayoutPlugin"
 
 const plugins: FigurlPlugin[] = [
     VegaLitePlugin,

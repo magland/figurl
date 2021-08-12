@@ -2,7 +2,7 @@ import FigurlApp from 'figurl/FigurlApp';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import taskFunctionIds from 'taskFunctionIds';
-import figurlPlugins from './python/figurl/plugins/plugins';
+import figurlPlugins from './plugins/plugins';
 import introMd from './intro.md.gen';
 import packageName from './packageName';
 import reportWebVitals from './reportWebVitals';

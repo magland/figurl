@@ -1,4 +1,3 @@
-import { useChannel } from 'figurl/kachery-react'
 import SelectChannelDialog from 'figurl/kachery-react/components/SelectChannel/SelectChannelDialog'
 import { RecentFigure, RecentFigures } from 'figurl/RecentFigures'
 import { FigurlPlugin } from 'figurl/types'
@@ -10,7 +9,6 @@ import './Home.css'
 import IntroSection from './IntroSection'
 import './localStyles.css'
 import RecentFiguresSection from './RecentFiguresSection'
-import TestResponsivenessSection from './TestResponsivenessSection'
 
 export type HomePageProps = {
     taskFunctionIds: TaskFunctionId[]
@@ -28,7 +26,6 @@ const hardCodedChannels = ['ccm'] as any as ChannelName[]
 
 const HomePage: FunctionComponent<HomePageProps> = ({taskFunctionIds, introMd, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, recentFigures, plugins, onOpenFigure}) => {
     const selectChannelVisibility = useVisible()
-    const {channelName} = useChannel()
 
     return (
         <div style={{margin: 'auto', maxWidth: 1200, paddingLeft: 10, paddingRight: 10}}>
