@@ -36,9 +36,6 @@ const HomePage: FunctionComponent<HomePageProps> = ({taskFunctionIds, introMd, p
             <IntroSection introMd={introMd} />
             <ChannelSection onSelectChannel={selectChannelVisibility.show} taskFunctionIds={taskFunctionIds} packageName={packageName} />
             <RecentFiguresSection recentFigures={recentFigures} plugins={plugins} onOpenFigure={onOpenFigure} />
-            {
-                channelName && <TestResponsivenessSection />
-            }
             <span>
                 <hr />
                 <p style={{fontFamily: 'courier', color: 'gray'}}>Python package version: {packageName} {pythonProjectVersion} | GUI version: {webAppProjectVersion} | <a href={repoUrl} rel="noreferrer" target="_blank">View project source code</a></p>

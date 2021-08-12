@@ -33,7 +33,6 @@ const ChannelSection: FunctionComponent<Props> = ({onSelectChannel, taskFunction
             {
                 channel ? (
                     <span>
-                        
                         <p>The selected channel is <span style={{fontWeight: 'bold'}}>{channel}</span></p>
                         {/* {
                             backendPythonProjectVersion && (
