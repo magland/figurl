@@ -1,4 +1,5 @@
 import { AppBar, Button, Toolbar } from '@material-ui/core';
+import { useChannel } from 'figurl/kachery-react';
 import ChannelControl from 'figurl/kachery-react/components/SelectChannel/ChannelControl';
 import SelectChannel from 'figurl/kachery-react/components/SelectChannel/SelectChannel';
 import TaskMonitor from 'figurl/kachery-react/components/TaskMonitor/TaskMonitor';
@@ -54,6 +55,9 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
         setRoute({routePath: '/home'})
     }, [gapi, setRoute])
 
+    const {backendId} = useChannel()
+    const channelControlColor = backendId ? 'orange' : 'white'
+
     return (
         <span>
             <AppBar position="static" style={{height: appBarHeight, color: 'white'}}>
@@ -76,7 +80,7 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
                     )
                 }
                 <span style={{paddingBottom: 0, color: 'white'}}>
-                    <ChannelControl onOpen={openChannel} color={'white'} />
+                    <ChannelControl onOpen={openChannel} color={channelControlColor} />
                 </span>
                 <span style={{paddingBottom: 0, color: 'white'}}>
                     <TaskMonitorControl onOpen={openTaskMonitor} color="white" />

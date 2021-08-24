@@ -82,6 +82,10 @@ const TaskInfoView: FunctionComponent<{task: Task<any>}> = ({ task }) => {
             value: task.taskId
         },
         {
+            label: 'Backend ID',
+            value: task.backendId
+        },
+        {
             label: 'Function ID',
             value: task.functionId
         },

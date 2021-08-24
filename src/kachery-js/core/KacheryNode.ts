@@ -5,7 +5,7 @@ import { getStats, GetStatsOpts } from './getStats'
 import KacheryHubInterface from './KacheryHubInterface'
 import NodeStats from './NodeStats'
 import { KacheryNodeRequestBody } from '../types/kacheryNodeRequestTypes'
-import { ByteCount, ChannelName, FileKey, isArrayOf, isString, JSONValue, NodeId, NodeLabel, Sha1Hash, Signature, UserId } from '../types/kacheryTypes'
+import { ByteCount, ChannelName, FileKey, isArrayOf, isString, JSONValue, NodeId, NodeLabel, nowTimestamp, Sha1Hash, Signature, UserId } from '../types/kacheryTypes'
 import { KacheryHubPubsubMessageBody } from '../types/pubsubMessages'
 
 export interface KacheryNodeOpts {
@@ -102,6 +102,7 @@ class KacheryNode {
     verifyClientAuthCode(code: string, opts: {browserAccess: boolean}) {
         if (code === this.#clientAuthCode.current) return true
         if ((this.#clientAuthCode.previous) && (code === this.#clientAuthCode.previous)) return true
+        console.info(`${nowTimestamp}: Incorrect client auth code: ${code} <> ${this.#clientAuthCode.current} ${this.#clientAuthCode.current}`)
         if (!opts.browserAccess) {
             return false
         }

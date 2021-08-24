@@ -9,8 +9,8 @@ type Props = {
 }
 
 const ActionLatencyTest: FunctionComponent<Props> = () => {
-    const {channelName} = useChannel()
-    const {returnValue: subfeedInfo} = useQueryTask<{feedId: FeedId, subfeedHash: SubfeedHash}>('get_action_latency_test_subfeed.1', {}, {channelName, useCache: true})
+    const {channelName, backendId} = useChannel()
+    const {returnValue: subfeedInfo} = useQueryTask<{feedId: FeedId, subfeedHash: SubfeedHash}>('get_action_latency_test_subfeed.1', {}, {useCache: true})
 
     const {messages: subfeedMessages} = useSubfeed({feedId: subfeedInfo ? subfeedInfo.feedId : undefined, subfeedHash: subfeedInfo ? subfeedInfo.subfeedHash : undefined })
 
@@ -46,7 +46,7 @@ const ActionLatencyTest: FunctionComponent<Props> = () => {
             if (canceled) return
             let result: any
             try {
-                result = await runQueryTaskAsync<{numMessages: number}>(kacheryNode, 'subfeed_latency_test_append.1', {message: {a: 'test1'}}, {channelName, useCache: false})
+                result = await runQueryTaskAsync<{numMessages: number}>(kacheryNode, 'subfeed_latency_test_append.1', {message: {a: 'test1'}}, {channelName, backendId, useCache: false})
             }
             catch(err) {
                 if (canceled) return
@@ -59,7 +59,7 @@ const ActionLatencyTest: FunctionComponent<Props> = () => {
         return () => {
             canceled = true
         }
-    }, [testCode, channelName, kacheryNode])
+    }, [testCode, channelName, backendId, kacheryNode])
 
     useEffect(() => {
         if (!result) return

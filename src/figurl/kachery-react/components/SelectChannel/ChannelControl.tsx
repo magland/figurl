@@ -1,7 +1,7 @@
 import { IconButton } from '@material-ui/core';
 import { Storage } from '@material-ui/icons';
-import useChannel from '../../useChannel';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
+import useChannel from '../../useChannel';
 
 type Props = {
     onOpen: () => void
@@ -9,10 +9,10 @@ type Props = {
 }
 
 const ChannelControl: FunctionComponent<Props> = ({ onOpen, color }) => {
-    const {channelName} = useChannel()
+    const {channelName, backendId} = useChannel()
     const { icon, title } = useMemo(() => {
-        return {icon: <Storage />, title: channelName ? `Channel: ${channelName}` : 'Configure channel'}
-    }, [channelName])
+        return {icon: <Storage />, title: channelName ? `Channel: ${channelName} | backend ID: ${backendId}` : 'Configure channel and backend ID'}
+    }, [channelName, backendId])
 
     const handleClick = useCallback(() => {
         onOpen()

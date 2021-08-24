@@ -27,7 +27,7 @@ const ClientSidePlot: FunctionComponent<{
     const [visible, setVisible] = useState(false);
 
     const kacheryNode = useKacheryNode()
-    const {channelName} = useChannel()
+    const {channelName, backendId} = useChannel()
 
     useEffect(() => {
         ;(async () => {
@@ -37,7 +37,7 @@ const ClientSidePlot: FunctionComponent<{
                 setCalculationStatus('calculating');
                 let plot_data;
                 try {
-                    plot_data = await runPureCalculationTaskAsync(kacheryNode, dataFunctionName, dataFunctionArgs, {channelName})
+                    plot_data = await runPureCalculationTaskAsync(kacheryNode, dataFunctionName, dataFunctionArgs, {channelName, backendId})
                 }
                 catch (err) {
                     console.error(err);
@@ -52,7 +52,7 @@ const ClientSidePlot: FunctionComponent<{
                 setCalculationStatus('finished');
             }
         })()
-    }, [kacheryNode, channelName, dataFunctionName, calculationStatus, calculationPool, dataFunctionArgs, visible])
+    }, [kacheryNode, channelName, backendId, dataFunctionName, calculationStatus, calculationPool, dataFunctionArgs, visible])
 
     if (calculationStatus === 'waitingForVisible') {
         return (

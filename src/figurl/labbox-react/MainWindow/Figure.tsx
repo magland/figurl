@@ -17,11 +17,10 @@ type Props = {
 }
 
 const useFigureObjectHelper = (figureObjectOrHash?: JSONObject | Sha1Hash) => {
-    const {channelName} = useChannel()
     let {returnValue: object, task} = usePureCalculationTask<FigureObject>(
         figureObjectOrHash && (typeof(figureObjectOrHash) === 'string') ? `figurl.get_figure_object.1` : undefined,
         {figure_object_hash: figureObjectOrHash},
-        {channelName}
+        {}
     )
     if (!figureObjectOrHash) {
         return {task, object: undefined, error: 'No figure object'}

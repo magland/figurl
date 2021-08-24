@@ -1,16 +1,18 @@
-import { ChannelName, JSONStringifyDeterministic, TaskFunctionId, TaskFunctionType, TaskKwargs } from "kachery-js/types/kacheryTypes";
+import { JSONStringifyDeterministic, TaskFunctionId, TaskFunctionType, TaskKwargs } from "kachery-js/types/kacheryTypes";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import initiateTask, { Task } from "./initiateTask";
+import useChannel from "./useChannel";
 import useKacheryNode from "./useKacheryNode";
 
-const useTask = <ReturnType>(functionId: TaskFunctionId | string | undefined, kwargs: TaskKwargs | {[key: string]: any}, functionType: TaskFunctionType, opts: {channelName?: ChannelName, queryUseCache?: boolean, queryFallbackToCache?: boolean}) => {
+const useTask = <ReturnType>(functionId: TaskFunctionId | string | undefined, kwargs: TaskKwargs | {[key: string]: any}, functionType: TaskFunctionType, opts: {queryUseCache?: boolean, queryFallbackToCache?: boolean}) => {
     const [task, setTask] = useState<Task<ReturnType> | undefined>(undefined)
     const kacheryNode = useKacheryNode()
     const [, setUpdateCode] = useState<number>(0)
     const incrementUpdateCode = useCallback(() => {setUpdateCode(c => (c+1))}, [])
     const kwargsString = JSONStringifyDeterministic(kwargs)
+    const {channelName, backendId} = useChannel()
     useEffect(() => {
-        if (!opts.channelName) return
+        if (!channelName) return
         if (!functionId) return
         let valid = true
         
@@ -23,7 +25,8 @@ const useTask = <ReturnType>(functionId: TaskFunctionId | string | undefined, kw
 
         const t = initiateTask<ReturnType>({
             kacheryNode,
-            channelName: opts.channelName,
+            channelName,
+            backendId,
             functionId,
             kwargs: kwargs2,
             functionType,
@@ -37,7 +40,7 @@ const useTask = <ReturnType>(functionId: TaskFunctionId | string | undefined, kw
         return () => {
             valid = false
         }
-    }, [functionId, kwargsString, functionType, opts.channelName, kacheryNode, incrementUpdateCode, opts.queryUseCache, opts.queryFallbackToCache])
+    }, [functionId, kwargsString, functionType, channelName, backendId, kacheryNode, incrementUpdateCode, opts.queryUseCache, opts.queryFallbackToCache])
     const taskStatus = task ? task.status : undefined
     const returnValue = useMemo(() => {
         if (!task) return undefined

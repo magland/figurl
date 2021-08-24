@@ -15,7 +15,7 @@ const QueryLatencyTest: FunctionComponent<Props> = () => {
     const [timeFinished, setTimeFinished] = useState<Timestamp | undefined>(undefined)
     const [errorMsg, setErrorMsg] = useState<string | undefined>(undefined)
     const kacheryNode = useKacheryNode()
-    const {channelName} = useChannel()
+    const {channelName, backendId} = useChannel()
     const elapsedSec = useMemo(() => {
         if (!timeStarted) return undefined
         if (!timeFinished) return undefined
@@ -38,7 +38,7 @@ const QueryLatencyTest: FunctionComponent<Props> = () => {
             if (canceled) return
             let result: any
             try {
-                result = await runQueryTaskAsync(kacheryNode, 'latency_test_query.1', {x: 'test1'}, {channelName, useCache: false})
+                result = await runQueryTaskAsync(kacheryNode, 'latency_test_query.1', {x: 'test1'}, {channelName, backendId, useCache: false})
             }
             catch(err) {
                 if (canceled) return
@@ -56,7 +56,7 @@ const QueryLatencyTest: FunctionComponent<Props> = () => {
         return () => {
             canceled = true
         }
-    }, [testCode, channelName, kacheryNode])
+    }, [testCode, channelName, backendId, kacheryNode])
 
     if ((!timeStarted) || (errorMsg)) {
         return (

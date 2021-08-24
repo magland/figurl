@@ -2,11 +2,12 @@ import { KacheryNode } from "kachery-js"
 import { ChannelName, TaskFunctionId, TaskFunctionType, TaskKwargs } from "kachery-js/types/kacheryTypes"
 import initiateTask from "./initiateTask"
 
-const runTaskAsync = async <ReturnType>(kacheryNode: KacheryNode, functionId: TaskFunctionId | string, kwargs: TaskKwargs | { [key: string]: any }, functionType: TaskFunctionType, opts: { channelName: ChannelName, queryUseCache?: boolean }): Promise<ReturnType> => {
+const runTaskAsync = async <ReturnType>(kacheryNode: KacheryNode, functionId: TaskFunctionId | string, kwargs: TaskKwargs | { [key: string]: any }, functionType: TaskFunctionType, opts: { channelName: ChannelName, backendId: string | null, queryUseCache?: boolean }): Promise<ReturnType> => {
   return new Promise((resolve, reject) => {
     const task = initiateTask<ReturnType>({
       kacheryNode,
       channelName: opts.channelName,
+      backendId: opts.backendId || null,
       functionId,
       kwargs,
       functionType,

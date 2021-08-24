@@ -6,10 +6,11 @@ import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } f
 
 type Props = {
     channelName: ChannelName
+    backendId: string | null
     taskFunctionIds: TaskFunctionId[]
 }
 
-const CheckRegisteredTaskFunctions: FunctionComponent<Props> = ({channelName, taskFunctionIds}) => {
+const CheckRegisteredTaskFunctions: FunctionComponent<Props> = ({channelName, backendId, taskFunctionIds}) => {
     const kacheryNode = useKacheryNode()
     const [registeredTaskFunctions, setRegisteredTaskFunctions] = useState<RegisteredTaskFunction[] | undefined>(undefined)
     const [refreshCode, setRefreshCode] = useState<number>(0)
@@ -30,7 +31,7 @@ const CheckRegisteredTaskFunctions: FunctionComponent<Props> = ({channelName, ta
             update()
         })
         update()
-        kacheryNode.kacheryHubInterface().probeTaskFunctionsFromChannel({channelName, taskFunctionIds})
+        kacheryNode.kacheryHubInterface().probeTaskFunctionsFromChannel({channelName, backendId, taskFunctionIds})
         let canceled = false
         setProbing(true)
         setTimeout(() => {
@@ -41,7 +42,7 @@ const CheckRegisteredTaskFunctions: FunctionComponent<Props> = ({channelName, ta
             canceled = true
             cancel()
         }
-    }, [kacheryNode, channelName, taskFunctionIds, refreshCode])
+    }, [kacheryNode, channelName, backendId, taskFunctionIds, refreshCode])
 
     const numRegistered = (registeredTaskFunctions || []).length
 

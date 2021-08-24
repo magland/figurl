@@ -7,6 +7,7 @@ import randomAlphaString from "../util/randomAlphaString";
 
 type RegisteredTaskFunctionGroup = {
     taskFunctions: RegisteredTaskFunction[]
+    backendId: string | null
     incomingRequestedTasksCallback?: (incomingRequestedTasks: RequestedTask[]) => void
     internalRequestedTaskList: RequestedTask[]
 }
@@ -24,8 +25,8 @@ export default class IncomingTaskManager {
     #registeredTaskFunctionGroups = new GarbageMap<string, RegisteredTaskFunctionGroup>(null)
     #pendingTaskRequests: PendingTaskRequest[] = []
     #processScheduled = false
-    async registerTaskFunctions(args: {taskFunctions: RegisteredTaskFunction[], timeoutMsec: DurationMsec}): Promise<RequestedTask[]> {
-        const {taskFunctions, timeoutMsec} = args
+    async registerTaskFunctions(args: {taskFunctions: RegisteredTaskFunction[], backendId: string | null, timeoutMsec: DurationMsec}): Promise<RequestedTask[]> {
+        const {taskFunctions, backendId, timeoutMsec} = args
         return new Promise<RequestedTask[]>((resolve, reject) => {
             let complete = false
             const key = randomAlphaString(10)
@@ -37,6 +38,7 @@ export default class IncomingTaskManager {
             }
             const tfg: RegisteredTaskFunctionGroup = {
                 taskFunctions,
+                backendId,
                 incomingRequestedTasksCallback: (incomingRequestedTasks) => {
                     if (complete) throw Error('Unexpected complete')
                     _return(incomingRequestedTasks)
@@ -44,7 +46,7 @@ export default class IncomingTaskManager {
                 internalRequestedTaskList: []
             }
             this.#registeredTaskFunctionGroups.set(key, tfg)
-            this._processPendingTaskRequests()
+            this._processPendingTaskRequests(backendId)
             setTimeout(() => {
                 if (!complete) {
                     _return([])
@@ -52,12 +54,13 @@ export default class IncomingTaskManager {
             }, durationMsecToNumber(timeoutMsec))
         })
     }
-    requestTask(args: {channelName: ChannelName, taskId: TaskId, taskFunctionId: TaskFunctionId, taskKwargs: TaskKwargs, taskFunctionType: TaskFunctionType}) {
-        const {channelName, taskId, taskFunctionId, taskKwargs, taskFunctionType} = args
+    requestTask(args: {channelName: ChannelName, taskId: TaskId, taskFunctionId: TaskFunctionId, taskKwargs: TaskKwargs, taskFunctionType: TaskFunctionType, backendId: string | null}) {
+        const {channelName, taskId, taskFunctionId, taskKwargs, taskFunctionType, backendId} = args
         const taskHash = computeTaskHash(taskFunctionId, taskKwargs)
         this.#pendingTaskRequests.push({
             requestedTask: {
                 channelName,
+                backendId,
                 taskId,
                 taskHash,
                 taskFunctionId,
@@ -66,18 +69,21 @@ export default class IncomingTaskManager {
             },
             timestamp: nowTimestamp()
         })
-        this._scheduleProcessPendingTaskRequests()
+        this._scheduleProcessPendingTaskRequests(backendId)
     }
-    async probeTaskFunctions(args: {channelName: ChannelName, taskFunctionIds: TaskFunctionId[]}): Promise<ProbeTaskFunctionsResult> {
-        const {channelName, taskFunctionIds} = args
+    async probeTaskFunctions(args: {channelName: ChannelName, backendId: string | null, taskFunctionIds: TaskFunctionId[]}): Promise<ProbeTaskFunctionsResult> {
+        const {channelName, backendId, taskFunctionIds} = args
         const foundIds = new Set<TaskFunctionId>()
         const ret: ProbeTaskFunctionsResult = {registeredTaskFunctions: []}
         for (let pass = 1; pass <= 2; pass++) {
             for (let id of taskFunctionIds) {
                 if (!foundIds.has(id)) {
-                    const g = this._findRegisteredTaskFunctionGroupForTaskFunction(id, channelName)
+                    const g = this._findRegisteredTaskFunctionGroupForTaskFunction(id, channelName, backendId)
                     if (g) {
-                        const x = g.taskFunctions.filter(a => ((a.taskFunctionId === id) && (a.channelName === channelName)))[0]
+                        const x = g.taskFunctions.filter(a => (
+                            (a.taskFunctionId === id) &&
+                            (a.channelName === channelName)
+                        ))[0]
                         if (!x) throw Error('Unexpected, unable to find task function in probeTaskFunctions')
                         foundIds.add(id)
                         ret.registeredTaskFunctions.push({
@@ -99,21 +105,21 @@ export default class IncomingTaskManager {
         }
         return ret
     }
-    _scheduleProcessPendingTaskRequests() {
+    _scheduleProcessPendingTaskRequests(backendId: string | null) {
         if (this.#processScheduled) return
         this.#processScheduled = true
         setTimeout(() => {
             this.#processScheduled = false
-            this._processPendingTaskRequests()
+            this._processPendingTaskRequests(backendId)
         }, 100)
     }
-    _processPendingTaskRequests() {
+    _processPendingTaskRequests(backendId: string | null) {
         const newList: PendingTaskRequest[] = []
         for (let x of this.#pendingTaskRequests) {
             let remove = false
             const elapsed = elapsedSince(x.timestamp)
             if (elapsed < 1000 * 4) {
-                const g = this._findRegisteredTaskFunctionGroupForTaskFunction(x.requestedTask.taskFunctionId, x.requestedTask.channelName)
+                const g = this._findRegisteredTaskFunctionGroupForTaskFunction(x.requestedTask.taskFunctionId, x.requestedTask.channelName, backendId)
                 if (g) {
                     g.internalRequestedTaskList.push(x.requestedTask)
                     remove = true
@@ -133,13 +139,15 @@ export default class IncomingTaskManager {
             }
         }
     }
-    _findRegisteredTaskFunctionGroupForTaskFunction(taskFunctionId: TaskFunctionId, channelName: ChannelName) {
+    _findRegisteredTaskFunctionGroupForTaskFunction(taskFunctionId: TaskFunctionId, channelName: ChannelName, backendId: string | null) {
         for (let k of this.#registeredTaskFunctionGroups.keys()) {
             const g = this.#registeredTaskFunctionGroups.get(k)
             if (!g) throw Error('Unexpected')
-            for (let f of g.taskFunctions) {
-                if ((f.taskFunctionId === taskFunctionId) && (f.channelName === channelName)) {
-                    return g
+            if (g.backendId === backendId) {
+                for (let f of g.taskFunctions) {
+                    if ((f.taskFunctionId === taskFunctionId) && (f.channelName === channelName)) {
+                        return g
+                    }
                 }
             }
         }

@@ -7,4 +7,12 @@ const useFigurlPlugins = () => {
     return context.plugins
 }
 
+export const useBackendId = () => {
+    const context = useContext(FigurlContext)
+    return {
+        backendId: context ? context.backendId : null,
+        setBackendId: context ? context.setBackendId : () => {}
+    }
+}
+
 export default useFigurlPlugins

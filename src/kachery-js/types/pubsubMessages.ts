@@ -1,5 +1,5 @@
 import { isRegisteredTaskFunction, RegisteredTaskFunction } from "./kacheryHubTypes";
-import { ErrorMessage, FeedId, FileKey, isArrayOf, isEqualTo, isErrorMessage, isFeedId, isFileKey, isMessageCount, isNodeId, isOneOf, isSignature, isSubfeedHash, isSubfeedPosition, isTaskFunctionId, isTaskFunctionType, isTaskId, isTaskKwargs, isTaskStatus, MessageCount, NodeId, optional, Signature, SubfeedHash, SubfeedPosition, TaskFunctionId, TaskFunctionType, TaskId, TaskKwargs, TaskStatus, _validateObject } from "./kacheryTypes";
+import { ErrorMessage, FeedId, FileKey, isArrayOf, isEqualTo, isErrorMessage, isFeedId, isFileKey, isMessageCount, isNodeId, isNull, isOneOf, isSignature, isString, isSubfeedHash, isSubfeedPosition, isTaskFunctionId, isTaskFunctionType, isTaskId, isTaskKwargs, isTaskStatus, MessageCount, NodeId, optional, Signature, SubfeedHash, SubfeedPosition, TaskFunctionId, TaskFunctionType, TaskId, TaskKwargs, TaskStatus, _validateObject } from "./kacheryTypes";
 
 export type RequestFileMessageBody = {
     type: 'requestFile',
@@ -77,6 +77,7 @@ export const isUpdateTaskStatusMessageBody = (x: any): x is UpdateTaskStatusMess
 
 export type RequestTaskMessageBody = {
     type: 'requestTask',
+    backendId?: string | null,
     taskId: TaskId,
     taskFunctionId: TaskFunctionId,
     taskFunctionType: TaskFunctionType,
@@ -86,6 +87,7 @@ export type RequestTaskMessageBody = {
 export const isRequestTaskMessageBody = (x: any): x is RequestTaskMessageBody => {
     return _validateObject(x, {
         type: isEqualTo('requestTask'),
+        backendId: optional(isOneOf([isString, isNull])),
         taskId: isTaskId,
         taskFunctionId: isTaskFunctionId,
         taskFunctionType: isTaskFunctionType,
@@ -95,13 +97,15 @@ export const isRequestTaskMessageBody = (x: any): x is RequestTaskMessageBody =>
 
 export type ProbeTaskFunctionsBody = {
     type: 'probeTaskFunctions',
-    taskFunctionIds: TaskFunctionId[]
+    taskFunctionIds: TaskFunctionId[],
+    backendId?: string | null
 }
 
 export const isProbeTaskFunctionsBody = (x: any): x is ProbeTaskFunctionsBody => {
     return _validateObject(x, {
         type: isEqualTo('probeTaskFunctions'),
-        taskFunctionIds: isArrayOf(isTaskFunctionId)
+        taskFunctionIds: isArrayOf(isTaskFunctionId),
+        backendId: optional(isOneOf([isString, isNull])),
     })
 }
 

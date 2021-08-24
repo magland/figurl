@@ -658,6 +658,7 @@ export const isRegisteredTaskFunction = (x: any): x is RegisteredTaskFunction =>
 
 export type RequestedTask = {
     channelName: ChannelName
+    backendId: string | null
     taskId: TaskId
     taskHash: Sha1Hash
     taskFunctionId: TaskFunctionId

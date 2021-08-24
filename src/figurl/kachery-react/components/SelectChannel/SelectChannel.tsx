@@ -13,7 +13,9 @@ type Props = {
 const SelectChannel: FunctionComponent<Props> = ({onClose, hardCodedChannels}) => {
     const {
         channelName: selectedChannel,
-        selectChannel
+        backendId,
+        selectChannel,
+        setBackendId
     } = useChannel()
     
     const [channelItems, channelItemsDispatch] = useReducer(channelItemsReducer, initialChannelItems())
@@ -29,9 +31,13 @@ const SelectChannel: FunctionComponent<Props> = ({onClose, hardCodedChannels}) =
     }, [channelItems, hardCodedChannels])
 
     const [editChannel, setEditChannel] = useState<string>('')
+    const [editBackendId, setEditBackendId] = useState<string>('')
     useEffect(() => {
         setEditChannel(selectedChannel?.toString() || '')
     }, [selectedChannel])
+    useEffect(() => {
+        setEditBackendId(backendId || '')
+    }, [backendId])
     const handleChange = useCallback((evt: any) => {
         const val: string = evt.target.value
         setEditChannel(val)
@@ -53,7 +59,12 @@ const SelectChannel: FunctionComponent<Props> = ({onClose, hardCodedChannels}) =
         if (!editChannel) return
         if (!isChannelName(editChannel)) return
         handleSelectChannel(editChannel)
-    }, [handleSelectChannel, editChannel])
+        setBackendId(editBackendId)
+    }, [handleSelectChannel, editChannel, setBackendId, editBackendId])
+    const handleBackendIdChange = useCallback((evt: any) => {
+        const val: string = evt.target.value
+        setEditBackendId(val)
+    }, [])
     const handleKeyDown = useCallback((e: any) => {
         if (e.keyCode === 13) {
            handleOkay()
@@ -71,6 +82,9 @@ const SelectChannel: FunctionComponent<Props> = ({onClose, hardCodedChannels}) =
                 selectedChannel={editChannel as any as ChannelName}
                 onSelectChannel={handleSelectChannel}
             />
+            <h3>Specify a backend ID</h3>
+            <p>Optionally specify a backend ID</p>
+            <TextField style={{width: '100%'}} label="Backend ID" value={editBackendId} onChange={handleBackendIdChange} onKeyDown={handleKeyDown} />
         </div>
     )
 }

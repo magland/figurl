@@ -1,3 +1,4 @@
+import { useBackendId } from "figurl/useFigurlPlugins"
 import { ChannelName } from "kachery-js/types/kacheryTypes"
 import QueryString from 'querystring'
 import { useCallback, useMemo } from "react"
@@ -15,10 +16,13 @@ const useChannel = () => {
         const search2 = queryString(query2)
         history.push({...location, pathname: pathname2, search: search2})
     }, [history, location, query])
-    return {
+    const {backendId, setBackendId} = useBackendId()
+    return useMemo(() => ({
         channelName: channel,
-        selectChannel
-    }
+        selectChannel,
+        backendId,
+        setBackendId
+    }), [channel, selectChannel, backendId, setBackendId])
 }
 
 const queryString = (params: { [key: string]: string | string[] }) => {

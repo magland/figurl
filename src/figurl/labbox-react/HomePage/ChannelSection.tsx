@@ -11,6 +11,7 @@ import aboutKacheryChannelsMd from './aboutKacheryChannels.md.gen'
 import CheckBackendPythonPackageVersion from './CheckBackendPythonPackageVersion'
 import CheckRegisteredTaskFunctions from './CheckRegisteredTaskFunctions'
 import hyperlinkStyle from './hyperlinkStyle'
+import { useChannel } from 'figurl/kachery-react'
 
 type Props = {
     onSelectChannel: () => void
@@ -19,7 +20,8 @@ type Props = {
 }
 
 const ChannelSection: FunctionComponent<Props> = ({onSelectChannel, taskFunctionIds, packageName}) => {
-    const {channel, setRoute} = useRoute()
+    const {setRoute} = useRoute()
+    const {channelName, backendId} = useChannel()
     // const channelInfo = useBackendInfo()
     // const backendPythonProjectVersion = backendInfo.backendPythonProjectVersion
     // const {visible: customBackendInstructionsVisible, show: showCustomBackendInstructions, hide: hideCustomBackendInstructions} = useVisible()
@@ -31,9 +33,9 @@ const ChannelSection: FunctionComponent<Props> = ({onSelectChannel, taskFunction
         <div className="ChannelSection HomeSection">
             <h3>Select a kachery channel <IconButton onClick={aboutKacheryChannelsVisible.show}><Help /></IconButton></h3>
             {
-                channel ? (
+                channelName ? (
                     <span>
-                        <p>The selected channel is <span style={{fontWeight: 'bold'}}>{channel}</span></p>
+                        <p>The selected channel is <span style={{fontWeight: 'bold'}}>{channelName}</span></p>
                         {/* {
                             backendPythonProjectVersion && (
                                 <span>
@@ -50,7 +52,8 @@ const ChannelSection: FunctionComponent<Props> = ({onSelectChannel, taskFunction
                         <p><Hyperlink style={hyperlinkStyle} onClick={onSelectChannel}>Select a different channel</Hyperlink></p>
                         {/* <p><Hyperlink style={hyperlinkStyle} onClick={showCustomBackendInstructions}>Use your own channel</Hyperlink></p> */}
                         <CheckRegisteredTaskFunctions
-                            channelName={channel}
+                            channelName={channelName}
+                            backendId={backendId}
                             taskFunctionIds={taskFunctionIds}
                         />
                         <CheckBackendPythonPackageVersion packageName={packageName} />
@@ -61,6 +64,13 @@ const ChannelSection: FunctionComponent<Props> = ({onSelectChannel, taskFunction
                         <RecentlyUsedBackends onSelectChannel={handleSetChannel} />
                         {/* <p><Hyperlink style={hyperlinkStyle} onClick={showCustomBackendInstructions}>Or use your own channel</Hyperlink></p> */}
                     </span>
+                )
+            }
+            {
+                backendId ? (
+                    <p>The selected backend ID is: {backendId}</p>
+                ) : (
+                    <p>No backend ID is specified (using default)</p>
                 )
             }
             <MarkdownDialog
