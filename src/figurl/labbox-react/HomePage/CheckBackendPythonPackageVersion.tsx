@@ -1,27 +1,34 @@
 import { useChannel, useQueryTask } from 'figurl/kachery-react'
 import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView'
+import { TaskFunctionId } from 'kachery-js/types/kacheryTypes'
 import React, { FunctionComponent } from 'react'
+import CheckRegisteredTaskFunctions from './CheckRegisteredTaskFunctions'
 
 type Props = {
     packageName: string
+    taskFunctionIds: string[]
+    getPythonPackageVersionTaskFunctionId: string
+    expectedPythonPackageVersion: string
 }
 
-const CheckBackendPythonPackageVersion: FunctionComponent<Props> = ({packageName}) => {
+const CheckBackend: FunctionComponent<Props> = ({packageName, taskFunctionIds, getPythonPackageVersionTaskFunctionId, expectedPythonPackageVersion}) => {
     const {channelName} = useChannel()
 
-    const {returnValue: version, task} = useQueryTask<string>(`${packageName}.get_python_package_version.1`, {}, {useCache: false})
+    const {returnValue: version, task} = useQueryTask<string>(getPythonPackageVersionTaskFunctionId, {}, {useCache: false})
     if (!channelName) return <span />
     if (!version) {
-        if ((task) && (task.status === 'waiting')) {
-            return <span />
-        }
-        else return <TaskStatusView label="Checking backend package version" task={task} />
+        return <TaskStatusView label={`Checking backend package version for ${packageName}`} task={task} />
     }
     return (
         <div>
-            Backend package version: {packageName} {version}
+            <div>
+                Backend package version: {packageName} {version}
+            </div>
+            <CheckRegisteredTaskFunctions
+                taskFunctionIds={taskFunctionIds.map(x => (x as any as TaskFunctionId))}
+            />
         </div>
     )
 }
 
-export default CheckBackendPythonPackageVersion
+export default CheckBackend

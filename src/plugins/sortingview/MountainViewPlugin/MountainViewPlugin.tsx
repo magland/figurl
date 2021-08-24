@@ -1,10 +1,11 @@
+import { useChannel } from 'figurl/kachery-react';
 import { FigurlPlugin } from "figurl/types";
 import { isString, _validateObject } from "kachery-js/types/kacheryTypes";
-import { useChannel } from 'figurl/kachery-react';
 import WorkspaceView from 'plugins/sortingview/gui/extensions/workspaceview/WorkspaceView';
 import { WorkspaceRoute } from 'plugins/sortingview/gui/pluginInterface';
 import { useSortingViewWorkspace } from 'plugins/sortingview/gui/WorkspacePage/WorkspacePage';
 import React, { FunctionComponent, useMemo } from 'react';
+import MountainViewSetup from "../gui/extensions/MountainViewSetup";
 
 
 type MountainViewData = {
@@ -56,16 +57,18 @@ const MountainViewComponent: FunctionComponent<Props> = ({data, width, height}) 
     }, [workspaceUri, recordingId, sortingId, channelName])
 
     return (
-        <div className="WorkspacePage" style={divStyle}>
-            <WorkspaceView
-                workspace={workspace}
-                workspaceDispatch={workspaceDispatch}
-                workspaceRoute={workspaceRoute}
-                workspaceRouteDispatch={workspaceRouteDispatch}
-                width={width - horizontalPadding * 2}
-                height={height - workspaceNavigationHeight - paddingTop}
-            />
-        </div>
+        <MountainViewSetup>
+            <div className="WorkspacePage" style={divStyle}>
+                <WorkspaceView
+                    workspace={workspace}
+                    workspaceDispatch={workspaceDispatch}
+                    workspaceRoute={workspaceRoute}
+                    workspaceRouteDispatch={workspaceRouteDispatch}
+                    width={width - horizontalPadding * 2}
+                    height={height - workspaceNavigationHeight - paddingTop}
+                />
+            </div>
+        </MountainViewSetup>
     )
 }
 

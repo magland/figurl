@@ -1,8 +1,9 @@
 // import { createCalculationPool } from 'labbox';
+import { usePureCalculationTask } from 'figurl/kachery-react';
 import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView';
 import useChannel from 'figurl/kachery-react/useChannel';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
-import { usePureCalculationTask } from 'figurl/kachery-react';
+import sortingviewTaskFunctionIds from '../../../../sortingviewTaskFunctionIds';
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelection, SortingSelectionDispatch } from "../../../pluginInterface";
 import IndividualClusterWidget from './IndividualClusterWidget';
 
@@ -29,7 +30,7 @@ type Result = {
 const IndividualClusterView: FunctionComponent<Props> = ({ recording, sorting, curation, selection, selectionDispatch, unitId, width, height, snippetLen }) => {
     const {channelName} = useChannel()
     const {returnValue: features, task} = usePureCalculationTask<Result>(
-        'individual_cluster_features.1',
+        sortingviewTaskFunctionIds.individualClusterFeatures,
         {
             recording_object: recording.recordingObject,
             sorting_object: sorting.sortingObject,

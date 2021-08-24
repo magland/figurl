@@ -1,6 +1,7 @@
+import useChannel from 'figurl/kachery-react/useChannel';
 import usePureCalculationTask from 'figurl/kachery-react/usePureCalculationTask';
-import useChannel from 'figurl/kachery-react/useChannel'
 import React, { Fragment, FunctionComponent, useEffect, useMemo, useRef, useState } from 'react';
+import sortingviewTaskFunctionIds from '../../../../sortingviewTaskFunctionIds';
 import { Recording, Sorting } from "../../../pluginInterface";
 
 interface ChildProps {
@@ -26,7 +27,7 @@ const PreloadCheck: FunctionComponent<Props> = ({ recording, sorting, children, 
     )), [])
 
     const {channelName} = useChannel()
-    const {task: preloadExtractSnippetsTask} = usePureCalculationTask<string>((recordingObject && sortingObject) ? 'preload_extract_snippets.2' : undefined, {recording_object: recordingObject, sorting_object: sortingObject, snipets_len: snippetLen}, {channelName})
+    const {task: preloadExtractSnippetsTask} = usePureCalculationTask<string>((recordingObject && sortingObject) ? sortingviewTaskFunctionIds.preloadExtractSnippets : undefined, {recording_object: recordingObject, sorting_object: sortingObject, snipets_len: snippetLen}, {channelName})
     const status = preloadExtractSnippetsTask?.status || 'waiting'
     const message = useMemo(() => {
         if (status === 'running') return 'Precomputing snippets'

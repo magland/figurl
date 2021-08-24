@@ -5,6 +5,7 @@ import { isString, _validateObject } from "kachery-js/types/kacheryTypes";
 import { useEffect } from "react";
 import { useReducer } from "react";
 import { FunctionComponent } from "react";
+import sortingviewTaskFunctionIds from "../sortingviewTaskFunctionIds";
 import ExperitimeTimeseriesView from "./ExperitimeTimeseriesView/ExperitimeTimeseriesView";
 import { TimeseriesInfo } from "./interface/TimeseriesInfo";
 import { timeseriesSelectionReducer } from "./interface/TimeseriesSelection";
@@ -27,7 +28,7 @@ type Props = {
 const useTimeseriesInfo = (timeseriesUri: string) => {
     const {channelName} = useChannel()
     const {returnValue: timeseriesInfo, task} = usePureCalculationTask<TimeseriesInfo>(
-        timeseriesUri ? 'experitime.get_timeseries_info.2' : undefined,
+        timeseriesUri ? sortingviewTaskFunctionIds.experitimeGetTimeseriesInfo : undefined,
         {timeseries_uri: timeseriesUri},
         {channelName}
     )

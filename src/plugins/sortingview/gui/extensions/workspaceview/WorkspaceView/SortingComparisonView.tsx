@@ -1,15 +1,16 @@
-import { JSONObject, sha1OfObject, SubfeedHash } from 'kachery-js/types/kacheryTypes';
 import { initiateTask, useChannel, useKacheryNode } from 'figurl/kachery-react';
 import useSubfeedReducer from 'figurl/kachery-react/useSubfeedReducer';
+import { usePlugins } from 'figurl/labbox-react';
 import Hyperlink from 'figurl/labbox-react/components/Hyperlink/Hyperlink';
-import { SortingCurationAction } from 'plugins/sortingview/gui/pluginInterface/SortingCuration';
-import { useRecordingInfo } from 'plugins/sortingview/gui/pluginInterface/useRecordingInfo';
-import { useSortingInfo } from 'plugins/sortingview/gui/pluginInterface/useSortingInfo';
+import { JSONObject, sha1OfObject, SubfeedHash } from 'kachery-js/types/kacheryTypes';
 import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { parseWorkspaceUri } from '../../../../gui/pluginInterface/misc';
+import { SortingCurationAction } from '../../../../gui/pluginInterface/SortingCuration';
+import { useRecordingInfo } from '../../../../gui/pluginInterface/useRecordingInfo';
+import { useSortingInfo } from '../../../../gui/pluginInterface/useSortingInfo';
+import sortingviewTaskFunctionIds from '../../../../sortingviewTaskFunctionIds';
 import { LabboxPlugin, Recording, Sorting, sortingComparisonViewPlugins, SortingSelection, sortingSelectionReducer, WorkspaceRoute, WorkspaceRouteDispatch } from '../../../pluginInterface';
 import { sortingCurationReducer } from '../../../pluginInterface/workspaceReducer';
-import { parseWorkspaceUri } from 'plugins/sortingview/gui/pluginInterface/misc';
-import { usePlugins } from 'figurl/labbox-react';
 
 interface Props {
   sorting1: Sorting
@@ -59,7 +60,7 @@ const SortingComparisonView: React.FunctionComponent<Props> = (props) => {
       kacheryNode,
       channelName,
       backendId,
-      functionId: 'sortingview_workspace_sorting_curation_action.1',
+      functionId: sortingviewTaskFunctionIds.sortingCurationAction,
       kwargs: {
         workspace_uri: workspaceRoute.workspaceUri,
         sorting_id: sortingId1,
@@ -79,7 +80,7 @@ const SortingComparisonView: React.FunctionComponent<Props> = (props) => {
       kacheryNode,
       channelName,
       backendId,
-      functionId: 'sortingview_workspace_sorting_curation_action.1',
+      functionId: sortingviewTaskFunctionIds.sortingCurationAction,
       kwargs: {
         workspace_uri: workspaceRoute.workspaceUri,
         sorting_id: sortingId2,

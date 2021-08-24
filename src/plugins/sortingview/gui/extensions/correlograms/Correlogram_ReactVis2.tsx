@@ -1,8 +1,9 @@
+import { usePureCalculationTask } from 'figurl/kachery-react';
 import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView';
+import useChannel from 'figurl/kachery-react/useChannel';
 import React, { FunctionComponent } from 'react';
 import { VerticalBarSeries, XAxis, XYPlot, YAxis } from 'react-vis';
-import { usePureCalculationTask } from 'figurl/kachery-react';
-import useChannel from 'figurl/kachery-react/useChannel'
+import sortingviewTaskFunctionIds from '../../../sortingviewTaskFunctionIds';
 import { applyMergesToUnit, Sorting, SortingCuration, SortingSelection, SortingSelectionDispatch } from "../../pluginInterface";
 
 type PlotData = {
@@ -35,7 +36,7 @@ const Correlogram_rv2: FunctionComponent<Props> = ({ sorting, unitId1, unitId2, 
     // )
 
     const {channelName} = useChannel()
-    const {returnValue: plotData, task: taskPlotData} = usePureCalculationTask<PlotData>('fetch_correlogram_plot_data.6', {
+    const {returnValue: plotData, task: taskPlotData} = usePureCalculationTask<PlotData>(sortingviewTaskFunctionIds.fetchCorrelogramPlotData, {
         sorting_object: sorting.sortingObject,
         unit_x: applyMergesToUnit(unitId1, curation, selection.applyMerges),
         unit_y: unitId2 !== undefined ? applyMergesToUnit(unitId2, curation, selection.applyMerges) : null,

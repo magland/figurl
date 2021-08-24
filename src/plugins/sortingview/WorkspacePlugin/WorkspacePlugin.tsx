@@ -7,6 +7,7 @@ import { useSortingViewWorkspace } from 'plugins/sortingview/gui/WorkspacePage/W
 import QueryString from 'querystring';
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from "react-router-dom";
+import MountainViewSetup from "../gui/extensions/MountainViewSetup";
 
 
 type WorkspaceData = {
@@ -74,16 +75,18 @@ const WorkspaceComponent: FunctionComponent<Props> = ({data, width, height}) => 
     const {workspaceRoute, workspaceRouteDispatch} = useWorkspaceRoute2(workspaceUri)
 
     return (
-        <div className="WorkspacePage" style={divStyle}>
-            <WorkspaceView
-                workspace={workspace}
-                workspaceDispatch={workspaceDispatch}
-                workspaceRoute={workspaceRoute}
-                workspaceRouteDispatch={workspaceRouteDispatch}
-                width={width - horizontalPadding * 2}
-                height={height - workspaceNavigationHeight - paddingTop}
-            />
-        </div>
+        <MountainViewSetup>
+            <div className="WorkspacePage" style={divStyle}>
+                <WorkspaceView
+                    workspace={workspace}
+                    workspaceDispatch={workspaceDispatch}
+                    workspaceRoute={workspaceRoute}
+                    workspaceRouteDispatch={workspaceRouteDispatch}
+                    width={width - horizontalPadding * 2}
+                    height={height - workspaceNavigationHeight - paddingTop}
+                />
+            </div>
+        </MountainViewSetup>
     )
 }
 

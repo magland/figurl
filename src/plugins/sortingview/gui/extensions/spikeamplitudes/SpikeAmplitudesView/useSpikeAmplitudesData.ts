@@ -3,6 +3,7 @@ import { ChannelName } from "kachery-js/types/kacheryTypes"
 import { runPureCalculationTaskAsync, useChannel, useFetchCache, useKacheryNode } from "figurl/kachery-react"
 import { useMemo } from "react"
 import { getArrayMax, getArrayMin } from "../../common/utility"
+import sortingviewTaskFunctionIds from "plugins/sortingview/sortingviewTaskFunctionIds"
 
 export type SpikeAmplitudesData = {
     getSpikeAmplitudes: (unitId: number | number[]) => {timepoints: number[], amplitudes: number[], minAmp: number, maxAmp: number} | undefined | null
@@ -23,7 +24,7 @@ const fetchSpikeAmplitudes = async ({kacheryNode, channelName, backendId, record
         amplitudes: number[]
     }>(
         kacheryNode,
-        'fetch_spike_amplitudes.1',
+        sortingviewTaskFunctionIds.fetchSpikeAmplitudes,
         {
             recording_object: recordingObject,
             sorting_object: sortingObject,

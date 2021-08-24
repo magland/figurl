@@ -1,4 +1,5 @@
 import WorkspaceNavigationComponent from 'plugins/sortingview/gui/WorkspacePage/WorkspaceNavigationComponent/WorkspaceNavigationComponent'
+import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds'
 import React, { FunctionComponent } from 'react'
 import WorkspaceView from '../extensions/workspaceview/WorkspaceView'
 import { initialWorkspaceState, WorkspaceAction, workspaceReducer, WorkspaceState } from '../pluginInterface/workspaceReducer'
@@ -16,7 +17,7 @@ export const useSortingViewWorkspace = (workspaceUri: string) => {
         workspaceReducer,
         initialWorkspaceState,
         actionField: true,
-        actionFunctionId: 'sortingview_workspace_action.1'
+        actionFunctionId: sortingviewTaskFunctionIds.workspaceAction
     })
 }
 

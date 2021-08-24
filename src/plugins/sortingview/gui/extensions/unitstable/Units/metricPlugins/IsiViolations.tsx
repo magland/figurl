@@ -1,3 +1,4 @@
+import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds';
 import React from 'react';
 import { SortingUnitMetricPlugin } from "../../../../pluginInterface";
 
@@ -13,7 +14,7 @@ const plugin: SortingUnitMetricPlugin = {
     label: 'ISI viol.',
     columnLabel: 'ISI viol.',
     tooltip: 'ISI violation rate',
-    hitherFnName: 'get_isi_violation_rates.1',
+    hitherFnName: sortingviewTaskFunctionIds.getIsiViolationRates,
     metricFnParams: {
         'isi_threshold_msec': 2.5
         // need to sort out how to pass unit ids list?

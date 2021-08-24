@@ -53,6 +53,7 @@ const useRoute = () => {
         if (o.routePath !== '/fig') {
             delete query2['figureObject']
             delete query2['label']
+            delete query2['workspaceRoute']
         }
         if (o.channel !== undefined) query2.channel = o.channel.toString()
         const search2 = queryString(query2)

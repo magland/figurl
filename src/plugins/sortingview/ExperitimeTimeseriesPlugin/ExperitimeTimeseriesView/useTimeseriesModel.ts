@@ -2,6 +2,7 @@ import { initiateTask, useChannel, useFetchCache, useKacheryNode } from "figurl/
 import { KacheryNode } from "kachery-js"
 import { ChannelName } from "kachery-js/types/kacheryTypes"
 import { useMemo } from "react"
+import sortingviewTaskFunctionIds from "../../sortingviewTaskFunctionIds"
 import { TimeseriesInfo } from "../interface/TimeseriesInfo"
 
 // it may be important to limit this when using a filter
@@ -39,7 +40,7 @@ const getTimeseriesDataSegment = async (args: {kacheryNode: KacheryNode, channel
       kacheryNode,
       channelName,
       backendId,
-      functionId: 'experitime.get_timeseries_samples.2',
+      functionId: sortingviewTaskFunctionIds.experitimeGetTimeseriesSamples,
       kwargs: {
         timeseries_uri: timeseriesUri,
         channel_name,

@@ -33,8 +33,8 @@ const RecentFiguresSection: FunctionComponent<Props> = ({recentFigures, plugins,
             <h3>Recent figures</h3>
             <ul>
                 {
-                    x.map(a => (
-                        <li><Hyperlink onClick={() => handleClick(a?.recentFigure)}>{a?.label}</Hyperlink></li>
+                    x.map((a, ii) => (
+                        <li key={ii}><Hyperlink onClick={() => handleClick(a?.recentFigure)}>{a?.label}</Hyperlink></li>
                     ))
                 }
             </ul>

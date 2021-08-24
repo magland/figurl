@@ -1,3 +1,4 @@
+import figurlTaskFunctionIds from 'figurl/figurlTaskFunctionIds';
 import { useChannel, usePureCalculationTask } from 'figurl/kachery-react';
 import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView';
 import { RecentFiguresAction } from 'figurl/RecentFigures';
@@ -18,7 +19,7 @@ type Props = {
 
 const useFigureObjectHelper = (figureObjectOrHash?: JSONObject | Sha1Hash) => {
     let {returnValue: object, task} = usePureCalculationTask<FigureObject>(
-        figureObjectOrHash && (typeof(figureObjectOrHash) === 'string') ? `figurl.get_figure_object.1` : undefined,
+        figureObjectOrHash && (typeof(figureObjectOrHash) === 'string') ? figurlTaskFunctionIds.getFigureObject : undefined,
         {figure_object_hash: figureObjectOrHash},
         {}
     )

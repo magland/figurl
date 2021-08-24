@@ -3,11 +3,12 @@ import initiateTask, { Task } from "figurl/kachery-react/initiateTask";
 import useChannel from "figurl/kachery-react/useChannel";
 import useKacheryNode from "figurl/kachery-react/useKacheryNode";
 import { useEffect, useRef, useState } from "react";
+import sortingviewTaskFunctionIds from '../../sortingviewTaskFunctionIds';
 import { Recording, RecordingInfo } from "../pluginInterface";
 
 export const useRecordingInfo = (recordingUri: string): RecordingInfo | undefined => {
     const {channelName} = useChannel()
-    const {returnValue: recordingInfo} = usePureCalculationTask<RecordingInfo>(recordingUri ? 'recording_info.3' : undefined, {recording_uri: recordingUri}, {channelName})
+    const {returnValue: recordingInfo} = usePureCalculationTask<RecordingInfo>(recordingUri ? sortingviewTaskFunctionIds.recordingInfo : undefined, {recording_uri: recordingUri}, {channelName})
     return recordingInfo
 }
 
@@ -29,7 +30,7 @@ export const useRecordingInfos = (recordings: Recording[]): {[key: string]: Reco
                     setCount(c => (c + 1))
                 }
             }
-            const task = initiateTask<RecordingInfo>({kacheryNode, functionId: 'recording_info.3', kwargs: {recording_uri: r.recordingPath}, channelName, backendId, functionType: 'pure-calculation', onStatusChanged})
+            const task = initiateTask<RecordingInfo>({kacheryNode, functionId: sortingviewTaskFunctionIds.recordingInfo, kwargs: {recording_uri: r.recordingPath}, channelName, backendId, functionType: 'pure-calculation', onStatusChanged})
             tasks.current[rid] = task || null
         }
         else if (t !== null) {

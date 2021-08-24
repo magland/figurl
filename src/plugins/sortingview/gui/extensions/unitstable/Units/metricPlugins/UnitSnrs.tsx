@@ -1,3 +1,4 @@
+import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds';
 import React from 'react';
 import { SortingUnitMetricPlugin } from "../../../../pluginInterface";
 
@@ -13,7 +14,7 @@ const plugin: SortingUnitMetricPlugin = {
     label: 'SNR',
     columnLabel: 'SNR',
     tooltip: 'Unit SNR (peak-to-peak amp of mean waveform / est. std. dev on peak chan)',
-    hitherFnName: 'get_unit_snrs.1',
+    hitherFnName: sortingviewTaskFunctionIds.getUnitSnrs,
     metricFnParams: {},
     hitherOpts: {
         useClientCache: true

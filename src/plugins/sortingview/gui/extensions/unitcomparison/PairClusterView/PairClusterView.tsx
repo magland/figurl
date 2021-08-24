@@ -1,6 +1,7 @@
 import { useChannel, usePureCalculationTask } from 'figurl/kachery-react';
 import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView';
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelection, SortingSelectionDispatch } from 'plugins/sortingview/gui/pluginInterface';
+import sortingviewTaskFunctionIds from '../../../../sortingviewTaskFunctionIds';
 import React, { FunctionComponent } from 'react';
 import { useMemo } from 'react';
 import PairClusterWidget from './PairClusterWidget';
@@ -36,7 +37,7 @@ const PairClusterView: FunctionComponent<Props> = ({recording, sorting, unitIds,
     const W = Math.min(width, height)
     const H = W
     const {returnValue: features, task} = usePureCalculationTask<Result>(
-        'pair_cluster_features.4',
+        sortingviewTaskFunctionIds.pairClusterFeatures,
         {
             recording_object: recording.recordingObject,
             sorting_object: sorting.sortingObject,

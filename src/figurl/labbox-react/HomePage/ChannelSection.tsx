@@ -1,17 +1,17 @@
 import { IconButton } from '@material-ui/core'
 import { Help } from '@material-ui/icons'
-import { ChannelName, TaskFunctionId } from 'kachery-js/types/kacheryTypes'
+import { useChannel } from 'figurl/kachery-react'
 import RecentlyUsedBackends from 'figurl/kachery-react/components/SelectChannel/RecentlyUsedChannels'
+import { ChannelName, TaskFunctionId } from 'kachery-js/types/kacheryTypes'
+import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds'
+import React, { FunctionComponent, useCallback } from 'react'
 import { useVisible } from '..'
 import Hyperlink from '../components/Hyperlink/Hyperlink'
 import MarkdownDialog from '../components/Markdown/MarkdownDialog'
-import React, { FunctionComponent, useCallback } from 'react'
 import useRoute from '../MainWindow/useRoute'
 import aboutKacheryChannelsMd from './aboutKacheryChannels.md.gen'
-import CheckBackendPythonPackageVersion from './CheckBackendPythonPackageVersion'
-import CheckRegisteredTaskFunctions from './CheckRegisteredTaskFunctions'
+import CheckBackend from './CheckBackendPythonPackageVersion'
 import hyperlinkStyle from './hyperlinkStyle'
-import { useChannel } from 'figurl/kachery-react'
 
 type Props = {
     onSelectChannel: () => void
@@ -51,12 +51,17 @@ const ChannelSection: FunctionComponent<Props> = ({onSelectChannel, taskFunction
                         } */}
                         <p><Hyperlink style={hyperlinkStyle} onClick={onSelectChannel}>Select a different channel</Hyperlink></p>
                         {/* <p><Hyperlink style={hyperlinkStyle} onClick={showCustomBackendInstructions}>Use your own channel</Hyperlink></p> */}
-                        <CheckRegisteredTaskFunctions
+                        {/* <CheckRegisteredTaskFunctions
                             channelName={channelName}
                             backendId={backendId}
                             taskFunctionIds={taskFunctionIds}
+                        /> */}
+                        <CheckBackend
+                            packageName="sortingview"
+                            taskFunctionIds={Object.values(sortingviewTaskFunctionIds)}
+                            getPythonPackageVersionTaskFunctionId={sortingviewTaskFunctionIds.getPythonPackageVersion}
+                            expectedPythonPackageVersion="0.5.0"
                         />
-                        <CheckBackendPythonPackageVersion packageName={packageName} />
                     </span>
                 ) : (
                     <span>

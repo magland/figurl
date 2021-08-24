@@ -3,11 +3,12 @@ import useChannel from "figurl/kachery-react/useChannel";
 import useKacheryNode from "figurl/kachery-react/useKacheryNode";
 import usePureCalculationTask from "figurl/kachery-react/usePureCalculationTask";
 import { useEffect, useRef, useState } from "react";
+import sortingviewTaskFunctionIds from "../../sortingviewTaskFunctionIds";
 import { Sorting, SortingInfo } from "./Sorting";
 
 export const useSortingInfo = (sortingUri: string | undefined): SortingInfo | undefined => {
     const {channelName} = useChannel()
-    const {returnValue: sortingInfo} = usePureCalculationTask<SortingInfo>(sortingUri ? 'sorting_info.3' : undefined, {sorting_uri: sortingUri}, {channelName})
+    const {returnValue: sortingInfo} = usePureCalculationTask<SortingInfo>(sortingUri ? sortingviewTaskFunctionIds.sortingInfo : undefined, {sorting_uri: sortingUri}, {channelName})
     return sortingInfo
 }
 
@@ -29,7 +30,7 @@ export const useSortingInfos = (sortings: Sorting[]): {[key: string]: SortingInf
                     setCount(c => (c + 1))
                 }
             }
-            const task = initiateTask<SortingInfo>({kacheryNode, functionId: 'sorting_info.3', kwargs: {sorting_uri: s.sortingPath}, channelName, backendId, functionType: 'pure-calculation', onStatusChanged})            
+            const task = initiateTask<SortingInfo>({kacheryNode, functionId: sortingviewTaskFunctionIds.sortingInfo, kwargs: {sorting_uri: s.sortingPath}, channelName, backendId, functionType: 'pure-calculation', onStatusChanged})            
             tasks.current[sid] = task || null
         }
         else if (t !== null) {

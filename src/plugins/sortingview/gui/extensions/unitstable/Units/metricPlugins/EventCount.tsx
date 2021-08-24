@@ -1,3 +1,4 @@
+import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds';
 import React from 'react';
 import { SortingUnitMetricPlugin } from "../../../../pluginInterface";
 
@@ -13,7 +14,7 @@ const plugin: SortingUnitMetricPlugin = {
     label: 'Num. events',
     columnLabel: 'Num. events',
     tooltip: 'Number of firing events',
-    hitherFnName: 'get_firing_data.1',
+    hitherFnName: sortingviewTaskFunctionIds.getFiringData,
     metricFnParams: {},
     hitherOpts: {
         useClientCache: true

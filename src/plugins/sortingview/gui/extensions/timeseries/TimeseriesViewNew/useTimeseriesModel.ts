@@ -5,6 +5,7 @@ import useChannel from 'figurl/kachery-react/useChannel'
 import useKacheryNode from "figurl/kachery-react/useKacheryNode"
 import { useMemo } from "react"
 import { RecordingInfo } from '../../../pluginInterface'
+import sortingviewTaskFunctionIds from "plugins/sortingview/sortingviewTaskFunctionIds"
 
 // it may be important to limit this when using a filter
 // const timeseriesCalculationPool = createCalculationPool({maxSimultaneous: 4, method: 'stack'})
@@ -23,7 +24,7 @@ const getTimeseriesDataSegment = async (args: {kacheryNode: KacheryNode | undefi
   if (!recordingObject) return undefined
   const x = await runPureCalculationTaskAsync<{traces: number[][]}>(
     kacheryNode,
-    'get_timeseries_segment.1',
+    sortingviewTaskFunctionIds.getTimeseriesSegment,
     {
       recording_object: recordingObject,
       ds_factor,

@@ -1,21 +1,24 @@
+import { useChannel, useKacheryNode } from 'figurl/kachery-react'
 import { RegisteredTaskFunction } from 'kachery-js/types/kacheryHubTypes'
-import { ChannelName, TaskFunctionId } from 'kachery-js/types/kacheryTypes'
-import { useKacheryNode } from 'figurl/kachery-react'
-import Hyperlink from '../components/Hyperlink/Hyperlink'
+import { TaskFunctionId } from 'kachery-js/types/kacheryTypes'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
+import Hyperlink from '../components/Hyperlink/Hyperlink'
 
 type Props = {
-    channelName: ChannelName
-    backendId: string | null
     taskFunctionIds: TaskFunctionId[]
 }
 
-const CheckRegisteredTaskFunctions: FunctionComponent<Props> = ({channelName, backendId, taskFunctionIds}) => {
+const CheckRegisteredTaskFunctions: FunctionComponent<Props> = ({taskFunctionIds}) => {
+    const {channelName, backendId} = useChannel()
     const kacheryNode = useKacheryNode()
     const [registeredTaskFunctions, setRegisteredTaskFunctions] = useState<RegisteredTaskFunction[] | undefined>(undefined)
     const [refreshCode, setRefreshCode] = useState<number>(0)
     const [probing, setProbing] = useState<boolean>(false)
     const incrementRefreshCode = useCallback(() => setRefreshCode(c => (c + 1)), [])
+    const [expanded, setExpanded] = useState<boolean>(false)
+    const toggleExpanded = useCallback(() => {
+        setExpanded(a => (!a))
+    }, [])
     useEffect(() => {
         const update = () => {
             const A: RegisteredTaskFunction[] = []
@@ -45,6 +48,9 @@ const CheckRegisteredTaskFunctions: FunctionComponent<Props> = ({channelName, ba
     }, [kacheryNode, channelName, backendId, taskFunctionIds, refreshCode])
 
     const numRegistered = (registeredTaskFunctions || []).length
+    const registeredTaskFunctionIds = useMemo(() => (
+        (registeredTaskFunctions || []).map(a => (a.taskFunctionId))
+    ), [registeredTaskFunctions])
 
     const color = useMemo(() => {
         if (numRegistered === taskFunctionIds.length) {
@@ -71,7 +77,20 @@ const CheckRegisteredTaskFunctions: FunctionComponent<Props> = ({channelName, ba
         }
     }
     return (
-        <div>Task functions: <span style={{color}}>{numRegistered} of {taskFunctionIds.length} registered</span> <Hyperlink onClick={handleRefresh}>refresh</Hyperlink></div>
+        <span>
+            <div>Task functions: <Hyperlink onClick={toggleExpanded}><span style={{color}}>{numRegistered} of {taskFunctionIds.length} registered</span></Hyperlink> <Hyperlink onClick={handleRefresh}>refresh</Hyperlink></div>
+            {
+                expanded && (
+                    <div>
+                        {
+                            taskFunctionIds.map(tfi => (
+                                <span key={tfi.toString()}><span style={{color: registeredTaskFunctionIds.includes(tfi) ? 'darkgreen' : 'darkred'}}>{tfi}</span> &nbsp;&nbsp;<span>|</span>&nbsp;&nbsp; </span>
+                            ))
+                        }
+                    </div>
+                )
+            }
+        </span>
     )
 }
 

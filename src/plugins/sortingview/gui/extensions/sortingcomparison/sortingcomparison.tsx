@@ -1,3 +1,4 @@
+import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds';
 import { LabboxExtensionContext } from '../../pluginInterface';
 
 const CellComponent = (record: any) => {
@@ -13,7 +14,7 @@ export function activate(context: LabboxExtensionContext) {
         label: 'Best match',
         columnLabel: 'Best match',
         tooltip: 'Best matching unit ID',
-        hitherFnName: 'get_best_matching_units.2',
+        hitherFnName: sortingviewTaskFunctionIds.getBestMatchingUnits,
         metricFnParams: {},
         hitherOpts: {
             useClientCache: true

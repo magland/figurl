@@ -1,8 +1,9 @@
 import { useChannel, usePureCalculationTask } from 'figurl/kachery-react';
 import sortByPriority from 'figurl/labbox-react/extensionSystem/sortByPriority';
-import { ExternalSortingUnitMetric } from 'plugins/sortingview/gui/pluginInterface/Sorting';
-import { SortingComparisonUnitMetricPlugin } from 'plugins/sortingview/gui/pluginInterface/SortingComparisonUnitMetricPlugin';
 import React, { FunctionComponent, useCallback } from 'react';
+import { ExternalSortingUnitMetric } from '../../../../gui/pluginInterface/Sorting';
+import { SortingComparisonUnitMetricPlugin } from '../../../../gui/pluginInterface/SortingComparisonUnitMetricPlugin';
+import sortingviewTaskFunctionIds from '../../../../sortingviewTaskFunctionIds';
 import { mergeGroupForUnitId, Sorting, SortingCuration, SortingSelection, SortingSelectionDispatch, SortingUnitMetricPlugin } from "../../../pluginInterface";
 import '../unitstable.css';
 import TableWidget, { Column, Row } from './TableWidget';
@@ -135,7 +136,7 @@ const UnitsTable: FunctionComponent<Props> = (props) => {
     })
 
     const {channelName} = useChannel()
-    const {returnValue: externalUnitMetrics} = usePureCalculationTask<ExternalSortingUnitMetric[]>(sorting.unitMetricsUri ? 'fetch_unit_metrics.1' : undefined, {unit_metrics_uri: sorting.unitMetricsUri || ''}, {channelName})
+    const {returnValue: externalUnitMetrics} = usePureCalculationTask<ExternalSortingUnitMetric[]>(sorting.unitMetricsUri ? sortingviewTaskFunctionIds.fetchUnitMetrics : undefined, {unit_metrics_uri: sorting.unitMetricsUri || ''}, {channelName})
 
     ;(externalUnitMetrics || []).forEach((m: ExternalSortingUnitMetric) => {
         const columnName = 'external-metric-' + m.name

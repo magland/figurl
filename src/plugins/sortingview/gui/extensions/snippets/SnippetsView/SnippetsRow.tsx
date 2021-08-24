@@ -8,6 +8,7 @@ import React, { FunctionComponent, useMemo } from 'react';
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelection, SortingSelectionDispatch } from "../../../pluginInterface";
 import { getElectrodesAspectRatio } from '../../averagewaveforms/AverageWaveformsView/setupElectrodes';
 import SnippetBox from './SnippetBox';
+import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds';
 
 
 type Props = {
@@ -61,7 +62,7 @@ const getSnippetsInfo = async (args: {recording: Recording, sorting: Sorting, un
         sampling_frequency: number
     }>(
         kacheryNode,
-        'get_sorting_unit_info.1',
+        sortingviewTaskFunctionIds.sortingInfo,
         {
             recording_object: recording.recordingObject,
             sorting_object: sorting.sortingObject,
@@ -88,7 +89,7 @@ const getSnippets = async (args: {recording: Recording, sorting: Sorting, unitId
         snippets: Snippet[]
     }>(
         kacheryNode,
-        'get_sorting_unit_snippets.1',
+        'sorting-unit-snippets-disabled', // sortingviewTaskFunctionIds.getSortingUnitSnippets,
         {
             recording_object: recording.recordingObject,
             sorting_object: sorting.sortingObject,

@@ -1,6 +1,7 @@
 import os
 from typing import Any, Union
 import urllib.parse
+from figurl.backend.tasks.get_figure_object import task_get_figure_object
 import kachery_client as kc
 from .serialize_wrapper import _serialize
 from .Sync import Sync
@@ -30,6 +31,7 @@ class Figure:
         if self._object_uri is None:
             self._object_uri = store_json(self._object)
         object_hash = self._object_uri.split('/')[2]
+        kc._run_task(task_get_figure_object, {'figure_object_hash': object_hash}, channel=channel)
         url = f'{base_url}/fig?channel={channel}&figureObject={object_hash}&label={_enc(label)}'
         return url
 

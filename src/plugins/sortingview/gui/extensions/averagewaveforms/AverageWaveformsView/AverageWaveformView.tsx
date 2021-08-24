@@ -3,6 +3,7 @@ import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStat
 import useChannel from 'figurl/kachery-react/useChannel';
 import usePureCalculationTask from 'figurl/kachery-react/usePureCalculationTask';
 import React, { FunctionComponent, useMemo } from 'react';
+import sortingviewTaskFunctionIds from '../../../../sortingviewTaskFunctionIds';
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelection, SortingSelectionDispatch } from '../../../pluginInterface';
 import { ActionItem, DividerItem } from '../../common/Toolbars';
 import WaveformWidget, { ElectrodeOpts } from './WaveformWidget';
@@ -33,7 +34,7 @@ type Props = {
 const AverageWaveformView: FunctionComponent<Props> = ({ sorting, curation, recording, unitId, selection, selectionDispatch, width, height, noiseLevel, customActions, snippetLen }) => {
     const {channelName} = useChannel()
     const {returnValue: plotData, task} = usePureCalculationTask<PlotData>(
-        'fetch_average_waveform.2',
+        sortingviewTaskFunctionIds.fetchAverageWaveform,
         {
             sorting_object: sorting.sortingObject,
             recording_object: recording.recordingObject,
