@@ -10,8 +10,8 @@ const useFigurlPlugins = () => {
 export const useBackendId = () => {
     const context = useContext(FigurlContext)
     return {
-        backendId: context ? context.backendId : null,
-        setBackendId: context ? context.setBackendId : () => {}
+        backendIdForChannel: context ? context.backendId : () => (null),
+        setBackendIdForChannel: context ? context.setBackendId : () => {}
     }
 }
 

@@ -3,8 +3,8 @@ import { FigurlPlugin } from './types'
 
 const FigurlContext = React.createContext<{
     plugins: FigurlPlugin[]
-    backendId: string | null
-    setBackendId: (x: string | null) => void
+    backendId: (channel: string) => string | null
+    setBackendId: (channel: string, x: string | null) => void
 } | undefined>(undefined)
 
 export default FigurlContext

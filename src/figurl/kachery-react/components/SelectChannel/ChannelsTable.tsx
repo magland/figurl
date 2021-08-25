@@ -1,9 +1,10 @@
-import { Button } from '@material-ui/core'
-import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
-import Hyperlink from 'figurl/labbox-react/components/Hyperlink/Hyperlink'
+import { Button } from '@material-ui/core';
+import Hyperlink from 'figurl/labbox-react/components/Hyperlink/Hyperlink';
 import NiceTable from 'figurl/labbox-react/components/NiceTable/NiceTable';
-import { ChannelName } from 'kachery-js/types/kacheryTypes'
-import { ChannelItem, ChannelItemsAction } from './channelItemsReducer'
+import { useBackendId } from 'figurl/useFigurlPlugins';
+import { ChannelName } from 'kachery-js/types/kacheryTypes';
+import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
+import { ChannelItem, ChannelItemsAction } from './channelItemsReducer';
 
 type Props = {
     selectedChannel: ChannelName | undefined
@@ -19,6 +20,10 @@ const ChannelsTable: FunctionComponent<Props> = ({selectedChannel, onSelectChann
             key: 'channel',
             label: 'Channel'
         },
+        {
+            key: 'backendId',
+            label: 'Backend ID'
+        },
         // {
         //     key: 'alive',
         //     label: 'Alive'
@@ -31,6 +36,7 @@ const ChannelsTable: FunctionComponent<Props> = ({selectedChannel, onSelectChann
     const handleForgetItem = useCallback((item: ChannelItem) => {
         channelItemsDispatch({type: 'removeItem', channel: item.channel})
     }, [channelItemsDispatch])
+    const {backendIdForChannel} = useBackendId()
     const rows = useMemo(() => (
         (channelItems || []).map(x=> ({
             key: x.channel.toString(),
@@ -39,13 +45,16 @@ const ChannelsTable: FunctionComponent<Props> = ({selectedChannel, onSelectChann
                     text: x.channel,
                     element: <Hyperlink onClick={() => {onSelectChannel(x.channel)}}>{x.channel}</Hyperlink>
                 },
+                backendId: {
+                    text: backendIdForChannel(x.channel.toString())
+                },
                 // alive: (channelStatuses[x.channel.toString()] || {}).alive ? 'YES' : 'NO',
                 forget: x.lastUsed === 0 ? '' : {
                     element: <button onClick={() => {handleForgetItem(x)}}>forget</button>
                 }
             }
         }))
-    ), [onSelectChannel, channelItems, handleForgetItem])
+    ), [onSelectChannel, channelItems, handleForgetItem, backendIdForChannel])
     const handleSelectedRowKeysChanged = useCallback((channels: string[]) => {
         if (channels[0]) {
             onSelectChannel(channels[0] as any as ChannelName)

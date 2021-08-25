@@ -4,6 +4,7 @@ import useChannel from '../../useChannel'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import channelItemsReducer, { initialChannelItems } from './channelItemsReducer'
 import ChannelsTable, { getChannelConfig } from './ChannelsTable'
+import { useBackendId } from 'figurl/useFigurlPlugins'
 
 type Props = {
     onClose: () => void
@@ -15,7 +16,7 @@ const SelectChannel: FunctionComponent<Props> = ({onClose, hardCodedChannels}) =
         channelName: selectedChannel,
         backendId,
         selectChannel,
-        setBackendId
+        setBackendIdForChannel
     } = useChannel()
     
     const [channelItems, channelItemsDispatch] = useReducer(channelItemsReducer, initialChannelItems())
@@ -32,6 +33,7 @@ const SelectChannel: FunctionComponent<Props> = ({onClose, hardCodedChannels}) =
 
     const [editChannel, setEditChannel] = useState<string>('')
     const [editBackendId, setEditBackendId] = useState<string>('')
+    const {backendIdForChannel} = useBackendId()
     useEffect(() => {
         setEditChannel(selectedChannel?.toString() || '')
     }, [selectedChannel])
@@ -55,12 +57,17 @@ const SelectChannel: FunctionComponent<Props> = ({onClose, hardCodedChannels}) =
             onClose()
         })
     }, [selectChannel, onClose])
+    useEffect(() => {
+        if (!editChannel) return
+        if (!backendIdForChannel) return
+        setEditBackendId(backendIdForChannel(editChannel) || '')
+    }, [editChannel, backendIdForChannel])
     const handleOkay = useCallback(() => {
         if (!editChannel) return
         if (!isChannelName(editChannel)) return
         handleSelectChannel(editChannel)
-        setBackendId(editBackendId)
-    }, [handleSelectChannel, editChannel, setBackendId, editBackendId])
+        setBackendIdForChannel(editChannel, editBackendId)
+    }, [handleSelectChannel, editChannel, editBackendId, setBackendIdForChannel])
     const handleBackendIdChange = useCallback((evt: any) => {
         const val: string = evt.target.value
         setEditBackendId(val)

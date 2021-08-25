@@ -16,13 +16,13 @@ const useChannel = () => {
         const search2 = queryString(query2)
         history.push({...location, pathname: pathname2, search: search2})
     }, [history, location, query])
-    const {backendId, setBackendId} = useBackendId()
+    const {backendIdForChannel, setBackendIdForChannel} = useBackendId()
     return useMemo(() => ({
         channelName: channel,
         selectChannel,
-        backendId,
-        setBackendId
-    }), [channel, selectChannel, backendId, setBackendId])
+        backendId: backendIdForChannel(channel.toString()),
+        setBackendIdForChannel
+    }), [channel, selectChannel, backendIdForChannel, setBackendIdForChannel])
 }
 
 const queryString = (params: { [key: string]: string | string[] }) => {
