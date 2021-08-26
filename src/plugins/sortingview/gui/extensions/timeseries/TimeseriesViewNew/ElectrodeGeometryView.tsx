@@ -15,6 +15,9 @@ interface Props {
 const ElectrodeGeometryView: FunctionComponent<Props> = ({recordingInfo, width, height, selection, visibleElectrodeIds, selectionDispatch}) => {
     const ri = recordingInfo
     const electrodes = useMemo(() => (ri ? zipElectrodes(ri.geom, ri.channel_ids) : []).filter(a => (visibleElectrodeIds.includes(a.id))), [ri, visibleElectrodeIds])
+    const selectedElectrodeIds = useMemo(() => (
+        selection.selectedElectrodeIds || []
+    ), [selection.selectedElectrodeIds])
     if (!ri) {
         return (
             <div>No recording info found for recording.</div>
@@ -23,7 +26,7 @@ const ElectrodeGeometryView: FunctionComponent<Props> = ({recordingInfo, width, 
     return (
         <ElectrodeGeometryWidget
             electrodes={electrodes}
-            selection={selection}
+            selectedElectrodeIds={selectedElectrodeIds}
             selectionDispatch={selectionDispatch}
             width={width}
             height={height}

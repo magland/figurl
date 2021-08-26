@@ -1,20 +1,20 @@
-import { IconButton } from '@material-ui/core';
-import { Help } from '@material-ui/icons';
-import { useVisible } from 'figurl/labbox-react';
-import MarkdownDialog from 'figurl/labbox-react/components/Markdown/MarkdownDialog';
-import Splitter from 'figurl/labbox-react/components/Splitter/Splitter';
-import { useRecordingInfo } from 'plugins/sortingview/gui/pluginInterface/useRecordingInfo';
-import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
-import SortingUnitPlotGrid from '../../../commonComponents/SortingUnitPlotGrid/SortingUnitPlotGrid';
-import info from '../../../helpPages/AverageWaveforms.md.gen';
-import { SortingViewProps } from '../../../pluginInterface';
-import { ActionItem, DividerItem } from '../../common/Toolbars';
-import ViewToolbar from '../../common/ViewToolbar';
-import AverageWaveformView from './AverageWaveformView';
+import { IconButton } from '@material-ui/core'
+import { Help } from '@material-ui/icons'
+import { useVisible } from 'figurl/labbox-react'
+import MarkdownDialog from 'figurl/labbox-react/components/Markdown/MarkdownDialog'
+import Splitter from 'figurl/labbox-react/components/Splitter/Splitter'
+import { useRecordingInfo } from 'plugins/sortingview/gui/pluginInterface/useRecordingInfo'
+import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FaArrowDown, FaArrowUp } from 'react-icons/fa'
+import SortingUnitPlotGrid from '../../../commonComponents/SortingUnitPlotGrid/SortingUnitPlotGrid'
+import info from '../../../helpPages/AverageWaveforms.md.gen'
+import { SortingViewProps } from '../../../pluginInterface'
+import { ActionItem, DividerItem } from '../../common/Toolbars'
+import ViewToolbar from '../../common/ViewToolbar'
+import AverageWaveformView from './AverageWaveformView'
+
 
 export type AverageWaveformAction = ActionItem  | DividerItem
-
 
 const TOOLBAR_INITIAL_WIDTH = 36 // hard-coded for now
 
@@ -25,16 +25,29 @@ const AverageWaveformsView: FunctionComponent<SortingViewProps> = (props) => {
     const boxWidth = 180
     const noiseLevel = (recordingInfo || {}).noise_level || 1  // fix this
     const [scalingActions, setScalingActions] = useState<AverageWaveformAction[] | null>(null)
+
+    const visibleElectrodeIds = useMemo(() => (selection.visibleElectrodeIds), [selection.visibleElectrodeIds])
+    const selectedElectrodeIds = useMemo(() => (selection.selectedElectrodeIds || []), [selection.selectedElectrodeIds])
+    const ampScaleFactor = useMemo(() => (selection.ampScaleFactor || 1), [selection.ampScaleFactor])
+    const applyMerges = useMemo(() => (selection.applyMerges || false), [selection.applyMerges])
+    const waveformsMode = useMemo(() => (selection.waveformsMode || 'geom'), [selection.waveformsMode])
+
     const unitComponent = useMemo(() => (unitId: number) => (
-        <AverageWaveformView
-            {...{sorting, curation, recording, unitId, selection, selectionDispatch}}
-            width={boxWidth}
-            height={boxHeight}
-            noiseLevel={noiseLevel}
-            customActions={scalingActions || []}
-            snippetLen={snippetLen}
-        />
-    ), [sorting, recording, selection, selectionDispatch, noiseLevel, scalingActions, curation, snippetLen])
+            <AverageWaveformView
+                {...{sorting, curation, recording, unitId, selectionDispatch}}
+                selectionDispatch={selectionDispatch}
+                width={boxWidth}
+                height={boxHeight}
+                noiseLevel={noiseLevel}
+                customActions={scalingActions || []}
+                snippetLen={snippetLen}
+                visibleElectrodeIds={visibleElectrodeIds}
+                selectedElectrodeIds={selectedElectrodeIds}
+                ampScaleFactor={ampScaleFactor}
+                applyMerges={applyMerges}
+                waveformsMode={waveformsMode}
+            />
+    ), [sorting, recording, selectionDispatch, noiseLevel, scalingActions, curation, snippetLen, visibleElectrodeIds, selectedElectrodeIds, ampScaleFactor, applyMerges, waveformsMode])
 
     const _handleScaleAmplitudeUp = useCallback(() => {
         selectionDispatch({type: 'ScaleAmpScaleFactor', direction: 'up'})

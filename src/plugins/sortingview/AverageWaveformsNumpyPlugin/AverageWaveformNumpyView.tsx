@@ -1,8 +1,9 @@
 // import { createCalculationPool } from 'labbox';
-import WaveformWidget, { ElectrodeOpts } from 'plugins/sortingview/gui/extensions/averagewaveforms/AverageWaveformsView/WaveformWidget';
+import WaveformWidget from 'plugins/sortingview/gui/extensions/averagewaveforms/AverageWaveformsView/WaveformWidget';
 import { ActionItem, DividerItem } from 'plugins/sortingview/gui/extensions/common/Toolbars';
 import { SortingSelection, SortingSelectionDispatch } from 'plugins/sortingview/gui/pluginInterface';
 import React, { FunctionComponent, useMemo } from 'react';
+import { ElectrodeOpts } from '../gui/extensions/common/sharedCanvasLayers/electrodesLayer';
 import { ElectrodeChannel, Waveform } from './AverageWaveformsNumpyPlugin';
 
 type PlotData = {
@@ -63,10 +64,12 @@ const AverageWaveformNumpyView: FunctionComponent<Props> = ({ electrodeChannels,
             samplingFrequency={plotData.sampling_frequency}
             width={width}
             height={height}
-            selection={selection}
+            selectedElectrodeIds={selection.selectedElectrodeIds || []}
             customActions={customActions}
             selectionDispatch={selectionDispatch}
             electrodeOpts={electrodeOpts}
+            ampScaleFactor={1}
+            waveformOpts={{waveformWidth: 1}}
         />
     )
 }
