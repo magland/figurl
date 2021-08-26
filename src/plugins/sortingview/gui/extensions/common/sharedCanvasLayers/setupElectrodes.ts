@@ -1,7 +1,7 @@
-import { norm } from 'mathjs';
 import { funcToTransform } from 'figurl/labbox-react/components/CanvasWidget';
 import { getBoundingBoxForEllipse, getHeight, getWidth, RectangularRegion, TransformationMatrix, transformDistance, Vec2 } from 'figurl/labbox-react/components/CanvasWidget/Geometry';
-import { getArrayMax, getArrayMin } from '../../common/utility';
+import { norm } from 'mathjs';
+import { getArrayMax, getArrayMin } from '../utility';
 
 export type ElectrodeBox = {
     label: string
@@ -19,7 +19,6 @@ const computeRadius = (electrodeLocations: number[][]): number => {
     if (val !== undefined) {
         return val
     }
-    if (electrodeLocations.length <= 1) return 1
     // how big should each electrode dot be? Really depends on how close
     // the dots are to each other. Let's find the closest pair of dots and
     // set the radius to 40% of the distance between them.

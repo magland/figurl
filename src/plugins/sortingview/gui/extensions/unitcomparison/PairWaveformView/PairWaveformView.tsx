@@ -4,9 +4,9 @@ import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStat
 import useChannel from 'figurl/kachery-react/useChannel';
 import usePureCalculationTask from 'figurl/kachery-react/usePureCalculationTask';
 import React, { FunctionComponent, useMemo } from 'react';
-import sortingviewTaskFunctionIds from '../../../../sortingviewTaskFunctionIds';
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelection, SortingSelectionDispatch } from '../../../pluginInterface';
-import WaveformWidget, { ElectrodeOpts } from '../../averagewaveforms/AverageWaveformsView/WaveformWidget';
+import WaveformWidget, { defaultWaveformOpts } from '../../averagewaveforms/AverageWaveformsView/WaveformWidget';
+import { ElectrodeOpts } from '../../common/sharedCanvasLayers/electrodesLayer';
 import { ActionItem, DividerItem } from '../../common/Toolbars';
 
 type PlotData = {
@@ -50,7 +50,7 @@ const PairWaveformView: FunctionComponent<Props> = ({ sorting, curation, recordi
 
     const {channelName} = useChannel()
     const {returnValue: plotData1, task: task1} = usePureCalculationTask<PlotData>(
-        sortingviewTaskFunctionIds.fetchAverageWaveform,
+        'fetch_average_waveform.2',
         {
             sorting_object: sorting.sortingObject,
             recording_object: recording.recordingObject,
@@ -62,7 +62,7 @@ const PairWaveformView: FunctionComponent<Props> = ({ sorting, curation, recordi
         }
     )
     const {returnValue: plotData2, task: task2} = usePureCalculationTask<PlotData>(
-        sortingviewTaskFunctionIds.fetchAverageWaveform,
+        'fetch_average_waveform.2',
         {
             sorting_object: sorting.sortingObject,
             recording_object: recording.recordingObject,
@@ -127,10 +127,12 @@ const PairWaveformView: FunctionComponent<Props> = ({ sorting, curation, recordi
                             samplingFrequency={plotData1b.sampling_frequency}
                             width={boxWidth}
                             height={height}
-                            selection={selection}
+                            ampScaleFactor={selection.ampScaleFactor || 1}
+                            selectedElectrodeIds={selection.selectedElectrodeIds || []}
                             customActions={customActions}
                             selectionDispatch={selectionDispatch}
                             electrodeOpts={electrodeOpts}
+                            waveformOpts={defaultWaveformOpts}
                         />
                     </TableCell>
                     <TableCell>
@@ -143,10 +145,12 @@ const PairWaveformView: FunctionComponent<Props> = ({ sorting, curation, recordi
                             samplingFrequency={plotData2b.sampling_frequency}
                             width={boxWidth}
                             height={height}
-                            selection={selection}
+                            ampScaleFactor={selection.ampScaleFactor || 1}
+                            selectedElectrodeIds={selection.selectedElectrodeIds || []}
                             customActions={customActions}
                             selectionDispatch={selectionDispatch}
                             electrodeOpts={electrodeOpts}
+                            waveformOpts={defaultWaveformOpts}
                         />
                     </TableCell>
                 </TableRow>
