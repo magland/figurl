@@ -17,7 +17,13 @@ class LocalSubfeed {
     async getSignedMessages(): Promise<SignedSubfeedMessage[]> {
         return [...this.#signedMessages] // important to return a copy here
     }
-    async appendSignedMessages(messages: SignedSubfeedMessage[]) : Promise<void> {
+    async appendSignedMessages(position: number, messages: SignedSubfeedMessage[]) : Promise<void> {
+        if (position < this.#signedMessages.length) {
+            messages = messages.slice(this.#signedMessages.length -position)
+        }
+        else if (position > this.#signedMessages.length) {
+            throw Error(`Invalid position in appendSignedMessages ${position} > ${this.#signedMessages.length} (${this.feedId})`)
+        }
         if (messages.length === 0) return
         for (let m of messages) {
             this.#signedMessages.push(m)
@@ -82,14 +88,14 @@ class BrowserLocalFeedManager {
         const sf = f.getSubfeed(subfeedHash)
         return await sf.getSignedMessages()
     }
-    async appendSignedMessagesToSubfeed(feedId: FeedId, subfeedHash: SubfeedHash, messages: SignedSubfeedMessage[]) : Promise<void> {
+    async appendSignedMessagesToSubfeed(position: number, feedId: FeedId, subfeedHash: SubfeedHash, messages: SignedSubfeedMessage[]) : Promise<void> {
         if (!this.#localFeeds.has(feedId)) {
             this.#localFeeds.set(feedId, new LocalFeed(feedId))
         }
         const f = this.#localFeeds.get(feedId)
         if (!f) throw Error(`Unexpected: no local feed: ${feedId}`)
         const sf = f.getSubfeed(subfeedHash)
-        await sf.appendSignedMessages(messages)
+        await sf.appendSignedMessages(position, messages)
     }
 }
 

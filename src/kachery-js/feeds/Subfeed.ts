@@ -25,14 +25,14 @@ class Subfeed {
 
     #onMessagesAddedCallbacks: (() => void)[] = []
 
-    #subscribeToRemoteSubfeedCallbacks: ((feedId: FeedId, subfeedHash: SubfeedHash, position: SubfeedPosition) => void)[] = []
+    #subscribeToRemoteSubfeedCallbacks: ((feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName, position: SubfeedPosition) => void)[] = []
 
     #mutex = new Mutex()
     #remoteSubfeedMessageDownloader: RemoteSubfeedMessageDownloader
 
     #triggerScheduled = false
 
-    constructor(private kacheryHubInterface: KacheryHubInterface, private feedId: FeedId, private subfeedHash: SubfeedHash, private localFeedManager: LocalFeedManagerInterface) {
+    constructor(private kacheryHubInterface: KacheryHubInterface, private feedId: FeedId, private subfeedHash: SubfeedHash, private channelName: ChannelName, private localFeedManager: LocalFeedManagerInterface) {
         this.#publicKey = hexToPublicKey(feedIdToPublicKeyHex(feedId)); // The public key of the feed (which is determined by the feed ID)
         this.#localSubfeedSignedMessagesManager = new LocalSubfeedSignedMessagesManager(localFeedManager, feedId, subfeedHash, this.#publicKey)
         this.#remoteSubfeedMessageDownloader = new RemoteSubfeedMessageDownloader(this.kacheryHubInterface, this)
@@ -73,21 +73,19 @@ class Subfeed {
             throw err
         }
 
-        // try to download messages from buckets
-        const A = await this.kacheryHubInterface.checkForSubfeedInChannelBuckets(this.feedId, this.subfeedHash)
-        if ((A) && (A.length > 0)) {
-            const A0 = A[0]
+        const numM = await this.kacheryHubInterface.checkForSubfeedInChannelBucket(this.feedId, this.subfeedHash, this.channelName)
+        if (numM !== null) {
             const start0 = this.#localSubfeedSignedMessagesManager.getNumMessages()
-            if (A0.numMessages > start0) {
+            if (numM > start0) {
                 let msgs: SignedSubfeedMessage[] | undefined = undefined
                 try {
-                    msgs = await this.kacheryHubInterface.downloadSignedSubfeedMessages(A0.channelName, this.feedId, this.subfeedHash, start0, A0.numMessages)
+                    msgs = await this.kacheryHubInterface.downloadSignedSubfeedMessages(this.channelName, this.feedId, this.subfeedHash, start0, numM)
                 }
                 catch(err) {
-                    console.warn(`Problem loading signed subfeed messages from channel ${A0.channelName} ${this.feedId} ${this.subfeedHash} ${start0} ${A0.numMessages}: ${err.message}`)
+                    console.warn(`Problem loading signed subfeed messages from channel ${this.channelName} ${this.feedId} ${this.subfeedHash} ${start0} ${numM}: ${err.message}`)
                 }
                 if (msgs) {
-                    console.info(`Loaded ${msgs.length} subfeed messages from channel ${A0.channelName}`)
+                    console.info(`Loaded ${msgs.length} subfeed messages from channel ${this.channelName}`)
                     this.#localSubfeedSignedMessagesManager.appendSignedMessages(msgs)
                     this._scheduleTriggerNewMessageCallbacks()
                 }
@@ -146,7 +144,7 @@ class Subfeed {
         if (messages.length > 0) return messages
         if (durationMsecToNumber(waitMsec) > 0) {
             this.#subscribeToRemoteSubfeedCallbacks.forEach(cb => {
-                cb(this.feedId, this.subfeedHash, subfeedPosition(Number(this.getNumLocalMessages())))
+                cb(this.feedId, this.subfeedHash, this.channelName, subfeedPosition(Number(this.getNumLocalMessages())))
             })
             return new Promise((resolve, reject) => {
                 const listenerId = createListenerId()
@@ -286,7 +284,7 @@ class Subfeed {
     onMessagesAdded(callback: () => void) {
         this.#onMessagesAddedCallbacks.push(callback)
     }
-    onSubscribeToRemoteSubfeed(callback: (feedId: FeedId, subfeedHash: SubfeedHash, position: SubfeedPosition) => void) {
+    onSubscribeToRemoteSubfeed(callback: (feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName, position: SubfeedPosition) => void) {
         this.#subscribeToRemoteSubfeedCallbacks.push(callback)
     }
     reportNumRemoteMessages(channelName: ChannelName, numRemoteMessages: MessageCount) {

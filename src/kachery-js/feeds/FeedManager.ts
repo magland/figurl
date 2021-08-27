@@ -18,8 +18,8 @@ class FeedManager {
         this.#incomingSubfeedSubscriptionManager = new IncomingSubfeedSubscriptionManager()
         this.#outgoingSubfeedSubscriptionManager = new OutgoingSubfeedSubscriptionManager()
 
-        this.#outgoingSubfeedSubscriptionManager.onSubscribeToRemoteSubfeed((feedId: FeedId, subfeedHash: SubfeedHash, position: SubfeedPosition) => {
-            this.kacheryHubInterface.subscribeToRemoteSubfeed(feedId, subfeedHash, position)
+        this.#outgoingSubfeedSubscriptionManager.onSubscribeToRemoteSubfeed((feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName, position: SubfeedPosition) => {
+            this.kacheryHubInterface.subscribeToRemoteSubfeed(feedId, subfeedHash, channelName, position)
         })
     }
     async createFeed({ feedName } : {feedName: FeedName | null }) {
@@ -189,7 +189,7 @@ class FeedManager {
         }
     }
     async reportSubfeedMessageCountUpdate(channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, messageCount: MessageCount) {
-        if (this.#outgoingSubfeedSubscriptionManager.hasSubfeedSubscription(feedId, subfeedHash)) {
+        if (this.#outgoingSubfeedSubscriptionManager.hasSubfeedSubscription(feedId, subfeedHash, channelName)) {
             const subfeed = await this._loadSubfeed(feedId, subfeedHash, channelName)
             subfeed.reportNumRemoteMessages(channelName, messageCount)
         }
@@ -211,13 +211,13 @@ class FeedManager {
         }
         else {
             // Instantiate and initialize the subfeed
-            subfeed = new Subfeed(this.kacheryHubInterface, feedId, subfeedHash, this.localFeedManager)
+            subfeed = new Subfeed(this.kacheryHubInterface, feedId, subfeedHash, channelName, this.localFeedManager)
             subfeed.onMessagesAdded(() => {
                 if (!subfeed) throw Error('Unexpected')
-                this._uploadSubfeedMessagesToSubscribedChannels(feedId, subfeedHash)
+                this._uploadSubfeedMessagesIfSubscribedToChannel(feedId, subfeedHash, channelName)
             })
-            subfeed.onSubscribeToRemoteSubfeed((feedId: FeedId, subfeedHash: SubfeedHash, position: SubfeedPosition) => {
-                this.#outgoingSubfeedSubscriptionManager.createOrRenewOutgoingSubscription(feedId, subfeedHash, position)
+            subfeed.onSubscribeToRemoteSubfeed((feedId: FeedId, subfeedHash: SubfeedHash, channelName, position: SubfeedPosition) => {
+                this.#outgoingSubfeedSubscriptionManager.createOrRenewOutgoingSubscription(feedId, subfeedHash, channelName, position)
             })
             // Store in memory for future access (the order is important here, see waitUntilInitialized above)
             this.#subfeeds.set(k, subfeed)
@@ -240,10 +240,12 @@ class FeedManager {
         // Return the subfeed instance
         return subfeed
     }
-    async _uploadSubfeedMessagesToSubscribedChannels(feedId: FeedId, subfeedHash: SubfeedHash) {
+    async _uploadSubfeedMessagesIfSubscribedToChannel(feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName) {
         const channelNames = this.#incomingSubfeedSubscriptionManager.getChannelsSubscribingToSubfeed(feedId, subfeedHash)
-        for (let channelName of channelNames) {
-            await this._uploadSubfeedMessagesToChannel(channelName, feedId, subfeedHash)
+        for (let ch of channelNames) {
+            if (ch === channelName) {
+                await this._uploadSubfeedMessagesToChannel(channelName, feedId, subfeedHash)
+            }
         }
     }
     async _uploadSubfeedMessagesToChannel(channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash) {
