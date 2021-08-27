@@ -89,6 +89,7 @@ class Subfeed {
                 if (msgs) {
                     console.info(`Loaded ${msgs.length} subfeed messages from channel ${A0.channelName}`)
                     this.#localSubfeedSignedMessagesManager.appendSignedMessages(msgs)
+                    this._scheduleTriggerNewMessageCallbacks()
                 }
             }
         }

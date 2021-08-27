@@ -54,7 +54,7 @@ const SortingComparisonView: React.FunctionComponent<Props> = (props) => {
   // curation1
   const curationSubfeedName1 = useMemo(() => ({name: 'sortingCuration', sortingId1}), [sortingId1])
   const curationSubfeedHash1 = sha1OfObject(curationSubfeedName1 as any as JSONObject) as any as SubfeedHash
-  const {state: curation1} = useSubfeedReducer(feedId, curationSubfeedHash1, sortingCurationReducer, {}, {actionField: false})
+  const {state: curation1} = useSubfeedReducer({feedId, subfeedHash: curationSubfeedHash1}, sortingCurationReducer, {}, {actionField: false})
   const curation1Dispatch = useCallback((a: SortingCurationAction) => {
     initiateTask({
       kacheryNode,
@@ -74,7 +74,7 @@ const SortingComparisonView: React.FunctionComponent<Props> = (props) => {
   // curation2
   const curationSubfeedName2 = useMemo(() => ({name: 'sortingCuration', sortingId2}), [sortingId2])
   const curationSubfeedHash2 = sha1OfObject(curationSubfeedName2 as any as JSONObject) as any as SubfeedHash
-  const {state: curation2} = useSubfeedReducer(feedId, curationSubfeedHash2, sortingCurationReducer, {}, {actionField: false})
+  const {state: curation2} = useSubfeedReducer({feedId, subfeedHash: curationSubfeedHash2}, sortingCurationReducer, {}, {actionField: false})
   const curation2Dispatch = useCallback((a: SortingCurationAction) => {
     initiateTask({
       kacheryNode,
