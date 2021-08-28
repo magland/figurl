@@ -158,27 +158,31 @@ class MCMCRun:
             'chainUri': c.get_subfeed().uri
         }
 
-run = MCMCRun('run-1', label='Run 1', meta_data={})
-chain1 = run.add_chain('chain-1')
-chain2 = run.add_chain('chain-2')
-chain3 = run.add_chain('chain-3')
+def main():
+    run = MCMCRun('run-1', label='Run 1', meta_data={})
+    chain1 = run.add_chain('chain-1')
+    chain2 = run.add_chain('chain-2')
+    chain3 = run.add_chain('chain-3')
 
-for i in range(25):
-    chain1.add_iteration({'x': i / 25, 'y': -i / 25})
-    chain2.add_iteration({'x': (i / 25) ** 2, 'y': -(i / 25) ** 2})
-    time.sleep(0.02)
-for i in range(20):
-    chain3.add_iteration({'x': i / 20, 'y': -i / 20})
-    time.sleep(0.02)
+    for i in range(25):
+        chain1.add_iteration({'x': i / 25, 'y': -i / 25})
+        chain2.add_iteration({'x': (i / 25) ** 2, 'y': -(i / 25) ** 2})
+        time.sleep(0.02)
+    for i in range(20):
+        chain3.add_iteration({'x': i / 20, 'y': -i / 20})
+        time.sleep(0.02)
 
-F = run.figurl(snapshot=False)
-url = F.url(label='test mcmc monitor')
-print(url)
+    F = run.figurl(snapshot=False)
+    url = F.url(label='test mcmc monitor')
+    print(url)
 
-for i in range(25, 1000):
-    print(f'Adding iteration {i + 1}')
-    chain1.add_iteration({'x': i / 25, 'y': -i / 25})
-    chain2.add_iteration({'x': (i / 25) ** 2, 'y': -(i / 25) ** 2})
-    time.sleep(6)
+    for i in range(25, 1000):
+        print(f'Adding iteration {i + 1}')
+        chain1.add_iteration({'x': i / 25, 'y': -i / 25})
+        chain2.add_iteration({'x': (i / 25) ** 2, 'y': -(i / 25) ** 2})
+        time.sleep(6)
 
-run.finalize()
+    run.finalize()
+
+if __name__ == '__main__':
+    main()
