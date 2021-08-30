@@ -22,7 +22,7 @@ const columns = [
 const ChainsTable: FunctionComponent<Props> = ({chains, selectedChainIds, onSelectedChainIdsChanged}) => {
     const rows = useMemo(() => (
         chains.map((chain) => ({
-            key: chain.chainId,
+            key: chain.chainId + '',
             columnValues: {
                 chainId: chain.chainId,
                 numIterations: chain.iterations.length

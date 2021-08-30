@@ -194,7 +194,7 @@ const MCMCRunView: FunctionComponent<Props> = ({data, width, height}) => {
     const [selectedChainIds, setSelectedChainIds] = useState<string[] | undefined>(undefined)
     const selectedChains: MCMCRunChain[] = useMemo(() => {
         if (!runData) return []
-        return runData.chains.filter(ch => (selectedChainIds?.includes(ch.chainId)))
+        return runData.chains.filter(ch => (selectedChainIds?.includes(ch.chainId + '')))
     }, [runData, selectedChainIds])
     const [selectedParameter, setSelectedParameter] = useState<string>('')
     if (!runData) {
