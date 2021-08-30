@@ -1,11 +1,12 @@
-import { useChannel, usePureCalculationTask } from 'kachery-react';
-import sortByPriority from 'labbox-react/extensionSystem/sortByPriority';
-import { ExternalSortingUnitMetric } from 'python/sortingview/gui/pluginInterface/Sorting';
-import { SortingComparisonUnitMetricPlugin } from 'python/sortingview/gui/pluginInterface/SortingComparisonUnitMetricPlugin';
+import { useChannel, usePureCalculationTask } from 'figurl/kachery-react';
+import sortByPriority from 'figurl/labbox-react/extensionSystem/sortByPriority';
+import { ExternalSortingUnitMetric } from '../../../pluginInterface/Sorting';
+import { SortingComparisonUnitMetricPlugin } from '../../../pluginInterface/SortingComparisonUnitMetricPlugin';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import { mergeGroupForUnitId, Sorting, SortingCuration, SortingSelectionDispatch, SortingUnitMetricPlugin } from "../../../pluginInterface";
 import '../unitstable.css';
 import TableWidget, { Column, Row } from './TableWidget';
+import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds';
 
 interface Props {
     sortingUnitMetrics?: SortingUnitMetricPlugin[]
@@ -16,7 +17,7 @@ interface Props {
     selectionDispatch: SortingSelectionDispatch
     unitMetricsUri?: string
     compareSorting?: Sorting
-    curation: SortingCuration
+    curation?: SortingCuration
     height?: number
     selectionDisabled?: boolean
     sortingSelector?: string
@@ -115,7 +116,7 @@ const UnitsTable: FunctionComponent<Props> = (props) => {
 
     // Fetch external metrics.
     const {channelName} = useChannel()
-    const {returnValue: externalUnitMetrics} = usePureCalculationTask<ExternalSortingUnitMetric[]>(unitMetricsUri ? 'fetch_unit_metrics.1' : undefined, {unit_metrics_uri: unitMetricsUri || ''}, {channelName})
+    const {returnValue: externalUnitMetrics} = usePureCalculationTask<ExternalSortingUnitMetric[]>(unitMetricsUri ? sortingviewTaskFunctionIds.fetchUnitMetrics : undefined, {unit_metrics_uri: unitMetricsUri || ''}, {channelName})
 
     // Assemble column list
     // -- Static columns (unit id & labels)
@@ -173,7 +174,7 @@ const UnitsTable: FunctionComponent<Props> = (props) => {
                 value: {unitId, mergeGroup: mergeGroupForUnitId(unitId, curation)},
                 sortValue: unitId
             }
-            const labels = getLabelsForUnitId(unitId, curation)
+            const labels = curation ? getLabelsForUnitId(unitId, curation) : []
             const labelData = {
                 value: labels,
                 sortValue: labels.join(', ')

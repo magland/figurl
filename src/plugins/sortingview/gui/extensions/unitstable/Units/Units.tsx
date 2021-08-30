@@ -1,11 +1,11 @@
 
 import { Button, Paper } from '@material-ui/core';
-import { runPureCalculationTaskAsync } from 'kachery-react';
-import useChannel from 'kachery-react/useChannel';
-import useKacheryNode from 'kachery-react/useKacheryNode';
-import { usePlugins } from 'labbox-react';
-import sortByPriority from 'labbox-react/extensionSystem/sortByPriority';
-import { SortingComparisonUnitMetricPlugin } from 'python/sortingview/gui/pluginInterface/SortingComparisonUnitMetricPlugin';
+import { runPureCalculationTaskAsync } from 'figurl/kachery-react';
+import useChannel from 'figurl/kachery-react/useChannel';
+import useKacheryNode from 'figurl/kachery-react/useKacheryNode';
+import { usePlugins } from 'figurl/labbox-react';
+import sortByPriority from 'figurl/labbox-react/extensionSystem/sortByPriority';
+import { SortingComparisonUnitMetricPlugin } from '../../../pluginInterface/SortingComparisonUnitMetricPlugin';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { LabboxPlugin, Recording, sortingComparisonUnitMetricPlugins, SortingUnitMetricPlugin, sortingUnitMetricPlugins, SortingViewProps } from "../../../pluginInterface";
 import UnitsTable from './UnitsTable';
@@ -76,7 +76,7 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
     }, [recording, previousRecording, setPreviousRecording, updateMetrics])
 
     const kacheryNode = useKacheryNode()
-    const {channelName} = useChannel()
+    const {channelName, backendId} = useChannel()
 
 
     const fetchMetric = useCallback(async (metric: SortingUnitMetricPlugin) => {
@@ -101,7 +101,8 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
                     configuration: metric.metricFnParams
                 },
                 {
-                    channelName
+                    channelName,
+                    backendId
                 }
             )
             updateMetrics({metricName: metric.name, status: 'completed', data})
@@ -109,7 +110,7 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
             console.error(err);
             updateMetrics({metricName: metric.name, status: 'error', error: err.message})
         }
-    }, [kacheryNode, channelName, metrics, sorting.sortingObject, recording.recordingObject, snippetLen])
+    }, [kacheryNode, channelName, backendId, metrics, sorting.sortingObject, recording.recordingObject, snippetLen])
 
     const fetchComparisonMetric = useCallback(async (metric: SortingComparisonUnitMetricPlugin) => {
         if (!compareSorting) return
@@ -136,7 +137,8 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
                     configuration: metric.metricFnParams
                 },
                 {
-                    channelName
+                    channelName,
+                    backendId
                 }
             )
             updateMetrics({metricName: metric.name, status: 'completed', data})
@@ -144,7 +146,7 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
             console.error(err);
             updateMetrics({metricName: metric.name, status: 'error', error: err.message})
         }
-    }, [kacheryNode, channelName, metrics, sorting.sortingObject, compareSorting, sortingSelector, recording.recordingObject, snippetLen])
+    }, [kacheryNode, channelName, backendId, metrics, sorting.sortingObject, compareSorting, sortingSelector, recording.recordingObject, snippetLen])
 
     const plugins = usePlugins<LabboxPlugin>()
     useEffect(() => { 

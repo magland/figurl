@@ -1,7 +1,7 @@
 import { faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Checkbox, Grid, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
-import { useMemoCompare } from 'kachery-react/useMemoCompare'
+import { useMemoCompare } from 'figurl/kachery-react/useMemoCompare'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
 import '../unitstable.css'
 
