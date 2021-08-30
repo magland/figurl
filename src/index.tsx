@@ -2,11 +2,11 @@ import FigurlApp from 'figurl/FigurlApp';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import taskFunctionIds from 'taskFunctionIds';
-import figurlPlugins from './plugins/plugins';
 import introMd from './intro.md.gen';
-import packageName from './packageName';
-import reportWebVitals from './reportWebVitals';
 import logo from './logo.png';
+import packageName from './packageName';
+import figurlPlugins from './plugins/plugins';
+import reportWebVitals from './reportWebVitals';
 import { pythonProjectVersion, webAppProjectVersion } from './version';
 
 ReactDOM.render(

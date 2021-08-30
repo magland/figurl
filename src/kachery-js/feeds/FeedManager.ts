@@ -18,8 +18,8 @@ class FeedManager {
         this.#incomingSubfeedSubscriptionManager = new IncomingSubfeedSubscriptionManager()
         this.#outgoingSubfeedSubscriptionManager = new OutgoingSubfeedSubscriptionManager()
 
-        this.#outgoingSubfeedSubscriptionManager.onSubscribeToRemoteSubfeed((feedId: FeedId, subfeedHash: SubfeedHash, position: SubfeedPosition) => {
-            this.kacheryHubInterface.subscribeToRemoteSubfeed(feedId, subfeedHash, position)
+        this.#outgoingSubfeedSubscriptionManager.onSubscribeToRemoteSubfeed((feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName, position: SubfeedPosition) => {
+            this.kacheryHubInterface.subscribeToRemoteSubfeed(feedId, subfeedHash, channelName, position)
         })
     }
     async createFeed({ feedName } : {feedName: FeedName | null }) {
@@ -35,11 +35,11 @@ class FeedManager {
     async hasWriteableFeed(feedId: FeedId) {
         return await this.localFeedManager.hasWriteableFeed(feedId)
     }
-    async appendMessages(args: { feedId: FeedId, subfeedHash: SubfeedHash, messages: SubfeedMessage[]}) {
+    async appendMessages(args: { feedId: FeedId, subfeedHash: SubfeedHash, messages: SubfeedMessage[], channelName: ChannelName}) {
         // Append messages to a subfeed (must be in a writeable feed on this node)
 
         // Load the subfeed and make sure it is writeable
-        const subfeed = await this._loadSubfeed(args.feedId, args.subfeedHash);
+        const subfeed = await this._loadSubfeed(args.feedId, args.subfeedHash, args.channelName);
         if (!subfeed) {
             /* istanbul ignore next */
             throw Error(`Unable to load subfeed: ${args.feedId} ${args.subfeedHash}`);
@@ -58,18 +58,18 @@ class FeedManager {
             release()
         }
     }
-    async getNumLocalMessages({ feedId, subfeedHash }: {feedId: FeedId, subfeedHash: SubfeedHash}): Promise<MessageCount> {
+    async getNumLocalMessages({ feedId, subfeedHash, channelName }: {feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName}): Promise<MessageCount> {
         // Get the total number of messages in the local feed only
         // future: we may want to optionally do a search, and retrieve the number of messages without retrieving the actual messages
-        const subfeed = await this._loadSubfeed(feedId, subfeedHash);
+        const subfeed = await this._loadSubfeed(feedId, subfeedHash, channelName);
         if (!subfeed) {
             /* istanbul ignore next */
             throw Error(`Unable to load subfeed: ${feedId} ${subfeedHash}`);
         }
         return subfeed.getNumLocalMessages()
     }
-    async getFinalLocalMessage({ feedId, subfeedHash } : {feedId: FeedId, subfeedHash: SubfeedHash}): Promise<SubfeedMessage | null> {
-        const subfeed = await this._loadSubfeed(feedId, subfeedHash);
+    async getFinalLocalMessage({ feedId, subfeedHash, channelName } : {feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName}): Promise<SubfeedMessage | null> {
+        const subfeed = await this._loadSubfeed(feedId, subfeedHash, channelName);
         if (!subfeed) {
             return null
         }
@@ -107,7 +107,7 @@ class FeedManager {
             const watchName = wn as any as SubfeedWatchName
             const w = subfeedWatches.get(watchName)
             if (!w) throw Error('Unexpected.')
-            const subfeed = await this._loadSubfeed(w.feedId, w.subfeedHash)
+            const subfeed = await this._loadSubfeed(w.feedId, w.subfeedHash, w.channelName)
             const numLocalMessages = subfeed.getNumLocalMessages()
             let numMessages = messageCountToNumber(numLocalMessages) - subfeedPositionToNumber(w.position)
             if ( numMessages > 0 ) {
@@ -153,7 +153,7 @@ class FeedManager {
                 messages.set(watchName, [])
             })
             subfeedWatches.forEach((w: SubfeedWatch, watchName: SubfeedWatchName) => {
-                this._loadSubfeed(w.feedId, w.subfeedHash).then((subfeed) => {
+                this._loadSubfeed(w.feedId, w.subfeedHash, w.channelName).then((subfeed) => {
                     if (subfeed) {
                         subfeed.waitForSignedMessages({position: w.position, maxNumMessages, waitMsec}).then((messages0) => {
                             if (messages0.length > 0) {
@@ -178,7 +178,7 @@ class FeedManager {
     }
     async createOrRenewIncomingSubfeedSubscription(channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, position: SubfeedPosition) {
         if (!(await this.hasWriteableFeed(feedId))) return
-        const subfeed = await this._loadSubfeed(feedId, subfeedHash)
+        const subfeed = await this._loadSubfeed(feedId, subfeedHash, channelName)
         if (!subfeed.isWriteable()) {
             throw Error('Cannot have an incoming subscription to a subfeed that is not writeable')
         }
@@ -189,16 +189,16 @@ class FeedManager {
         }
     }
     async reportSubfeedMessageCountUpdate(channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, messageCount: MessageCount) {
-        if (this.#outgoingSubfeedSubscriptionManager.hasSubfeedSubscription(feedId, subfeedHash)) {
-            const subfeed = await this._loadSubfeed(feedId, subfeedHash)
+        if (this.#outgoingSubfeedSubscriptionManager.hasSubfeedSubscription(feedId, subfeedHash, channelName)) {
+            const subfeed = await this._loadSubfeed(feedId, subfeedHash, channelName)
             subfeed.reportNumRemoteMessages(channelName, messageCount)
         }
     }
     async reportNumRemoteMessages(channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, numRemoteMessages: MessageCount) {
-        const subfeed = await this._loadSubfeed(feedId, subfeedHash)
+        const subfeed = await this._loadSubfeed(feedId, subfeedHash, channelName)
         subfeed.reportNumRemoteMessages(channelName, numRemoteMessages)
     }
-    async _loadSubfeed(feedId: FeedId, subfeedHash: SubfeedHash, channelName?: ChannelName): Promise<Subfeed> {
+    async _loadSubfeed(feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName): Promise<Subfeed> {
         // const timer = nowTimestamp()
         // Load a subfeed (Subfeed() instance
 
@@ -211,13 +211,13 @@ class FeedManager {
         }
         else {
             // Instantiate and initialize the subfeed
-            subfeed = new Subfeed(this.kacheryHubInterface, feedId, subfeedHash, this.localFeedManager)
+            subfeed = new Subfeed(this.kacheryHubInterface, feedId, subfeedHash, channelName, this.localFeedManager)
             subfeed.onMessagesAdded(() => {
                 if (!subfeed) throw Error('Unexpected')
-                this._uploadSubfeedMessagesToSubscribedChannels(feedId, subfeedHash)
+                this._uploadSubfeedMessagesIfSubscribedToChannel(feedId, subfeedHash, channelName)
             })
-            subfeed.onSubscribeToRemoteSubfeed((feedId: FeedId, subfeedHash: SubfeedHash, position: SubfeedPosition) => {
-                this.#outgoingSubfeedSubscriptionManager.createOrRenewOutgoingSubscription(feedId, subfeedHash, position)
+            subfeed.onSubscribeToRemoteSubfeed((feedId: FeedId, subfeedHash: SubfeedHash, channelName, position: SubfeedPosition) => {
+                this.#outgoingSubfeedSubscriptionManager.createOrRenewOutgoingSubscription(feedId, subfeedHash, channelName, position)
             })
             // Store in memory for future access (the order is important here, see waitUntilInitialized above)
             this.#subfeeds.set(k, subfeed)
@@ -240,14 +240,16 @@ class FeedManager {
         // Return the subfeed instance
         return subfeed
     }
-    async _uploadSubfeedMessagesToSubscribedChannels(feedId: FeedId, subfeedHash: SubfeedHash) {
+    async _uploadSubfeedMessagesIfSubscribedToChannel(feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName) {
         const channelNames = this.#incomingSubfeedSubscriptionManager.getChannelsSubscribingToSubfeed(feedId, subfeedHash)
-        for (let channelName of channelNames) {
-            await this._uploadSubfeedMessagesToChannel(channelName, feedId, subfeedHash)
+        for (let ch of channelNames) {
+            if (ch === channelName) {
+                await this._uploadSubfeedMessagesToChannel(channelName, feedId, subfeedHash)
+            }
         }
     }
     async _uploadSubfeedMessagesToChannel(channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash) {
-        const subfeed = await this._loadSubfeed(feedId, subfeedHash)
+        const subfeed = await this._loadSubfeed(feedId, subfeedHash, channelName)
         const subfeedJson = await this.kacheryHubInterface.loadSubfeedJson(channelName, feedId, subfeedHash)
         if (subfeedJson) {
             if (Number(subfeedJson.messageCount) >= Number(subfeed.getNumLocalMessages())) {

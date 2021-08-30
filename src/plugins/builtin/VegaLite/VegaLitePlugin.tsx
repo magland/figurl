@@ -6,7 +6,7 @@ import { VegaLite } from 'react-vega'
 // See https://github.com/vega/react-vega/issues/85#issuecomment-795138175
 import './VegaLitePlugin.css'
 
-type VegaLiteData = {
+export type VegaLiteData = {
     spec: any
 }
 const isVegaLiteData = (x: any): x is VegaLiteData => {
@@ -21,7 +21,7 @@ type Props = {
     height: number
 }
 
-const VegaLiteComponent: FunctionComponent<Props> = ({data, width, height}) => {
+export const VegaLiteComponent: FunctionComponent<Props> = ({data, width, height}) => {
     const {spec} = data
     const spec2 = useMemo(() => {
         return {...spec, width: "container", height: "container"}

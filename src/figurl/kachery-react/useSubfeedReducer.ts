@@ -1,7 +1,7 @@
 import Subfeed from 'kachery-js/feeds/Subfeed'
 import { FeedId, JSONStringifyDeterministic, SubfeedHash, SubfeedMessage } from 'kachery-js/types/kacheryTypes'
 import { useEffect, useMemo, useState } from 'react'
-import useSubfeed from './useSubfeed'
+import useSubfeed, { parseSubfeedUri } from './useSubfeed'
 
 type CompositeState<State> = {
     feedId: FeedId,
@@ -11,8 +11,19 @@ type CompositeState<State> = {
     state: State
 }
 
-const useSubfeedReducer = <State, Action>(feedId: FeedId | undefined, subfeedHash: SubfeedHash | undefined, reducer: (s: State, a: Action) => State, initialState: State, opts: {actionField: boolean}): {state: State, subfeed: Subfeed | undefined} => {
+const useSubfeedReducer = <State, Action>(a: {feedId?: FeedId, subfeedHash?: SubfeedHash, subfeedUri?: string}, reducer: (s: State, a: Action) => State, initialState: State, opts: {actionField: boolean}): {state: State, subfeed: Subfeed | undefined} => {
     const [compositeState, setCompositeState] = useState<CompositeState<State> | undefined>(undefined)
+
+    let {feedId, subfeedHash, subfeedUri} = a
+    if (subfeedUri) {
+        // note: this is duplicated code with useSubfeed
+        if ((feedId) || (subfeedHash)) {
+            throw Error('useSubfeed: Cannot specify both subfeedUri and feedId/subfeedHash')
+        }
+        const {feedId: fid, subfeedHash: sfh} = parseSubfeedUri(subfeedUri)
+        feedId = fid
+        subfeedHash = sfh
+    }
 
     const {messages: messages2, subfeed} = useSubfeed({feedId, subfeedHash})
 

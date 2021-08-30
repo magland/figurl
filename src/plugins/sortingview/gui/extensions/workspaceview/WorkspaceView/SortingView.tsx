@@ -59,7 +59,7 @@ const SortingView: React.FunctionComponent<Props> = (props) => {
 
   const curationSubfeedName = useMemo(() => ({name: 'sortingCuration', sortingId}), [sortingId])
   const curationSubfeedHash = sha1OfObject(curationSubfeedName as any as JSONObject) as any as SubfeedHash
-  const {state: curation} = useSubfeedReducer(feedId, curationSubfeedHash, sortingCurationReducer, {}, {actionField: false})
+  const {state: curation} = useSubfeedReducer({feedId, subfeedHash: curationSubfeedHash}, sortingCurationReducer, {}, {actionField: false})
   const kacheryNode = useKacheryNode()
   const {channelName, backendId} = useChannel()
   const curationDispatch = useCallback((a: SortingCurationAction) => {

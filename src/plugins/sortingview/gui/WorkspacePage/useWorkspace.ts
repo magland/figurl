@@ -35,7 +35,7 @@ const useWorkspace = <WorkspaceState extends BaseWorkspaceState, WorkspaceAction
     if (!feedId) throw Error(`Error parsing workspace URI: ${workspaceUri}`)
 
     const subfeedHash = sha1OfString('main') as any as SubfeedHash
-    const {state: workspace} = useSubfeedReducer(feedId, subfeedHash, workspaceReducer, initialWorkspaceState, {actionField})
+    const {state: workspace} = useSubfeedReducer({feedId, subfeedHash: subfeedHash}, workspaceReducer, initialWorkspaceState, {actionField})
     const userWorkspacePermissions = useCurrentUserWorkspacePermissions(workspace)
     const readOnly = userWorkspacePermissions.edit ? false : true
     const kacheryNode = useKacheryNode()

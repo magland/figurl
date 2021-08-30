@@ -91,34 +91,33 @@ class KacheryHubInterface {
         }
         return options
     }
-    async checkForSubfeedInChannelBuckets(feedId: FeedId, subfeedHash: SubfeedHash): Promise<{numMessages: MessageCount, channelName: ChannelName}[] | null> {
+    async checkForSubfeedInChannelBucket(feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName): Promise<MessageCount | null> {
         await this.initialize()
         const nodeConfig = this.#nodeConfig
         if (!nodeConfig) return null
-        const options: {numMessages: MessageCount, channelName: ChannelName}[] = []
         const checkedBucketUrls = new Set<string>()
         for (let cm of (nodeConfig.channelMemberships || [])) {
-            const channelName = cm.channelName
-            const bucketUri = cm.channelBucketUri
-            if (bucketUri) {
-                const bucketUrl = urlFromUri(bucketUri)
-                if (!checkedBucketUrls.has(bucketUrl)) {
-                    checkedBucketUrls.add(bucketUrl)
-                    const f = feedId.toString()
-                    const s = subfeedHash.toString()
-                    const subfeedPath = `feeds/${f[0]}${f[1]}/${f[2]}${f[3]}/${f[4]}${f[5]}/${f}/subfeeds/${s[0]}${s[1]}/${s[2]}${s[3]}/${s[4]}${s[5]}/${s}`
-                    const url2 = urlString(`${bucketUrl}/${subfeedPath}/subfeed.json`)
-                    const subfeedJson = await downloadJson(url2, {cacheBust: true})
-                    if (subfeedJson) {
-                        if (isSubfeedJson(subfeedJson)) {
-                            options.push({numMessages: subfeedJson.messageCount, channelName})
+            if (channelName === cm.channelName) {
+                const bucketUri = cm.channelBucketUri
+                if (bucketUri) {
+                    const bucketUrl = urlFromUri(bucketUri)
+                    if (!checkedBucketUrls.has(bucketUrl)) {
+                        checkedBucketUrls.add(bucketUrl)
+                        const f = feedId.toString()
+                        const s = subfeedHash.toString()
+                        const subfeedPath = `feeds/${f[0]}${f[1]}/${f[2]}${f[3]}/${f[4]}${f[5]}/${f}/subfeeds/${s[0]}${s[1]}/${s[2]}${s[3]}/${s[4]}${s[5]}/${s}`
+                        const url2 = urlString(`${bucketUrl}/${subfeedPath}/subfeed.json`)
+                        const subfeedJson = await downloadJson(url2, {cacheBust: true})
+                        if (subfeedJson) {
+                            if (isSubfeedJson(subfeedJson)) {
+                                return subfeedJson.messageCount
+                            }
                         }
                     }
                 }
             }
         }
-        options.sort((a, b) => (Number(b.numMessages) - Number(a.numMessages))) // sort descending by num. messages
-        return options
+        return null
     }
     async requestFileFromChannels(fileKey: FileKey): Promise<boolean> {
         await this.initialize()
@@ -237,27 +236,27 @@ class KacheryHubInterface {
         }
         this._publishMessageToPubsubChannel(channelName, pubsubChannelName(`${channelName}-provideFeeds`), msg)
     }
-    async subscribeToRemoteSubfeed(feedId: FeedId, subfeedHash: SubfeedHash, position: SubfeedPosition) {
+    async subscribeToRemoteSubfeed(feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName, position: SubfeedPosition) {
         await this.initialize()
         const nodeConfig = this.#nodeConfig
         if (!nodeConfig) return
-        const channelNames: ChannelName[] = []
-        for (let channelMembership of (nodeConfig.channelMemberships || [])) {
-            if (channelMembership.roles.requestFeeds) {
-                if ((channelMembership.authorization) && (channelMembership.authorization.permissions.requestFeeds)) {
-                    channelNames.push(channelMembership.channelName)
-                }
-            }
-        }
+        // const channelNames: ChannelName[] = []
+        // for (let channelMembership of (nodeConfig.channelMemberships || [])) {
+        //     if (channelMembership.roles.requestFeeds) {
+        //         if ((channelMembership.authorization) && (channelMembership.authorization.permissions.requestFeeds)) {
+        //             channelNames.push(channelMembership.channelName)
+        //         }
+        //     }
+        // }
         const msg: RequestSubfeedMessageBody = {
             type: 'requestSubfeed',
             feedId,
             subfeedHash,
             position
         }
-        for (let channelName of channelNames) {
-            this._publishMessageToPubsubChannel(channelName, pubsubChannelName(`${channelName}-requestFeeds`), msg)
-        }
+        // for (let channelName of channelNames) {
+        this._publishMessageToPubsubChannel(channelName, pubsubChannelName(`${channelName}-requestFeeds`), msg)
+        // }
     }
     async _requestTaskFromChannel(args: {channelName: ChannelName, taskFunctionId: TaskFunctionId, kwargs: TaskKwargs, taskFunctionType: TaskFunctionType, taskId: TaskId, backendId: string | null}) {
         const {channelName, taskFunctionId, kwargs, taskFunctionType, taskId, backendId} = args
@@ -349,15 +348,16 @@ class KacheryHubInterface {
         if (!subfeedJson) {
             throw Error(`Unable to load subfeed.json for subfeed: ${feedId} ${subfeedHash} ${channelName}`)
         }
+        let end2 = Number(end)
         if (Number(subfeedJson.messageCount) < Number(end)) {
-            throw Error(`Not enough messages for subfeed: ${feedId} ${subfeedHash} ${channelName}`)
+            end = subfeedJson.messageCount
         }
         const subfeedPath = getSubfeedPath(feedId, subfeedHash)
 
         const client = new GoogleObjectStorageClient({bucketName: channelBucketName})
 
         const ret: SignedSubfeedMessage[] = []
-        for (let i = Number(start); i < Number(end); i++) {
+        for (let i = Number(start); i < end2; i++) {
             const messagePath = `${subfeedPath}/${i}`
             const messageJson = await client.getObjectJson(messagePath, {cacheBust: false, nodeStats: this.opts.nodeStats, channelName})
             if (!messageJson) {

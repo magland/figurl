@@ -73,11 +73,24 @@ const NiceTable: FunctionComponent<Props> = ({
     const handleEditRow = useCallback((rowKey: string) => {
         onEditRow && onEditRow(rowKey)
     }, [onEditRow])
+    const allSelected = (selectedRowKeys.length === rows.length)
+    const showSelectAllBox = (selectionMode === "multiple") && (rows.length > 0)
+    const handleSelectAll = useCallback(() => {
+        if (!onSelectedRowKeysChanged) return
+        if (allSelected) onSelectedRowKeysChanged([])
+        else {
+            onSelectedRowKeysChanged(rows.map(r => (r.key)))
+        }
+    }, [allSelected, onSelectedRowKeysChanged, rows])
     return (
         <Table className="NiceTable">
             <TableHead>
                 <TableRow>
-                    <TableCell key="_first" style={{ width: 0 }} />
+                    <TableCell key="_first" style={{ width: 0 }}>
+                        {
+                            showSelectAllBox && <Checkbox checked={allSelected} onClick={handleSelectAll} title={allSelected ? 'deselect all' : 'select all'} />
+                        }
+                    </TableCell>
                     {
                         columns.map(col => (
                             <TableCell key={col.key}>

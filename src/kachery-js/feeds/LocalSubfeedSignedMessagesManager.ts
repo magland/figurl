@@ -80,7 +80,7 @@ class LocalSubfeedSignedMessagesManager {
         if (this.#appending) throw Error('Cannot append messages while messages are being appended.')
         this.#appending = true
         // CHAIN:append_messages:step(6)
-        await this.localFeedManager.appendSignedMessagesToSubfeed(this.feedId, this.subfeedHash, signedMessagesToAppend)
+        await this.localFeedManager.appendSignedMessagesToSubfeed(firstAppendMessageNumber as number, this.feedId, this.subfeedHash, signedMessagesToAppend)
         for (let sm of signedMessagesToAppend) {
             this.#signedMessages.push(sm)
         }

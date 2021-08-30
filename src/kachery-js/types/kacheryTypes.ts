@@ -784,12 +784,14 @@ export const messageCount = (x: number): MessageCount => {
 export interface SubfeedWatch {
     feedId: FeedId,
     subfeedHash: SubfeedHash,
+    channelName: ChannelName,
     position: SubfeedPosition
 }
 export const isSubfeedWatch = (x: any): x is SubfeedWatch => {
     return _validateObject(x, {
         feedId: isFeedId,
         subfeedHash: isSubfeedHash,
+        channelName: isChannelName,
         position: isSubfeedPosition
     });
 }
