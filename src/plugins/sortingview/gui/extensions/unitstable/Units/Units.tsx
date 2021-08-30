@@ -1,14 +1,14 @@
 
 import { Button, Paper } from '@material-ui/core';
+import { runPureCalculationTaskAsync } from 'figurl/kachery-react';
+import useChannel from 'figurl/kachery-react/useChannel';
+import useKacheryNode from 'figurl/kachery-react/useKacheryNode';
+import { usePlugins } from 'figurl/labbox-react';
+import sortByPriority from 'figurl/labbox-react/extensionSystem/sortByPriority';
+import { SortingComparisonUnitMetricPlugin } from '../../../pluginInterface/SortingComparisonUnitMetricPlugin';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { LabboxPlugin, Recording, sortingComparisonUnitMetricPlugins, SortingUnitMetricPlugin, sortingUnitMetricPlugins, SortingViewProps } from "../../../pluginInterface";
 import UnitsTable from './UnitsTable';
-import { runPureCalculationTaskAsync } from 'figurl/kachery-react';
-import useChannel from 'figurl/kachery-react/useChannel'
-import { usePlugins } from 'figurl/labbox-react';
-import useKacheryNode from 'figurl/kachery-react/useKacheryNode';
-import sortByPriority from 'figurl/labbox-react/extensionSystem/sortByPriority';
-import { SortingComparisonUnitMetricPlugin } from 'plugins/sortingview/gui/pluginInterface/SortingComparisonUnitMetricPlugin';
 
 // const defaultLabelOptions = ['noise', 'MUA', 'artifact', 'accept', 'reject'];
 
@@ -165,6 +165,9 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
         showExpandButton = true;
     }
 
+    const selectedUnitIds = useMemo(() => selection.selectedUnitIds || [], [selection.selectedUnitIds])
+    const unitMetricsUri = useMemo(() => (sorting.unitMetricsUri), [sorting.unitMetricsUri])
+
     return (
         <div style={{width: width || 300}}>
             <Paper style={{maxHeight: props.maxHeight, overflow: 'auto'}}>
@@ -173,9 +176,9 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
                     sortingComparisonUnitMetrics={comparisonMetricsPlugins}
                     units={units}
                     metrics={metrics}
-                    selection={selection}
+                    selectedUnitIds={selectedUnitIds}
                     selectionDispatch={selectionDispatch}
-                    sorting={sorting}
+                    unitMetricsUri={unitMetricsUri}
                     compareSorting={compareSorting}
                     curation={curation}
                     height={height}
