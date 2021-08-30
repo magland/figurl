@@ -1,14 +1,14 @@
 
 import { Button, Paper } from '@material-ui/core';
+import { runPureCalculationTaskAsync } from 'kachery-react';
+import useChannel from 'kachery-react/useChannel';
+import useKacheryNode from 'kachery-react/useKacheryNode';
+import { usePlugins } from 'labbox-react';
+import sortByPriority from 'labbox-react/extensionSystem/sortByPriority';
+import { SortingComparisonUnitMetricPlugin } from 'python/sortingview/gui/pluginInterface/SortingComparisonUnitMetricPlugin';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { LabboxPlugin, Recording, sortingComparisonUnitMetricPlugins, SortingUnitMetricPlugin, sortingUnitMetricPlugins, SortingViewProps } from "../../../pluginInterface";
 import UnitsTable from './UnitsTable';
-import { runPureCalculationTaskAsync } from 'figurl/kachery-react';
-import useChannel from 'figurl/kachery-react/useChannel'
-import { usePlugins } from 'figurl/labbox-react';
-import useKacheryNode from 'figurl/kachery-react/useKacheryNode';
-import sortByPriority from 'figurl/labbox-react/extensionSystem/sortByPriority';
-import { SortingComparisonUnitMetricPlugin } from 'plugins/sortingview/gui/pluginInterface/SortingComparisonUnitMetricPlugin';
 
 // const defaultLabelOptions = ['noise', 'MUA', 'artifact', 'accept', 'reject'];
 
@@ -76,7 +76,7 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
     }, [recording, previousRecording, setPreviousRecording, updateMetrics])
 
     const kacheryNode = useKacheryNode()
-    const {channelName, backendId} = useChannel()
+    const {channelName} = useChannel()
 
 
     const fetchMetric = useCallback(async (metric: SortingUnitMetricPlugin) => {
@@ -101,8 +101,7 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
                     configuration: metric.metricFnParams
                 },
                 {
-                    channelName,
-                    backendId
+                    channelName
                 }
             )
             updateMetrics({metricName: metric.name, status: 'completed', data})
@@ -110,7 +109,7 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
             console.error(err);
             updateMetrics({metricName: metric.name, status: 'error', error: err.message})
         }
-    }, [kacheryNode, channelName, backendId, metrics, sorting.sortingObject, recording.recordingObject, snippetLen])
+    }, [kacheryNode, channelName, metrics, sorting.sortingObject, recording.recordingObject, snippetLen])
 
     const fetchComparisonMetric = useCallback(async (metric: SortingComparisonUnitMetricPlugin) => {
         if (!compareSorting) return
@@ -137,8 +136,7 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
                     configuration: metric.metricFnParams
                 },
                 {
-                    channelName,
-                    backendId
+                    channelName
                 }
             )
             updateMetrics({metricName: metric.name, status: 'completed', data})
@@ -146,7 +144,7 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
             console.error(err);
             updateMetrics({metricName: metric.name, status: 'error', error: err.message})
         }
-    }, [kacheryNode, channelName, backendId, metrics, sorting.sortingObject, compareSorting, sortingSelector, recording.recordingObject, snippetLen])
+    }, [kacheryNode, channelName, metrics, sorting.sortingObject, compareSorting, sortingSelector, recording.recordingObject, snippetLen])
 
     const plugins = usePlugins<LabboxPlugin>()
     useEffect(() => { 
@@ -165,6 +163,9 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
         showExpandButton = true;
     }
 
+    const selectedUnitIds = useMemo(() => selection.selectedUnitIds || [], [selection.selectedUnitIds])
+    const unitMetricsUri = useMemo(() => (sorting.unitMetricsUri), [sorting.unitMetricsUri])
+
     return (
         <div style={{width: width || 300}}>
             <Paper style={{maxHeight: props.maxHeight, overflow: 'auto'}}>
@@ -173,9 +174,9 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
                     sortingComparisonUnitMetrics={comparisonMetricsPlugins}
                     units={units}
                     metrics={metrics}
-                    selection={selection}
+                    selectedUnitIds={selectedUnitIds}
                     selectionDispatch={selectionDispatch}
-                    sorting={sorting}
+                    unitMetricsUri={unitMetricsUri}
                     compareSorting={compareSorting}
                     curation={curation}
                     height={height}
