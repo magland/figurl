@@ -5,9 +5,9 @@ import useChannel from 'figurl/kachery-react/useChannel';
 import useKacheryNode from 'figurl/kachery-react/useKacheryNode';
 import { usePlugins } from 'figurl/labbox-react';
 import sortByPriority from 'figurl/labbox-react/extensionSystem/sortByPriority';
-import { SortingComparisonUnitMetricPlugin } from '../../../pluginInterface/SortingComparisonUnitMetricPlugin';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { LabboxPlugin, Recording, sortingComparisonUnitMetricPlugins, SortingUnitMetricPlugin, sortingUnitMetricPlugins, SortingViewProps } from "../../../pluginInterface";
+import { SortingComparisonUnitMetricPlugin } from '../../../pluginInterface/SortingComparisonUnitMetricPlugin';
 import UnitsTable from './UnitsTable';
 
 // const defaultLabelOptions = ['noise', 'MUA', 'artifact', 'accept', 'reject'];
@@ -157,13 +157,11 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
     const metricsPlugins = useMemo(() => (sortingUnitMetricPlugins(plugins)), [plugins])
     const comparisonMetricsPlugins = useMemo(() => (sortingComparisonUnitMetricPlugins(plugins)), [plugins])
 
-    let units = selection.visibleUnitIds || sortingInfo.unit_ids
-    let showExpandButton = false;
+    const units = selection.visibleUnitIds || sortingInfo.unit_ids
     const totalNumUnits = units.length
-    if ((!expandedTable) && (totalNumUnits > 30)) {
-        units = units.slice(0, 30);
-        showExpandButton = true;
-    }
+    const maxDisplayedUnits = 30
+    const showExpandButton = !expandedTable && (totalNumUnits > maxDisplayedUnits)
+    const displayedUnitCount = showExpandButton ? maxDisplayedUnits : totalNumUnits
 
     const selectedUnitIds = useMemo(() => selection.selectedUnitIds || [], [selection.selectedUnitIds])
     const unitMetricsUri = useMemo(() => (sorting.unitMetricsUri), [sorting.unitMetricsUri])
@@ -175,6 +173,7 @@ const Units: React.FunctionComponent<SortingViewProps & OwnProps> = (props) => {
                     sortingUnitMetrics={metricsPlugins}
                     sortingComparisonUnitMetrics={comparisonMetricsPlugins}
                     units={units}
+                    displayedUnitCount={displayedUnitCount}
                     metrics={metrics}
                     selectedUnitIds={selectedUnitIds}
                     selectionDispatch={selectionDispatch}
