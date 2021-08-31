@@ -41,8 +41,12 @@
     min-width: 206px;
 } */
 
+.plotWrapperButtonParent {
+    display: inline-block
+}
+
 .plotWrapperStyleButton {
-    padding-top: 100px;
+    padding-top: 50px;
 }
 
 .plotUnselectedStyle {
