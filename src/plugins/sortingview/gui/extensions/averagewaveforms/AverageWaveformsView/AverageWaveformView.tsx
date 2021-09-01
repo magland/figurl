@@ -6,7 +6,7 @@ import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunct
 import React, { FunctionComponent, useMemo } from 'react'
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelectionDispatch } from '../../../pluginInterface'
 import { ElectrodeOpts } from '../../common/sharedCanvasLayers/electrodesLayer'
-import { ActionItem, DividerItem } from '../../common/Toolbars'
+import { AverageWaveformAction } from './AverageWaveformsView'
 import WaveformWidget, { defaultWaveformOpts } from './WaveformWidget'
 
 
@@ -26,7 +26,7 @@ type Props = {
     width: number
     height: number
     noiseLevel: number
-    customActions?: (ActionItem | DividerItem)[]
+    customActions?: AverageWaveformAction[]
     snippetLen?: [number, number]
     visibleElectrodeIds?: number[]
     selectedElectrodeIds?: number[]
