@@ -1,7 +1,7 @@
 import { useVisible } from 'figurl/labbox-react'
 import { CanvasPainter, PainterPath } from 'figurl/labbox-react/components/CanvasWidget/CanvasPainter'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { FaArrowDown, FaArrowUp, FaEye } from 'react-icons/fa'
+import { FaArrowDown, FaArrowUp, FaEye, FaRegTimesCircle } from 'react-icons/fa'
 import { RecordingSelection, RecordingSelectionDispatch, recordingSelectionReducer, SortingSelection } from '../../../pluginInterface'
 import useBufferedDispatch from '../../common/useBufferedDispatch'
 import { colorForUnitId } from '../../spikeamplitudes/SpikeAmplitudesView/SpikeAmplitudesPanel'
@@ -177,6 +177,10 @@ const TimeseriesWidgetNew = (props: Props) => {
     const _handleScaleAmplitudeDown = useCallback(() => {
         recordingSelectionDispatch({type: 'ScaleAmpScaleFactor', direction: 'down'})
     }, [recordingSelectionDispatch])
+    const _handleResetAmplitude = useCallback(() => {
+        recordingSelectionDispatch({type: 'SetAmpScaleFactor', ampScaleFactor: 1})
+    }, [recordingSelectionDispatch])
+
 
     const spikeMarkersVisibility = useVisible()
 
@@ -205,10 +209,22 @@ const TimeseriesWidgetNew = (props: Props) => {
             },
             {
                 type: 'button',
+                callback: _handleResetAmplitude,
+                title: 'Reset scale amplitude',
+                icon: <FaRegTimesCircle />
+            },
+            {
+                type: 'button',
                 callback: _handleScaleAmplitudeDown,
                 title: 'Scale amplitude down [down arrow]',
                 icon: <FaArrowDown />,
                 keyCode: 40
+            },
+            {
+                type: 'text',
+                title: 'Zoom level',
+                content: recordingSelection?.ampScaleFactor || 1,
+                contentSigFigs: 2
             },
             {
                 type: 'divider'
@@ -227,7 +243,7 @@ const TimeseriesWidgetNew = (props: Props) => {
             })
         }
         return a
-    }, [_handleScaleAmplitudeDown, _handleScaleAmplitudeUp, spikeAmplitudesData, spikeMarkersVisibility, sortingSelection])
+    }, [_handleScaleAmplitudeDown, recordingSelection.ampScaleFactor, _handleResetAmplitude, _handleScaleAmplitudeUp, spikeAmplitudesData, spikeMarkersVisibility, sortingSelection])
 
     const numTimepoints = useMemo(() => (timeseriesData ? timeseriesData.numTimepoints() : 0), [timeseriesData])
 
