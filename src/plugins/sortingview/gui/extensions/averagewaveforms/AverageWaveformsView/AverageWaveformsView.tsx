@@ -5,16 +5,16 @@ import MarkdownDialog from 'figurl/labbox-react/components/Markdown/MarkdownDial
 import Splitter from 'figurl/labbox-react/components/Splitter/Splitter'
 import { useRecordingInfo } from 'plugins/sortingview/gui/pluginInterface/useRecordingInfo'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
-import { FaArrowDown, FaArrowUp } from 'react-icons/fa'
+import { FaArrowDown, FaArrowUp, FaRegTimesCircle } from 'react-icons/fa'
 import SortingUnitPlotGrid from '../../../commonComponents/SortingUnitPlotGrid/SortingUnitPlotGrid'
 import info from '../../../helpPages/AverageWaveforms.md.gen'
 import { SortingViewProps } from '../../../pluginInterface'
-import { ActionItem, CheckboxItem, DividerItem } from '../../common/Toolbars'
+import { ActionItem, CheckboxItem, DividerItem, TextItem } from '../../common/Toolbars'
 import ViewToolbar from '../../common/ViewToolbar'
 import AverageWaveformView from './AverageWaveformView'
 
 
-export type AverageWaveformAction = ActionItem  | DividerItem | CheckboxItem
+export type AverageWaveformAction = ActionItem  | CheckboxItem | DividerItem | TextItem
 
 const TOOLBAR_INITIAL_WIDTH = 36 // hard-coded for now
 
@@ -59,6 +59,9 @@ const AverageWaveformsView: FunctionComponent<SortingViewProps> = (props) => {
     const _handleScaleAmplitudeDown = useCallback(() => {
         selectionDispatch({type: 'ScaleAmpScaleFactor', direction: 'down'})
     }, [selectionDispatch])
+    const _handleResetAmplitude = useCallback(() => {
+        selectionDispatch({type: 'SetAmpScaleFactor', ampScaleFactor: 1})
+    }, [selectionDispatch])
 
     useEffect(() => {
         const actions: AverageWaveformAction[] = [
@@ -71,10 +74,22 @@ const AverageWaveformsView: FunctionComponent<SortingViewProps> = (props) => {
             },
             {
                 type: 'button',
+                callback: _handleResetAmplitude,
+                title: 'Reset scale amplitude',
+                icon: <FaRegTimesCircle />
+            },
+            {
+                type: 'button',
                 callback: _handleScaleAmplitudeDown,
                 title: 'Scale amplitude down [down arrow]',
                 icon: <FaArrowDown />,
                 keyCode: 40
+            },
+            {
+                type: 'text',
+                title: 'Zoom level',
+                content: ampScaleFactor,
+                contentSigFigs: 2
             },
             {
                 type: 'divider'
@@ -87,7 +102,7 @@ const AverageWaveformsView: FunctionComponent<SortingViewProps> = (props) => {
             }
         ]
         setScalingActions(actions)
-    }, [_handleScaleAmplitudeUp, _handleScaleAmplitudeDown, _handleWaveformToggle, waveformsMode])
+    }, [_handleScaleAmplitudeUp, ampScaleFactor, _handleScaleAmplitudeDown, _handleResetAmplitude, _handleWaveformToggle, waveformsMode])
 
     const infoVisible = useVisible()
 

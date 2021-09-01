@@ -16,6 +16,8 @@ type Button = {
     icon: any
     selected: boolean
     disabled?: boolean
+    content?: string | number
+    contentSigFigs?: number
     // TODO: Support for indeterminate state for checkboxes?
 }
 
@@ -34,7 +36,9 @@ const ViewToolbar: FunctionComponent<Props> = (props) => {
                 onClick: a.callback,
                 icon: a.icon || '',
                 selected: a.selected,
-                disabled: a.disabled
+                disabled: a.disabled,
+                content: a.content,
+                contentSigFigs: a.contentSigFigs
             });
         }
         return b
@@ -52,9 +56,31 @@ const ViewToolbar: FunctionComponent<Props> = (props) => {
                             </IconButton>
                         );
                     }
+                    else if (button.type === 'text') {
+                        const numericContent: number = Number.isFinite(button.content)
+                            ? button.content as any as number
+                            : 0
+                        const sigFigs = button.contentSigFigs || 0
+                        const roundsToInt = Math.abs(numericContent - Math.round(numericContent)) * (10**(sigFigs + 1)) < 1
+                        const _content = Number.isFinite(button.content)
+                            ? roundsToInt
+                                ? Math.round(numericContent) + ''
+                                : (numericContent).toFixed(button.contentSigFigs || 2)
+                            : (button.content || '')
+                        return (
+                            <div
+                                key={ii}
+                                title={button.title}
+                                style={{textAlign: 'center', fontWeight: 'bold'}}
+                            >
+                                {_content}
+                            </div>
+                        )
+                    }
                     else if (button.type === 'checkbox') {
                         return (
                             <Checkbox
+                                key={ii}
                                 checked={button.selected}
                                 onClick={button.onClick}
                                 style={{padding: 1, paddingLeft: 6 }}
