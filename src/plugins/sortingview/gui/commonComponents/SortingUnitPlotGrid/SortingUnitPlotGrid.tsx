@@ -1,5 +1,5 @@
 import { Button, Grid } from '@material-ui/core';
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, FunctionComponent, useCallback, useMemo, useState } from 'react';
 import { isMergeGroupRepresentative, Sorting, SortingCuration, SortingInfo, SortingSelection, SortingSelectionDispatch } from "../../pluginInterface";
 import { useSortingInfo } from '../../pluginInterface/useSortingInfo';
 
@@ -13,8 +13,8 @@ type Props = {
 }
 
 const SortingUnitPlotGrid: FunctionComponent<Props> = ({ sorting, selection, curation, selectionDispatch, unitComponent, sortingSelector }) => {
-    const maxUnitsVisibleIncrement = 60;
-    const [maxUnitsVisible, setMaxUnitsVisible] = useState(30);
+    const maxUnitsVisibleIncrement = 60
+    const [maxUnitsVisible, setMaxUnitsVisible] = useState(30)
     const sortingInfo: SortingInfo | undefined = useSortingInfo(sorting.sortingPath)
 
     const visibleUnitIds = useMemo(() => selection.visibleUnitIds, [selection.visibleUnitIds])
@@ -34,50 +34,53 @@ const SortingUnitPlotGrid: FunctionComponent<Props> = ({ sorting, selection, cur
     }, [selectionDispatch])
 
     return (
-        <Grid container>
-            {
-                unit_ids.map(unitId => (
-                    <Grid key={unitId} item>
-                        <div className='plotWrapperStyle'
-                        >
-                            <div
-                                data-unit-id={unitId}
-                                className={selectedUnitIds?.includes(unitId) ? 'plotSelectedStyle' : 'plotUnselectedStyle'}
-                                onClick={handleUnitClick}
+        <Fragment>
+            <Grid container>
+                {
+                    unit_ids.map(unitId => (
+                        <Grid key={unitId} item>
+                            <div className='plotWrapperStyle'
                             >
-                                <div className='plotUnitLabel'>
-                                    <div>Unit {unitId}{sortingSelector || ''}</div>
+                                <div
+                                    data-unit-id={unitId}
+                                    className={selectedUnitIds?.includes(unitId) ? 'plotSelectedStyle' : 'plotUnselectedStyle'}
+                                    onClick={handleUnitClick}
+                                >
+                                    <div className='plotUnitLabel'>
+                                        <div>Unit {unitId}{sortingSelector || ''}</div>
+                                    </div>
+                                    {
+                                        unitComponent(unitId)
+                                    }
+                                    {/* <ClientSidePlot
+                                        dataFunctionName={dataFunctionName}
+                                        dataFunctionArgs={dataFunctionArgsCallback(unitId)}
+                                        boxSize={boxSize}
+                                        PlotComponent={plotComponent}
+                                        plotComponentArgs={plotComponentArgsCallback(unitId)}
+                                        plotComponentProps={plotComponentPropsCallback ? plotComponentPropsCallback(unitId): undefined}
+                                        calculationPool={calculationPool}
+                                        title=""
+                                        hither={hither}
+                                    /> */}
                                 </div>
-                                {
-                                    unitComponent(unitId)
-                                }
-                                {/* <ClientSidePlot
-                                    dataFunctionName={dataFunctionName}
-                                    dataFunctionArgs={dataFunctionArgsCallback(unitId)}
-                                    boxSize={boxSize}
-                                    PlotComponent={plotComponent}
-                                    plotComponentArgs={plotComponentArgsCallback(unitId)}
-                                    plotComponentProps={plotComponentPropsCallback ? plotComponentPropsCallback(unitId): undefined}
-                                    calculationPool={calculationPool}
-                                    title=""
-                                    hither={hither}
-                                /> */}
                             </div>
-                        </div>
-                    </Grid>
-                ))
-            }
+                        </Grid>
+                    ))
+                }
+            </Grid>
             {
                 showExpandButton && (
-                    <div className='plotWrapperStyle'>
+                    <div className='plotWrapperButtonParent'>
                         <div className='plotWrapperStyleButton'>
                             <Button onClick={() => {setMaxUnitsVisible(maxUnitsVisible + maxUnitsVisibleIncrement)}}>Show more units</Button>
+                            <Button onClick={() => {setMaxUnitsVisible(baseUnitIds.length)}}>Show all units</Button>
                         </div>
                     </div>
                     
                 )
             }
-        </Grid>
+        </Fragment>
     );
 }
 
