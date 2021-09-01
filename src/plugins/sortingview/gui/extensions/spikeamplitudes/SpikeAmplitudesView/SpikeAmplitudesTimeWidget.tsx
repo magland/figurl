@@ -54,6 +54,7 @@ const SpikeAmplitudesTimeWidget: FunctionComponent<Props> = ({ spikeAmplitudesDa
             panels.push(p)
         })
         // we want the y-axis to show even when no units are selected
+        // NOTE: This doesn't actually seem to work right now...
         if (panels.length === 0) {
             panels.push(nullSpikeAmplitudesPanel)
         }
