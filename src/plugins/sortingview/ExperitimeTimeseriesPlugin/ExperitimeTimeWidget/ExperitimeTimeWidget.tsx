@@ -1,7 +1,7 @@
 import CanvasWidget from 'figurl/labbox-react/components/CanvasWidget'
 import { CanvasPainter } from 'figurl/labbox-react/components/CanvasWidget/CanvasPainter'
 import { useLayer, useLayers } from 'figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer'
-import { ActionItem, DividerItem } from 'plugins/sortingview/gui/extensions/common/Toolbars'
+import { ActionItem, DividerItem, TextItem } from 'plugins/sortingview/gui/extensions/common/Toolbars'
 import React, { useCallback, useEffect, useState } from 'react'
 import { TimeseriesSelection, TimeseriesSelectionDispatch } from '../interface/TimeseriesSelection'
 import { createCursorLayer } from './cursorLayer'
@@ -12,7 +12,7 @@ import TimeSpanWidget, { SpanWidgetInfo } from './TimeSpanWidget'
 import TimeWidgetBottomBar from './TimeWidgetBottomBar'
 import TimeWidgetToolbarNew from './TimeWidgetToolbarNew'
 
-export type TimeWidgetAction = ActionItem | DividerItem
+export type TimeWidgetAction = ActionItem | DividerItem | TextItem
 
 interface Props {
     panels: TimeWidgetPanel[]

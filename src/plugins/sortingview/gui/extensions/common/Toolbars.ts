@@ -13,6 +13,12 @@ export interface DividerItem {
     type: 'divider'
 }
 
+export interface TextItem {
+    type: 'text'
+    title: string
+    content: string | number
+    contentSigFigs?: number
+}
 export interface CheckboxItem {
     type: 'checkbox'
     callback: () => void

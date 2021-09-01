@@ -1,19 +1,19 @@
-import React, { useCallback, useEffect, useState } from 'react'
 import { CanvasPainter } from 'figurl/labbox-react/components/CanvasWidget/CanvasPainter'
 import CanvasWidget from 'figurl/labbox-react/components/CanvasWidget/CanvasWidget'
 import { useLayer, useLayers } from 'figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer'
+import React, { useCallback, useEffect, useState } from 'react'
 import { RecordingSelection, RecordingSelectionDispatch } from '../../../pluginInterface'
+import { ActionItem, DividerItem, TextItem } from '../../common/Toolbars'
 import { createCursorLayer } from './cursorLayer'
 import { createMainLayer } from './mainLayer'
+import { createMarkersLayer } from './markersLayer'
 import { createPanelLabelLayer } from './panelLabelLayer'
 import { createTimeAxisLayer } from './timeAxisLayer'
 import TimeSpanWidget, { SpanWidgetInfo } from './TimeSpanWidget'
 import TimeWidgetBottomBar from './TimeWidgetBottomBar'
 import TimeWidgetToolbarNew from './TimeWidgetToolbarNew'
-import { ActionItem, DividerItem } from '../../common/Toolbars'
-import { createMarkersLayer } from './markersLayer'
 
-export type TimeWidgetAction = ActionItem | DividerItem
+export type TimeWidgetAction = ActionItem | DividerItem | TextItem
 
 interface Props {
     panels: TimeWidgetPanel[]
