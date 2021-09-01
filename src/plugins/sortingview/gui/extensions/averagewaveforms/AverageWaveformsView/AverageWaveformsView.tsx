@@ -9,12 +9,12 @@ import { FaArrowDown, FaArrowUp } from 'react-icons/fa'
 import SortingUnitPlotGrid from '../../../commonComponents/SortingUnitPlotGrid/SortingUnitPlotGrid'
 import info from '../../../helpPages/AverageWaveforms.md.gen'
 import { SortingViewProps } from '../../../pluginInterface'
-import { ActionItem, DividerItem } from '../../common/Toolbars'
+import { ActionItem, CheckboxItem, DividerItem } from '../../common/Toolbars'
 import ViewToolbar from '../../common/ViewToolbar'
 import AverageWaveformView from './AverageWaveformView'
 
 
-export type AverageWaveformAction = ActionItem  | DividerItem
+export type AverageWaveformAction = ActionItem  | DividerItem | CheckboxItem
 
 const TOOLBAR_INITIAL_WIDTH = 36 // hard-coded for now
 
@@ -49,6 +49,10 @@ const AverageWaveformsView: FunctionComponent<SortingViewProps> = (props) => {
             />
     ), [sorting, recording, selectionDispatch, noiseLevel, scalingActions, curation, snippetLen, visibleElectrodeIds, selectedElectrodeIds, ampScaleFactor, applyMerges, waveformsMode])
 
+    const _handleWaveformToggle = useCallback(() => {
+        selectionDispatch({type: 'ToggleWaveformsMode', waveformsMode: waveformsMode})
+    }, [selectionDispatch, waveformsMode])
+
     const _handleScaleAmplitudeUp = useCallback(() => {
         selectionDispatch({type: 'ScaleAmpScaleFactor', direction: 'up'})
     }, [selectionDispatch])
@@ -71,10 +75,19 @@ const AverageWaveformsView: FunctionComponent<SortingViewProps> = (props) => {
                 title: 'Scale amplitude down [down arrow]',
                 icon: <FaArrowDown />,
                 keyCode: 40
+            },
+            {
+                type: 'divider'
+            },
+            {
+                type: 'checkbox',
+                callback: _handleWaveformToggle,
+                title: waveformsMode === 'geom' ? 'Hide electrode geometry' : 'Show electrode geometry',
+                selected: waveformsMode === 'geom'
             }
         ]
         setScalingActions(actions)
-    }, [_handleScaleAmplitudeUp, _handleScaleAmplitudeDown])
+    }, [_handleScaleAmplitudeUp, _handleScaleAmplitudeDown, _handleWaveformToggle, waveformsMode])
 
     const infoVisible = useVisible()
 

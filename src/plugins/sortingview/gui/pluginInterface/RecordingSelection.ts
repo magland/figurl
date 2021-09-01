@@ -115,6 +115,11 @@ type SetWaveformsModeRecordingSelectionAction = {
     waveformsMode: 'geom' | 'vertical'
 }
 
+type ToggleWaveformsModeRecordingSelectionAction = {
+    type: 'ToggleWaveformsMode',
+    waveformsMode: WaveformsMode
+}
+
 type SetRecordingSelectionAction = {
     type: 'Set',
     state: RecordingSelection
@@ -125,7 +130,7 @@ type TimeShiftFrac = {
     frac: number
 }
 
-export type RecordingSelectionAction = SetRecordingSelectionRecordingSelectionAction | SetSelectedElectrodeIdsRecordingSelectionAction | SetVisibleElectrodeIdsRecordingSelectionAction | SetNumTimepointsRecordingSelectionAction | SetCurrentTimepointRecordingSelectionAction | SetTimeRangeRecordingSelectionAction | ZoomTimeRangeRecordingSelectionAction | SetAmpScaleFactorRecordingSelectionAction | ScaleAmpScaleFactorRecordingSelectionAction | SetCurrentTimepointVelocityRecordingSelectionAction | SetWaveformsModeRecordingSelectionAction | SetRecordingSelectionAction | TimeShiftFrac
+export type RecordingSelectionAction = SetRecordingSelectionRecordingSelectionAction | SetSelectedElectrodeIdsRecordingSelectionAction | SetVisibleElectrodeIdsRecordingSelectionAction | SetNumTimepointsRecordingSelectionAction | SetCurrentTimepointRecordingSelectionAction | SetTimeRangeRecordingSelectionAction | ZoomTimeRangeRecordingSelectionAction | SetAmpScaleFactorRecordingSelectionAction | ScaleAmpScaleFactorRecordingSelectionAction | SetCurrentTimepointVelocityRecordingSelectionAction | SetWaveformsModeRecordingSelectionAction | SetRecordingSelectionAction | TimeShiftFrac | ToggleWaveformsModeRecordingSelectionAction
 
 const adjustTimeRangeToIncludeTimepoint = (timeRange: {min: number, max: number}, timepoint: number) => {
     if ((timeRange.min <= timepoint) && (timepoint < timeRange.max)) return timeRange
@@ -222,6 +227,12 @@ export const recordingSelectionReducer: Reducer<RecordingSelection, RecordingSel
         return {
             ...state,
             waveformsMode: action.waveformsMode
+        }
+    }
+    else if (action.type === 'ToggleWaveformsMode') {
+        return {
+            ...state,
+            waveformsMode: action.waveformsMode === 'geom' ? 'vertical' : 'geom'
         }
     }
     else if (action.type === 'TimeShiftFrac') {

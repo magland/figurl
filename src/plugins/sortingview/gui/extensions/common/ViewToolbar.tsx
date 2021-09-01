@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { Checkbox, IconButton } from '@material-ui/core';
 import React, { FunctionComponent, useMemo } from 'react';
 
 interface Props {
@@ -16,6 +16,7 @@ type Button = {
     icon: any
     selected: boolean
     disabled?: boolean
+    // TODO: Support for indeterminate state for checkboxes?
 }
 
 const ViewToolbar: FunctionComponent<Props> = (props) => {
@@ -31,7 +32,7 @@ const ViewToolbar: FunctionComponent<Props> = (props) => {
                 type: a.type || 'button',
                 title: a.title,
                 onClick: a.callback,
-                icon: a.icon,
+                icon: a.icon || '',
                 selected: a.selected,
                 disabled: a.disabled
             });
@@ -50,6 +51,17 @@ const ViewToolbar: FunctionComponent<Props> = (props) => {
                                 {button.icon}
                             </IconButton>
                         );
+                    }
+                    else if (button.type === 'checkbox') {
+                        return (
+                            <Checkbox
+                                checked={button.selected}
+                                onClick={button.onClick}
+                                style={{padding: 1, paddingLeft: 6 }}
+                                title={button.title}
+                                disabled={button.disabled}
+                            />
+                        )
                     }
                     else if (button.type === 'divider') {
                         return <hr key={ii} />;

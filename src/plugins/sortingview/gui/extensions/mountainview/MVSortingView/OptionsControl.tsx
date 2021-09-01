@@ -20,7 +20,7 @@ const WaveformLayoutControl: FunctionComponent<{selection: SortingSelection, sel
     const checked = waveformsMode === 'geom'
 
     const handleToggle = useCallback(() => {
-        selectionDispatch({type: 'SetWaveformsMode', waveformsMode: waveformsMode === 'geom' ? 'vertical' : 'geom'})
+        selectionDispatch({type: 'ToggleWaveformsMode', waveformsMode: waveformsMode })
     }, [waveformsMode, selectionDispatch])
 
     return (
