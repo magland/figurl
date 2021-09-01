@@ -1,9 +1,9 @@
-import Splitter from 'figurl/labbox-react/components/Splitter/Splitter';
-import useLocalUnitIds from 'plugins/sortingview/gui/pluginInterface/useLocalUnitIds';
-import React, { FunctionComponent, useState } from 'react';
-import LockableSelectUnitsWidget from '../../../commonComponents/SelectUnitsWidget/LockableSelectUnitsWidget';
-import { SortingViewProps } from "../../../pluginInterface";
-import CrossCorrelogramsWidget from './CrossCorrelogramsWidget';
+import Splitter from 'figurl/labbox-react/components/Splitter/Splitter'
+import useLocalUnitIds from 'plugins/sortingview/gui/pluginInterface/useLocalUnitIds'
+import React, { FunctionComponent, useState } from 'react'
+import LockableSelectUnitsWidget from '../../../commonComponents/SelectUnitsWidget/LockableSelectUnitsWidget'
+import { SortingViewProps } from "../../../pluginInterface"
+import CrossCorrelogramsWidget from './CrossCorrelogramsWidget'
 
 const CrossCorrelogramsView: FunctionComponent<SortingViewProps> = ({sorting, selection, curation, selectionDispatch, width, height, sortingSelector}) => {
     const [locked, setLocked] = useState(false)
