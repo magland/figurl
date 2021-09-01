@@ -29,6 +29,15 @@ const SpikeAmplitudesTimeWidget: FunctionComponent<Props> = ({ spikeAmplitudesDa
 
     const [spikeAmplitudesPanels, setSpikeAmplitudesPanels] = useState<SpikeAmplitudesPanel[] | null>(null)
 
+    const nullSpikeAmplitudesPanel = useMemo(() => {
+        return new SpikeAmplitudesPanel({
+            spikeAmplitudesData: null,
+            recording,
+            sorting,
+            unitId: -1
+        })
+    }, [sorting, recording])
+
     useEffect(() => {
         const panels: SpikeAmplitudesPanel[] = []
         const allMins: number[] = []
@@ -45,13 +54,9 @@ const SpikeAmplitudesTimeWidget: FunctionComponent<Props> = ({ spikeAmplitudesDa
             panels.push(p)
         })
         // we want the y-axis to show even when no units are selected
+        // NOTE: This doesn't actually seem to work right now...
         if (panels.length === 0) {
-            panels.push(new SpikeAmplitudesPanel({
-                spikeAmplitudesData: null,
-                recording,
-                sorting,
-                unitId: -1
-            }))
+            panels.push(nullSpikeAmplitudesPanel)
         }
         if (allMins.length > 0) {
             panels.forEach(p => {
@@ -59,7 +64,7 @@ const SpikeAmplitudesTimeWidget: FunctionComponent<Props> = ({ spikeAmplitudesDa
             })
         }
         setSpikeAmplitudesPanels(panels)
-    }, [unitIds, sorting, curation, recording, spikeAmplitudesData, selection]) // important that this depends on selection so that we refresh when time range changes
+    }, [unitIds, sorting, curation, recording, spikeAmplitudesData, nullSpikeAmplitudesPanel, selection]) // important that this depends on selection so that we refresh when time range changes
 
     const panels = useMemo(() => (
         spikeAmplitudesPanels ? [combinePanels(spikeAmplitudesPanels, '')] : [] as SpikeAmplitudesPanel[]
