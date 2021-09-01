@@ -1,17 +1,18 @@
 import { useChannel, usePureCalculationTask } from 'figurl/kachery-react';
 import sortByPriority from 'figurl/labbox-react/extensionSystem/sortByPriority';
-import { ExternalSortingUnitMetric } from '../../../pluginInterface/Sorting';
-import { SortingComparisonUnitMetricPlugin } from '../../../pluginInterface/SortingComparisonUnitMetricPlugin';
+import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import { mergeGroupForUnitId, Sorting, SortingCuration, SortingSelectionDispatch, SortingUnitMetricPlugin } from "../../../pluginInterface";
+import { ExternalSortingUnitMetric } from '../../../pluginInterface/Sorting';
+import { SortingComparisonUnitMetricPlugin } from '../../../pluginInterface/SortingComparisonUnitMetricPlugin';
 import '../unitstable.css';
 import TableWidget, { Column, Row } from './TableWidget';
-import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds';
 
 interface Props {
     sortingUnitMetrics?: SortingUnitMetricPlugin[]
     sortingComparisonUnitMetrics?: SortingComparisonUnitMetricPlugin[]
     units: number[]
+    displayedUnitCount?: number
     metrics?: {[key: string]: {data: {[key: string]: any}, error: string | null}}
     selectedUnitIds?: number[]
     selectionDispatch: SortingSelectionDispatch
@@ -87,7 +88,7 @@ const getLabelsForUnitId = (unitId: number, curation: SortingCuration) => {
 
 
 const UnitsTable: FunctionComponent<Props> = (props) => {
-    const { unitMetricsUri, sortingUnitMetrics, sortingComparisonUnitMetrics, units, metrics, selectedUnitIds, selectionDispatch, curation, height, selectionDisabled, sortingSelector } = props
+    const { unitMetricsUri, sortingUnitMetrics, sortingComparisonUnitMetrics, units, displayedUnitCount, metrics, selectedUnitIds, selectionDispatch, curation, height, selectionDisabled, sortingSelector } = props
     const selectedRowIds = useMemo(() => (selectedUnitIds || []).map(unitId => (unitId + '')), [selectedUnitIds])
     const _metrics = useMemo(() => metrics || {}, [metrics])
 
@@ -220,6 +221,7 @@ const UnitsTable: FunctionComponent<Props> = (props) => {
             columns={columns}
             selectedRowIds={selectedRowIds}
             onSelectedRowIdsChanged={handleSelectedRowIdsChanged}
+            displayedRowCount={displayedUnitCount}
             defaultSortColumnName="_unit_id"
             height={height}
             selectionDisabled={selectionDisabled}

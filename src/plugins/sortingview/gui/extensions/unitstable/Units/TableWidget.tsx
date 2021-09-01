@@ -146,6 +146,7 @@ interface TableProps {
     rows: Row[]
     columns: Column[]
     defaultSortColumnName?: string
+    displayedRowCount?: number
     height?: number
     selectionDisabled?: boolean
 }
@@ -163,14 +164,12 @@ const interpretSortFields = (fields: string[]): sortFieldEntry[] => {
 
 const TableWidget: FunctionComponent<TableProps> = (props) => {
     // useCheckForChanges('TableWidget', props)
-    const { selectedRowIds, onSelectedRowIdsChanged, rows, columns, defaultSortColumnName, height, selectionDisabled } = props
+    const { selectedRowIds, onSelectedRowIdsChanged, rows, columns, defaultSortColumnName, displayedRowCount, height, selectionDisabled } = props
     const [sortFieldOrder, setSortFieldOrder] = useState<string[]>([])
     const _selections = useMemoCompare<string[]>('_selections', selectedRowIds, [])
     const selectedRowsSet: Set<string> = useMemo(() => {
         return new Set(_selections || [])
     }, [_selections])
-    const allRowIds = useMemo(() => rows.map(r => r.rowId), [rows])
-    const allRowsSelected = useMemo(() => _selections.length === allRowIds.length, [_selections, allRowIds])
 
     useEffect(() => {
         if ((sortFieldOrder.length === 0) && (defaultSortColumnName)) {
@@ -205,6 +204,10 @@ const TableWidget: FunctionComponent<TableProps> = (props) => {
         }
         return _draft
     }, [rows, sortingRules, columnForName])
+
+    const visibleRows = useMemo(() => sortedRows.slice(0, displayedRowCount || sortedRows.length), [sortedRows, displayedRowCount])
+    const allRowIds = useMemo(() => visibleRows.map(r => r.rowId), [visibleRows])
+    const allRowsSelected = useMemo(() => _selections.length >= allRowIds.length, [_selections, allRowIds])
 
     const handleSelectAll = useCallback(() => {
         onSelectedRowIdsChanged(allRowIds)
@@ -316,7 +319,7 @@ const TableWidget: FunctionComponent<TableProps> = (props) => {
     // every time the selections change, instead of just touching the rows whose selection
     // status changed...
     const _unitrows = useMemo(() => {
-        return sortedRows.map((row) => {
+        return visibleRows.map((row) => {
             return (
                 <ContentRow
                     rowId={row.rowId}
@@ -327,7 +330,7 @@ const TableWidget: FunctionComponent<TableProps> = (props) => {
                 />
             )
         })
-    }, [selectedRowsSet, sortedRows, _metricsByRow, selectionDisabled, toggleSelectedRowId])
+    }, [selectedRowsSet, visibleRows, _metricsByRow, selectionDisabled, toggleSelectedRowId])
 
     return (
         <TableContainer style={height !== undefined ? {maxHeight: height} : {}}>
