@@ -16,7 +16,7 @@ const sortingviewTaskFunctionIds = {
     getTimeseriesSegment: 'get_timeseries_segment.1',
     getBestMatchingUnits: 'get_best_matching_units.2',
     getFiringData: 'get_firing_data.1',
-    getIsiViolationRates: 'get_isi_violation_rates.1',
+    getIsiViolationRates: 'get_isi_violation_rates.2',
     getPeakChannels: 'get_peak_channels.1',
     getUnitSnrs: 'get_unit_snrs.1',
     getPythonPackageVersion: 'sortingview.get_python_package_version.1'
