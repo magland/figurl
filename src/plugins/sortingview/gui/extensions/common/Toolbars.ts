@@ -18,6 +18,7 @@ export interface TextItem {
     title: string
     content: string | number
     contentSigFigs?: number
+    contentAlwaysShowDecimal?: boolean
 }
 export interface CheckboxItem {
     type: 'checkbox'
@@ -27,3 +28,5 @@ export interface CheckboxItem {
     keyCode?: number
     disabled?: boolean
 }
+
+export type ToolbarItem = ActionItem | CheckboxItem | DividerItem | TextItem

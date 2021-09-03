@@ -1,6 +1,7 @@
 import { IconButton } from '@material-ui/core';
+import TimeWidgetToolbarEntries from 'plugins/sortingview/gui/extensions/common/sharedToolbarSets/TimeWidgetToolbarEntries';
 import React, { FunctionComponent } from 'react';
-import { FaArrowLeft, FaArrowRight, FaSearchMinus, FaSearchPlus } from 'react-icons/fa';
+
 
 interface Props {
     width: number
@@ -22,39 +23,17 @@ const TimeWidgetToolbarNew: FunctionComponent<Props> = (props) => {
         top: props.top,
         overflow: 'hidden'
     };
-    let buttons = [];
-    buttons.push({
-        type: 'button',
-        title: "Time zoom in (+)",
-        onClick: props.onZoomIn,
-        icon: <FaSearchPlus />
-    });
-    buttons.push({
-        type: 'button',
-        title: "Time zoom out (-)",
-        onClick: props.onZoomOut,
-        icon: <FaSearchMinus />
-    });
-    buttons.push({
-        type: 'button',
-        title: "Shift time left [left arrow]",
-        onClick: props.onShiftTimeLeft,
-        icon: <FaArrowLeft />
-    });
-    buttons.push({
-        type: 'button',
-        title: "Shift time right [right arrow]",
-        onClick: props.onShiftTimeRight,
-        icon: <FaArrowRight />
-    });
-    buttons.push({
-        type: 'divider'
-    });
+    let buttons = [...TimeWidgetToolbarEntries({
+        onZoomIn: props.onZoomIn, 
+        onZoomOut: props.onZoomOut, 
+        onShiftTimeLeft: props.onShiftTimeLeft, 
+        onShiftTimeRight: props.onShiftTimeRight
+    })];
     for (let a of (props.customActions || [])) {
         buttons.push({
             type: a.type || 'button',
             title: a.title,
-            onClick: a.callback,
+            callback: a.callback,
             icon: a.icon,
             selected: a.selected,
             disabled: a.disabled
@@ -71,7 +50,7 @@ const TimeWidgetToolbarNew: FunctionComponent<Props> = (props) => {
                         return (
                             // If we don't put the title/tooltip in a span element, it will not be displayed when the button is disabled
                             <span title={button.title}>
-                                <IconButton onClick={button.onClick} key={ii} color={color} style={iconButtonStyle} disabled={button.disabled ? true : false}>
+                                <IconButton onClick={button.callback} key={ii} color={color} style={iconButtonStyle} disabled={button.disabled ? true : false}>
                                     {button.icon}
                                 </IconButton>
                             </span>

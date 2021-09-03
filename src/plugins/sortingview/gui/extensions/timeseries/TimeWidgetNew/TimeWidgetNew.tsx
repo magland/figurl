@@ -1,9 +1,11 @@
 import { CanvasPainter } from 'figurl/labbox-react/components/CanvasWidget/CanvasPainter'
 import CanvasWidget from 'figurl/labbox-react/components/CanvasWidget/CanvasWidget'
 import { useLayer, useLayers } from 'figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer'
-import React, { useCallback, useEffect, useState } from 'react'
+import ViewToolbar from 'plugins/sortingview/gui/extensions/common/ViewToolbar'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { RecordingSelection, RecordingSelectionDispatch } from '../../../pluginInterface'
-import { ActionItem, DividerItem, TextItem } from '../../common/Toolbars'
+import TimeWidgetToolbarEntries from '../../common/sharedToolbarSets/TimeWidgetToolbarEntries'
+import { ActionItem, CheckboxItem, DividerItem, TextItem } from '../../common/Toolbars'
 import { createCursorLayer } from './cursorLayer'
 import { createMainLayer } from './mainLayer'
 import { createMarkersLayer } from './markersLayer'
@@ -11,9 +13,8 @@ import { createPanelLabelLayer } from './panelLabelLayer'
 import { createTimeAxisLayer } from './timeAxisLayer'
 import TimeSpanWidget, { SpanWidgetInfo } from './TimeSpanWidget'
 import TimeWidgetBottomBar from './TimeWidgetBottomBar'
-import TimeWidgetToolbarNew from './TimeWidgetToolbarNew'
 
-export type TimeWidgetAction = ActionItem | DividerItem | TextItem
+export type TimeWidgetAction = ActionItem | CheckboxItem | DividerItem | TextItem
 
 interface Props {
     panels: TimeWidgetPanel[]
@@ -228,6 +229,8 @@ const plotMargins = {
 //     return {timeState: newTimeState, timeDispatch: newTimeDispatch}
 // }\
 
+const divider: DividerItem = { type: 'divider' }
+
 const TimeWidgetNew = (props: Props) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {panels, width, height, customActions, numTimepoints, maxTimeSpan, startTimeSpan, samplerate, selection, selectionDispatch, markers} = props
@@ -335,6 +338,17 @@ const TimeWidgetNew = (props: Props) => {
     const showBottomBar = true
     const bottomBarHeight = showBottomBar ? 40 : 0;
 
+    const actions = useMemo(() => ([
+        ...TimeWidgetToolbarEntries({
+            onZoomIn: handleZoomTimeIn,
+            onZoomOut: handleZoomTimeOut,
+            onShiftTimeLeft: handleShiftTimeLeft,
+            onShiftTimeRight: handleShiftTimeRight
+        }),
+        divider,
+        ...customActions || []
+    ]), [customActions, handleZoomTimeIn, handleZoomTimeOut, handleShiftTimeLeft, handleShiftTimeRight])
+
     const layerProps = {
         customActions,
         panels,
@@ -362,15 +376,11 @@ const TimeWidgetNew = (props: Props) => {
             className="TimeWidget"
             style={{position: 'relative', left: 0, top: 0, width, height}}
         >
-            <TimeWidgetToolbarNew
+            <ViewToolbar
                 width={toolbarWidth}
                 height={height}
                 top={0}
-                onZoomIn={handleZoomTimeIn}
-                onZoomOut={handleZoomTimeOut}
-                onShiftTimeLeft={handleShiftTimeLeft}
-                onShiftTimeRight={handleShiftTimeRight}
-                customActions={customActions}
+                customActions={actions}
             />
             <div
                 style={{position: 'relative', left: toolbarWidth, top: 0, width: width - toolbarWidth, height: height}}
