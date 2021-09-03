@@ -2,7 +2,7 @@ import { CanvasPainter } from "figurl/labbox-react/components/CanvasWidget/Canva
 import { CanvasDragEvent, CanvasWidgetLayer, ClickEvent, ClickEventType, DiscreteMouseEventHandler, DragHandler } from "figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer";
 import { pointIsInEllipse, RectangularRegion, rectangularRegionsIntersect } from "figurl/labbox-react/components/CanvasWidget/Geometry";
 import { RecordingSelectionDispatch } from '../../../pluginInterface';
-import { ActionItem, CheckboxItem, DividerItem, TextItem } from "../Toolbars";
+import { ActionItem, DividerItem, TextItem, ToggleableItem } from "../Toolbars";
 import setupElectrodes, { ElectrodeBox } from './setupElectrodes';
 
 export type Electrode = {
@@ -34,7 +34,7 @@ export type ElectrodeLayerProps = {
     selectedElectrodeIds: number[]
     selectionDispatch: RecordingSelectionDispatch
     electrodeOpts: ElectrodeOpts
-    customActions?: (ActionItem | CheckboxItem | DividerItem | TextItem )[]
+    customActions?: (ActionItem | ToggleableItem | DividerItem | TextItem )[]
 }
 
 type LayerState = {

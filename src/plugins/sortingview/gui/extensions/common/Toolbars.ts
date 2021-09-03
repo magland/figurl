@@ -20,8 +20,9 @@ export interface TextItem {
     contentSigFigs?: number
     contentAlwaysShowDecimal?: boolean
 }
-export interface CheckboxItem {
-    type: 'checkbox'
+export interface ToggleableItem {
+    type: 'toggle'
+    subtype: ToggleableItemType
     callback: () => void
     title: string
     selected?: boolean
@@ -29,4 +30,8 @@ export interface CheckboxItem {
     disabled?: boolean
 }
 
-export type ToolbarItem = ActionItem | CheckboxItem | DividerItem | TextItem
+export const Divider: DividerItem = { type: 'divider' }
+
+export type ToggleableItemType = 'checkbox' | 'slider'
+
+export type ToolbarItem = ActionItem | ToggleableItem | DividerItem | TextItem
