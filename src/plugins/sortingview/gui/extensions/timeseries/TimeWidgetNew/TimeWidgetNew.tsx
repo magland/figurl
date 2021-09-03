@@ -5,7 +5,7 @@ import ViewToolbar from 'plugins/sortingview/gui/extensions/common/ViewToolbar'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { RecordingSelection, RecordingSelectionDispatch } from '../../../pluginInterface'
 import TimeWidgetToolbarEntries from '../../common/sharedToolbarSets/TimeWidgetToolbarEntries'
-import { ActionItem, CheckboxItem, DividerItem, TextItem } from '../../common/Toolbars'
+import { ActionItem, Divider, DividerItem, TextItem, ToggleableItem } from '../../common/Toolbars'
 import { createCursorLayer } from './cursorLayer'
 import { createMainLayer } from './mainLayer'
 import { createMarkersLayer } from './markersLayer'
@@ -14,7 +14,7 @@ import { createTimeAxisLayer } from './timeAxisLayer'
 import TimeSpanWidget, { SpanWidgetInfo } from './TimeSpanWidget'
 import TimeWidgetBottomBar from './TimeWidgetBottomBar'
 
-export type TimeWidgetAction = ActionItem | CheckboxItem | DividerItem | TextItem
+export type TimeWidgetAction = ActionItem | ToggleableItem | DividerItem | TextItem
 
 interface Props {
     panels: TimeWidgetPanel[]
@@ -65,128 +65,6 @@ interface SetCurrentTime {
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type TimeAction = ZoomTimeRangeAction | SetTimeRangeAction | TimeShiftFrac | SetCurrentTime | {type: 'gotoHome' | 'gotoEnd'}
-// const timeReducer = (state: TimeState, action: TimeAction): TimeState => {
-
-//     const fix = (s: TimeState): TimeState => {
-//         if (s.numTimepoints === null) return s
-//         let ret: TimeState = s
-//         if (ret.currentTime !== null) {
-//             if (ret.currentTime >= ret.numTimepoints) {
-//                 ret = {
-//                     ...ret,
-//                     currentTime: ret.numTimepoints - 1
-//                 }
-//             }
-//         }
-//         if (ret.currentTime !== null) {
-//             if (ret.currentTime < 0) {
-//                 ret = {
-//                     ...ret,
-//                     currentTime: 0
-//                 }
-//             }
-//         }
-//         if (ret.timeRange !== null) {
-//             if (ret.timeRange.max - ret.timeRange.min > ret.maxTimeSpan) {
-//                 ret = {
-//                     ...ret,
-//                     timeRange: {min: ret.timeRange.min, max: ret.timeRange.min + ret.maxTimeSpan}
-//                 }
-//             }
-//         }
-//         if (ret.timeRange !== null) {
-//             if (ret.timeRange.max > ret.numTimepoints) {
-//                 const dt = ret.numTimepoints - ret.timeRange.max
-//                 ret = {
-//                     ...ret,
-//                     timeRange: {min: ret.timeRange.min + dt, max: ret.timeRange.max + dt}
-//                 }
-//             }
-//         }
-//         if (ret.timeRange !== null) {
-//             if (ret.timeRange.min < 0) {
-//                 const dt = -ret.timeRange.min
-//                 ret = {
-//                     ...ret,
-//                     timeRange: {min: ret.timeRange.min + dt, max: ret.timeRange.max + dt}
-//                 }
-//             }
-//         }
-//         return ret
-//     }
-
-//     if (action.type === 'zoomTimeRange') {
-//         const currentTime = state.currentTime
-//         const timeRange = state.timeRange
-//         if (!timeRange) return state
-//         if ((timeRange.max - timeRange.min) / action.factor > state.maxTimeSpan ) return state
-//         let t: number
-//         if ((currentTime === null) || (currentTime < timeRange.min))
-//             t = timeRange.min
-//         else if (currentTime > timeRange.max)
-//             t = timeRange.max
-//         else
-//             t = currentTime
-//         const newTimeRange = zoomTimeRange(timeRange, action.factor, t)
-//         return fix({
-//             ...state,
-//             timeRange: newTimeRange
-//         })
-//     }
-//     else if (action.type === 'setTimeRange') {
-//         return fix({
-//             ...state,
-//             timeRange: action.timeRange
-//         })
-//     }
-//     else if (action.type === 'setCurrentTime') {
-//         return fix({
-//             ...state,
-//             currentTime: action.currentTime
-//         })
-//     }
-//     else if (action.type === 'timeShiftFrac') {
-//         const timeRange = state.timeRange
-//         const currentTime = state.currentTime
-//         if (!timeRange) return state
-//         const span = timeRange.max - timeRange.min
-//         const shift = Math.floor(span * action.frac)
-//         const newTimeRange = shiftTimeRange(timeRange, shift)
-//         const newCurrentTime = currentTime !== null ? currentTime + shift : null
-//         return fix({
-//             ...state,
-//             currentTime: newCurrentTime,
-//             timeRange: newTimeRange
-//         })
-//     }
-//     else if (action.type === 'gotoHome') {
-//         const timeRange = state.timeRange
-//         if (!timeRange) return state
-//         const span = timeRange.max - timeRange.min
-//         const newTimeRange = {min: 0, max: span}
-//         return fix({
-//             ...state,
-//             currentTime: newTimeRange.min,
-//             timeRange: newTimeRange
-//         })
-//     }
-//     else if (action.type === 'gotoEnd') {
-//         const timeRange = state.timeRange
-//         if (!timeRange) return state
-//         const numTimepoints = state.numTimepoints
-//         if (numTimepoints === null) return state
-//         const span = timeRange.max - timeRange.min
-//         const newTimeRange = {min: numTimepoints - span, max: numTimepoints}
-//         return fix({
-//             ...state,
-//             currentTime: newTimeRange.max - 1,
-//             timeRange: newTimeRange
-//         })
-//     }
-//     else {
-//         return state
-//     }
-// }
 
 const plotMargins = {
     left: 80,
@@ -194,42 +72,6 @@ const plotMargins = {
     right: 40,
     bottom: 60
 }
-
-// const useTimeState = (args: {
-//     numTimepoints: number,
-//     maxTimeSpan: number,
-//     currentTimepoint?: number | null,
-//     onCurrentTimepointChanged?: (t: number | null) => void,
-//     timeRange?: {min: number, max: number} | null,
-//     onTimeRangeChanged?: (r: {min: number, max: number} | null) => void
-// }): {timeState: TimeState, timeDispatch: React.Dispatch<TimeAction>} => {
-//     const { numTimepoints, maxTimeSpan, currentTimepoint, onCurrentTimepointChanged, timeRange, onTimeRangeChanged } = args
-//     const [timeState, setTimeState] = useState<TimeState>({timeRange: null, currentTime: null, numTimepoints, maxTimeSpan})
-//     let newTimeState = {...timeState}
-//     if (currentTimepoint !== undefined) {
-//         newTimeState = {...newTimeState, currentTime: currentTimepoint}
-//     }
-//     if (timeRange !== undefined) {
-//         newTimeState = {...newTimeState, timeRange}
-//     }
-//     const newTimeDispatch = useMemo(() => ((a: TimeAction) => {
-//         const reducedTimeState = timeReducer(newTimeState, a)
-//         if (onCurrentTimepointChanged !== undefined) {
-//             if (reducedTimeState.currentTime !== currentTimepoint) {
-//                 onCurrentTimepointChanged(reducedTimeState.currentTime)
-//             }
-//         }
-//         if (onTimeRangeChanged !== undefined) {
-//             if ((reducedTimeState.timeRange?.min !== timeRange?.min) || (reducedTimeState.timeRange?.max !== timeRange?.max)) {
-//                 onTimeRangeChanged(reducedTimeState.timeRange)
-//             }
-//         }
-//         setTimeState(reducedTimeState)
-//     }), [currentTimepoint, ])
-//     return {timeState: newTimeState, timeDispatch: newTimeDispatch}
-// }\
-
-const divider: DividerItem = { type: 'divider' }
 
 const TimeWidgetNew = (props: Props) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -312,22 +154,6 @@ const TimeWidgetNew = (props: Props) => {
         })
     }, [allLayers])
 
-    const handleZoomTimeIn = useCallback(() => {
-        selectionDispatch({type: 'ZoomTimeRange', direction: 'in'})
-    }, [selectionDispatch])
-
-    const handleZoomTimeOut = useCallback(() => {
-        selectionDispatch({type: 'ZoomTimeRange', direction: 'out'})
-    }, [selectionDispatch])
-
-    const handleShiftTimeLeft = useCallback(() => {
-        selectionDispatch({type: 'TimeShiftFrac', frac: -0.2})
-    }, [selectionDispatch])
-
-    const handleShiftTimeRight = useCallback(() => {
-        selectionDispatch({type: 'TimeShiftFrac', frac: 0.2})
-    }, [selectionDispatch])
-
     const bottomBarInfo = {
         show: true,
         currentTime: selection.currentTimepoint,
@@ -338,16 +164,12 @@ const TimeWidgetNew = (props: Props) => {
     const showBottomBar = true
     const bottomBarHeight = showBottomBar ? 40 : 0;
 
+    const timeToolbar = useMemo(() => TimeWidgetToolbarEntries({selectionDispatch: selectionDispatch}), [selectionDispatch])
     const actions = useMemo(() => ([
-        ...TimeWidgetToolbarEntries({
-            onZoomIn: handleZoomTimeIn,
-            onZoomOut: handleZoomTimeOut,
-            onShiftTimeLeft: handleShiftTimeLeft,
-            onShiftTimeRight: handleShiftTimeRight
-        }),
-        divider,
+        ...timeToolbar,
+        Divider,
         ...customActions || []
-    ]), [customActions, handleZoomTimeIn, handleZoomTimeOut, handleShiftTimeLeft, handleShiftTimeRight])
+    ]), [customActions, timeToolbar])
 
     const layerProps = {
         customActions,

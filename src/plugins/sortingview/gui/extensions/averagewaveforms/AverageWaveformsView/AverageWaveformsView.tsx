@@ -5,16 +5,16 @@ import MarkdownDialog from 'figurl/labbox-react/components/Markdown/MarkdownDial
 import Splitter from 'figurl/labbox-react/components/Splitter/Splitter'
 import { useRecordingInfo } from 'plugins/sortingview/gui/pluginInterface/useRecordingInfo'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
-import { FaArrowDown, FaArrowUp, FaRegTimesCircle } from 'react-icons/fa'
 import SortingUnitPlotGrid from '../../../commonComponents/SortingUnitPlotGrid/SortingUnitPlotGrid'
 import info from '../../../helpPages/AverageWaveforms.md.gen'
 import { SortingViewProps } from '../../../pluginInterface'
-import { ActionItem, CheckboxItem, DividerItem, TextItem } from '../../common/Toolbars'
+import AmplitudeScaleToolbarEntries from '../../common/sharedToolbarSets/AmplitudeScaleToolbarEntries'
+import { ActionItem, DividerItem, TextItem, ToggleableItem } from '../../common/Toolbars'
 import ViewToolbar from '../../common/ViewToolbar'
 import AverageWaveformView from './AverageWaveformView'
 
 
-export type AverageWaveformAction = ActionItem  | CheckboxItem | DividerItem | TextItem
+export type AverageWaveformAction = ActionItem  | ToggleableItem | DividerItem | TextItem
 
 const TOOLBAR_INITIAL_WIDTH = 36 // hard-coded for now
 
@@ -53,56 +53,26 @@ const AverageWaveformsView: FunctionComponent<SortingViewProps> = (props) => {
         selectionDispatch({type: 'ToggleWaveformsMode', waveformsMode: waveformsMode})
     }, [selectionDispatch, waveformsMode])
 
-    const _handleScaleAmplitudeUp = useCallback(() => {
-        selectionDispatch({type: 'ScaleAmpScaleFactor', direction: 'up'})
-    }, [selectionDispatch])
-    const _handleScaleAmplitudeDown = useCallback(() => {
-        selectionDispatch({type: 'ScaleAmpScaleFactor', direction: 'down'})
-    }, [selectionDispatch])
-    const _handleResetAmplitude = useCallback(() => {
-        selectionDispatch({type: 'SetAmpScaleFactor', ampScaleFactor: 1})
-    }, [selectionDispatch])
+    const amplitudeScaleControls = useMemo(() => {
+        return AmplitudeScaleToolbarEntries({selectionDispatch, ampScaleFactor})
+    }, [selectionDispatch, ampScaleFactor])
 
     useEffect(() => {
         const actions: AverageWaveformAction[] = [
-            {
-                type: 'button',
-                callback: _handleScaleAmplitudeUp,
-                title: 'Scale amplitude up [up arrow]',
-                icon: <FaArrowUp />,
-                keyCode: 38
-            },
-            {
-                type: 'button',
-                callback: _handleResetAmplitude,
-                title: 'Reset scale amplitude',
-                icon: <FaRegTimesCircle />
-            },
-            {
-                type: 'button',
-                callback: _handleScaleAmplitudeDown,
-                title: 'Scale amplitude down [down arrow]',
-                icon: <FaArrowDown />,
-                keyCode: 40
-            },
-            {
-                type: 'text',
-                title: 'Zoom level',
-                content: ampScaleFactor,
-                contentSigFigs: 2
-            },
+            ...(amplitudeScaleControls || []),
             {
                 type: 'divider'
             },
             {
-                type: 'checkbox',
+                type: 'toggle',
+                subtype: 'slider',
                 callback: _handleWaveformToggle,
                 title: waveformsMode === 'geom' ? 'Hide electrode geometry' : 'Show electrode geometry',
                 selected: waveformsMode === 'geom'
             }
         ]
         setScalingActions(actions)
-    }, [_handleScaleAmplitudeUp, ampScaleFactor, _handleScaleAmplitudeDown, _handleResetAmplitude, _handleWaveformToggle, waveformsMode])
+    }, [amplitudeScaleControls,  _handleWaveformToggle, waveformsMode])
 
     const infoVisible = useVisible()
 

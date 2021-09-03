@@ -1,4 +1,4 @@
-import { Checkbox, IconButton } from '@material-ui/core';
+import { Checkbox, FormGroup, IconButton, Switch } from '@material-ui/core';
 import React, { FunctionComponent, useMemo } from 'react';
 
 interface Props {
@@ -12,6 +12,7 @@ const iconButtonStyle = {paddingLeft: 6, paddingRight: 6, paddingTop: 4, padding
 
 type ToolbarElement = {
     type: string
+    subtype?: string
     title: string
     onClick?: () => void
     icon?: any
@@ -64,17 +65,42 @@ const ToolbarItem: FunctionComponent<ToolbarElement> = (props: ToolbarElement) =
                 {_content}
             </div>
         )
-    } else if (props.type === 'checkbox') {
-        return (
-            <Checkbox
-                key={props.elementIndex}
-                checked={props.selected}
-                onClick={props.onClick}
-                style={{padding: 1, paddingLeft: 6 }}
-                title={props.title}
-                disabled={props.disabled}
-            />
-        )
+    } else if (props.type === 'toggle') {
+        if (props.subtype === 'checkbox') {
+            return (
+                <Checkbox
+                    key={props.elementIndex}
+                    checked={props.selected}
+                    onClick={props.onClick}
+                    style={{padding: 1, paddingLeft: 6 }}
+                    title={props.title}
+                    disabled={props.disabled}
+                />
+            )
+        }
+        else if (props.subtype === 'slider') {
+            // TODO: This actually suggests that we could do a better job of rewriting this entire section of functionality
+            // to better support accessibility practices/logical form-control grouping.
+            // (I.e. probably everything should be in a FormGroup or something.)
+            // I don't know enough to do this right now, but we'll want to come back to it.
+            // TODO: Compare this with what we do in LockableSelectUnitsWidget.
+            return (
+                <FormGroup key={props.elementIndex}>
+                    <Switch
+                            checked={props.selected}
+                            size={"small"} // TODO: make styling more configurable
+                            style={{left: -3}} // Note: this seems to center it in the 36-pixel spaces we've been using.
+                                               // There's probably a better way to do this...
+                            onChange={props.onClick}
+                            disabled={props.disabled}
+                            title={props.title}
+                    />
+                </FormGroup>
+            )
+        }
+        else {
+            return <span key={props.elementIndex}>ERROR: Bad toggle subtype {props.subtype}</span>
+        }
     } else {
         return <span key={props.elementIndex} />
     }
@@ -90,6 +116,7 @@ const ViewToolbar: FunctionComponent<Props> = (props) => {
     const elements: ToolbarElement[] = useMemo(() => {
         return (props.customActions || []).map((e, ii) => ({
             type: e.type || 'button',
+            subtype: e.subtype,
             title: e.title,
             onClick: e.callback,
             icon: e.icon || '',
