@@ -128,7 +128,9 @@ const ViewToolbar: FunctionComponent<Props> = (props) => {
             elementIndex: ii
         }))
     }, [props.customActions])
-    const renderedElements = useMemo(() => elements.map((e) => <ToolbarItem {...e}/>), [elements])
+    // The 'key' prop won't ever get used in this way, because the ToolbarItem is really a catch-all that gets replaced
+    // with more specific components, but this makes React happier.
+    const renderedElements = useMemo(() => elements.map((e) => <ToolbarItem {...e} key={e.elementIndex}/>), [elements])
     return (
         <div className="ViewToolBar" style={{position: 'absolute', ...toolbarStyle}}>
             {renderedElements}
