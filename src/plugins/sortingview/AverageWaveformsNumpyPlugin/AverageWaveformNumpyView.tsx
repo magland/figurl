@@ -1,6 +1,6 @@
 // import { createCalculationPool } from 'labbox';
+import { KeypressMap } from 'figurl/labbox-react/components/CanvasWidget';
 import WaveformWidget from 'plugins/sortingview/gui/extensions/averagewaveforms/AverageWaveformsView/WaveformWidget';
-import { ActionItem, DividerItem } from 'plugins/sortingview/gui/extensions/common/Toolbars';
 import { SortingSelection, SortingSelectionDispatch } from 'plugins/sortingview/gui/pluginInterface';
 import React, { FunctionComponent, useMemo } from 'react';
 import { ElectrodeOpts } from '../gui/extensions/common/sharedCanvasLayers/electrodesLayer';
@@ -22,12 +22,13 @@ type Props = {
     width: number
     height: number
     noiseLevel: number
-    customActions?: (ActionItem | DividerItem)[]
+    keypressMap?: KeypressMap
 }
 
 // const calculationPool = createCalculationPool({maxSimultaneous: 6})
 
-const AverageWaveformNumpyView: FunctionComponent<Props> = ({ electrodeChannels, waveforms, unitId, selection, selectionDispatch, width, height, noiseLevel, customActions }) => {
+const AverageWaveformNumpyView: FunctionComponent<Props> = (props) => {
+    const { electrodeChannels, waveforms, unitId, selection, selectionDispatch, width, height, noiseLevel, keypressMap } = props
     const plotData: PlotData = useMemo(() => {
         const x: PlotData = {
             average_waveform: [],
@@ -57,18 +58,18 @@ const AverageWaveformNumpyView: FunctionComponent<Props> = ({ electrodeChannels,
     return (
         <WaveformWidget
             waveform={plotData.average_waveform}
+            ampScaleFactor={1}
             layoutMode={selection.waveformsMode || 'geom'}
+            width={width}
+            height={height}
+            selectedElectrodeIds={selection.selectedElectrodeIds || []}
+            selectionDispatch={selectionDispatch}
+            electrodeOpts={electrodeOpts}
+            keypressMap={keypressMap ?? {}}
             noiseLevel={noiseLevel}
             electrodeIds={electrodeIds}
             electrodeLocations={electrodeLocations}
             samplingFrequency={plotData.sampling_frequency}
-            width={width}
-            height={height}
-            selectedElectrodeIds={selection.selectedElectrodeIds || []}
-            customActions={customActions}
-            selectionDispatch={selectionDispatch}
-            electrodeOpts={electrodeOpts}
-            ampScaleFactor={1}
             waveformOpts={{waveformWidth: 1}}
         />
     )

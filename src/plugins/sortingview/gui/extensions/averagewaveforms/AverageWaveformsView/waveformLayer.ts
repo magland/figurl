@@ -1,8 +1,21 @@
-import { funcToTransform } from 'figurl/labbox-react/components/CanvasWidget';
-import { CanvasPainter } from 'figurl/labbox-react/components/CanvasWidget/CanvasPainter';
-import { CanvasWidgetLayer, KeyboardEvent, KeyboardEventHandler } from 'figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer';
-import setupElectrodes, { ElectrodeBox } from '../../common/sharedCanvasLayers/setupElectrodes';
-import { WaveformLayerProps } from './WaveformWidget';
+import { CanvasWidgetLayer, KeyboardEvent, KeyboardEventHandler, KeypressMap } from 'figurl/labbox-react/components/CanvasWidget'
+import { CanvasPainter, PainterPath } from 'figurl/labbox-react/components/CanvasWidget/CanvasPainter'
+import { TransformationMatrix } from 'figurl/labbox-react/components/CanvasWidget/Geometry'
+import { ElectrodeBox } from '../../common/sharedCanvasLayers/setupElectrodes'
+
+export type WaveformLayerProps = {
+    keypressMap?: KeypressMap
+    electrodeBoxes: ElectrodeBox[]
+    paths: PainterPath[]
+    transform: TransformationMatrix
+    waveform?: number[][]
+    waveformOpts: {
+        colors?: WaveformColors
+        waveformWidth: number
+    }
+    width: number       // unused but required for a LayerProps
+    height: number      // unused but required for a LayerProps
+}
 
 export type WaveformColors = {
     base: string
@@ -11,7 +24,7 @@ const defaultWaveformColors: WaveformColors = {
     base: 'black'
 }
 type LayerState = {
-    electrodeBoxes: ElectrodeBox[]
+    electrodeBoxes: ElectrodeBox[],
 }
 const initialLayerState = {
     electrodeBoxes: []
@@ -20,44 +33,38 @@ const initialLayerState = {
 // If any custom actions have been set (that is, something a user of this component wants to happen in response to a key press)
 // expect them to have been passed in with the key 'customActions' & call them here.
 export const handleKeyboardEvent: KeyboardEventHandler = (e: KeyboardEvent, layer: CanvasWidgetLayer<WaveformLayerProps, LayerState>): boolean => {
+    console.log(`Got keystroke: ${e.keyCode}`) // This never actually triggers--keystrokes aren't getting through to the canvas layer
     const props = layer.getProps()
-    if (!props) return true
-    for (let a of props.customActions || []) {
-        if (a.type === 'button') {
-            if (a.keyCode === e.keyCode) {
-                a.callback()
-                return false
-            }
-        }
+    if (!props || !props.keypressMap) return true
+    if (e.keyCode in props.keypressMap) {
+        props.keypressMap[e.keyCode]()
+        return false
     }
     return true
 }
 
 export const createWaveformLayer = () => {
     const onPaint = (painter: CanvasPainter, props: WaveformLayerProps, state: LayerState) => {
-        const { waveform } = props
-        if (!waveform) return
-        const opts = props.waveformOpts
-        const colors = opts?.colors || defaultWaveformColors
+        const { waveformOpts, paths, electrodeBoxes } = props
+        if (!paths || paths.length === 0) return
+        console.log(`Painting waveform @${Date.now()}`)
+        const colors = waveformOpts?.colors || defaultWaveformColors
         // const maxAbs = Math.max(...waveform.map(w => Math.max(...w.map(x => Math.abs(x)))))
         painter.wipe()
-        // const yScaleFactor = 1 / maxAbs
-        const yScaleFactor = (props.ampScaleFactor || 1) / (props.noiseLevel || 1) * 1/10
-        for (let i = 0; i < state.electrodeBoxes.length; i++) {
-            const e = state.electrodeBoxes[i]
-            const painter2 = painter.transform(e.transform).transform(funcToTransform(p => {
-                return [p[0] / waveform[i].length, 0.5 - (p[1] / 2) * yScaleFactor]
-            }))
-            const path = painter2.createPainterPath()
-            for (let j = 0; j < waveform[i].length; j ++) {
-                path.lineTo(j, waveform[i][j])
-            }
-            painter2.drawPath(path, {color: colors.base, width: opts?.waveformWidth})
+        for (let i = 0; i < electrodeBoxes.length; i++) {
+            const e = electrodeBoxes[i]
+            const painter2 = painter.transform(e.transform)
+            // const path = painter2.createPainterPath()
+            // for (let j = 0; j < waveform[i].length; j ++) {
+            //     path.lineTo(j, waveform[i][j])
+            // }
+            painter2.drawPath(paths[i], {color: colors.base, width: waveformOpts?.waveformWidth})
         }
     }
     const onPropsChange = (layer: CanvasWidgetLayer<WaveformLayerProps, LayerState>, props: WaveformLayerProps) => {
-        const { width, height, electrodeLocations, electrodeIds } = props
-        const { electrodeBoxes, transform } = setupElectrodes({width, height, electrodeLocations, electrodeIds, layoutMode: props.layoutMode, maxElectrodePixelRadius: props.electrodeOpts.maxElectrodePixelRadius})
+        // const { width, height, electrodeLocations, electrodeIds } = props
+        // const { electrodeBoxes, transform } = setupElectrodes({width, height, electrodeLocations, electrodeIds, layoutMode: props.layoutMode, maxElectrodePixelRadius: props.electrodeOpts.maxElectrodePixelRadius})
+        const { electrodeBoxes, transform } = {...props}
         layer.setTransformMatrix(transform)
         layer.setState({electrodeBoxes})
         layer.scheduleRepaint()

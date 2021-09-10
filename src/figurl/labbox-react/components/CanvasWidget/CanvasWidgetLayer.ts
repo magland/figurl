@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { CanvasPainter, Context2D } from './CanvasPainter'
 import { getInverseTransformationMatrix, RectangularRegion, TransformationMatrix, transformPoint, transformRect, transformXY, Vec2 } from './Geometry'
 
@@ -44,6 +43,10 @@ export interface KeyboardEvent {
     keyCode: number
 }
 
+export interface KeypressMap {
+    [keyCode: number]: () => void
+}
+
 export enum KeyEventType {
     Press = 'PRESS',
     Release = 'RELEASE'
@@ -83,7 +86,7 @@ export interface EventHandlerSet {
     wheelEventHandlers?: WheelEventHandler[]
 }
 
-export const formClickEventFromMouseEvent = (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>, t: ClickEventType, i?: TransformationMatrix): ClickEvent => {
+export const formClickEventFromMouseEvent = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, t: ClickEventType, i?: TransformationMatrix): ClickEvent => {
     const element = e.currentTarget
     let point: Vec2 = [e.clientX - element.getBoundingClientRect().x, e.clientY - element.getBoundingClientRect().y]
     if (i) {
@@ -98,7 +101,7 @@ export const formClickEventFromMouseEvent = (e: React.MouseEvent<HTMLCanvasEleme
     return {point: [point[0], point[1]], mouseButton: e.buttons, modifiers: modifiers, type: t}
 }
 
-export const formWheelEvent = (e: React.WheelEvent<HTMLCanvasElement>): WheelEvent => {
+export const formWheelEvent = (e: React.WheelEvent<HTMLDivElement>): WheelEvent => {
     return {
         deltaY: e.deltaY
     }
@@ -251,7 +254,7 @@ export class CanvasWidgetLayer<LayerProps extends BaseLayerProps, State extends 
         this._lastRepaintTimestamp = Number(new Date())
     }
 
-    handleDiscreteEvent(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>, type: ClickEventType) {
+    handleDiscreteEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>, type: ClickEventType) {
         if (this._discreteMouseEventHandlers.length === 0) return
         const click = formClickEventFromMouseEvent(e, type, this._inverseMatrix)
         // Don't respond to events outside the layer
@@ -285,7 +288,7 @@ export class CanvasWidgetLayer<LayerProps extends BaseLayerProps, State extends 
         return passEventBackToUi
     }
 
-    handleMousePresenceEvent(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>, type: MousePresenceEventType) {
+    handleMousePresenceEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>, type: MousePresenceEventType) {
         if (this._mousePresenceEventHandlers.length === 0) return
         const presenceEvent = { type: type }
         for (let fn of this._mousePresenceEventHandlers) {
@@ -293,7 +296,7 @@ export class CanvasWidgetLayer<LayerProps extends BaseLayerProps, State extends 
         }
     }
 
-    handleWheelEvent(e: React.WheelEvent<HTMLCanvasElement>) {
+    handleWheelEvent(e: React.WheelEvent<HTMLDivElement>) {
         if (this._wheelEventHandlers.length === 0) return
         
         const wheelEvent = formWheelEvent(e)
@@ -303,54 +306,6 @@ export class CanvasWidgetLayer<LayerProps extends BaseLayerProps, State extends 
     }
 }
 
-export const useLayer = <LayerProps extends BaseLayerProps, LayerState extends Object>(createLayer: () => CanvasWidgetLayer<LayerProps, LayerState>, layerProps?: LayerProps): CanvasWidgetLayer<LayerProps, LayerState> | null => {
-    const [layer, setLayer] = useState<CanvasWidgetLayer<LayerProps, LayerState> | null>(null)
-    useEffect(() => {
-        if (layer === null) {
-            setLayer(createLayer())
-        }
-    }, [layer, setLayer, createLayer])
-    if ((layer) && (layerProps)) {
-        layer.setProps(layerProps)
-    }
-    return layer
-}
-
-const listsMatch = (list1: any[], list2: any[]) => {
-    if (list1.length !== list2.length) return false
-    for (let i = 0; i < list1.length; i++) {
-        if (list1[i] !== list2[i]) return false
-    }
-    return true
-}
-
-export const useLayers = (layers: (CanvasWidgetLayer<any, any> | null)[]) => {
-    const [prevLayers, setPrevLayers] = useState<(CanvasWidgetLayer<any, any> | null)[]>([])
-    if (listsMatch(prevLayers, layers)) {
-        return prevLayers
-    }
-    else {
-        setPrevLayers(layers)
-        return layers
-    }
-}
-
-// export const useLayers = <LayerProps extends BaseLayerProps>(layerList: (CanvasWidgetLayer<LayerProps, any> | null)[]): CanvasWidgetLayer<LayerProps, any>[] | null => {
-//     const [layers, setLayers] = useState<CanvasWidgetLayer<LayerProps, Object>[] | null>(null)
-//     useEffect(() => {
-//         if (layers === null) {
-//             if (layerList.filter(L => (L === null)).length === 0) {
-//                 const layerList2: CanvasWidgetLayer<LayerProps, any>[] = []
-//                 layerList.forEach(L => {
-//                     if (L === null) throw Error('Unexpected null layer')
-//                     layerList2.push(L)
-//                 })
-//                 setLayers(layerList2)
-//             }
-//         }
-//     }, [layers, setLayers, layerList])
-//     return layers
-// }
 
 const shallowEqual = (x: {[key: string]: any}, y: {[key: string]: any}) => {
     for (let k in x) {

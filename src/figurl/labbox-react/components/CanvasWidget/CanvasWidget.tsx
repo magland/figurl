@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { CanvasWidgetLayer, ClickEventType, formClickEventFromMouseEvent, KeyEventType, MousePresenceEventType } from './CanvasWidgetLayer'
 import { Vec2, Vec4 } from './Geometry'
 
@@ -194,7 +194,7 @@ const CanvasWidget = (props: Props) => {
         setPrevDragState(dragState)
     }, [dragState, prevDragState, setPrevDragState, layers])
 
-    const _handleDiscreteMouseEvents = useCallback((e: React.MouseEvent<HTMLCanvasElement, MouseEvent>, type: ClickEventType) => {
+    const _handleDiscreteMouseEvents = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>, type: ClickEventType) => {
         if (dragState.dragging) return
         for (let l of layers) {
             if (l) {
@@ -203,27 +203,27 @@ const CanvasWidget = (props: Props) => {
         }
     }, [layers, dragState])
 
-    const _handleMousePresenceEvents = useCallback((e: React.MouseEvent<HTMLCanvasElement, MouseEvent>, type: MousePresenceEventType) => {
+    const _handleMousePresenceEvents = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>, type: MousePresenceEventType) => {
         if (!layers) return
         for (const l of layers) {
             l && l.handleMousePresenceEvent(e, type)
         }
     }, [layers])
 
-    const _handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+    const _handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         const { point, mouseButton, modifiers } = formClickEventFromMouseEvent(e, ClickEventType.Move)
         // limit the rate of drag events by scheduling the dispatch drag
         scheduleDispatchDrag({type: COMPUTE_DRAG, mouseButton: mouseButton === 1, point: point, shift: modifiers.shift || false})
         _handleDiscreteMouseEvents(e, ClickEventType.Move)
     }, [_handleDiscreteMouseEvents])
 
-    const _handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+    const _handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         const { point, modifiers } = formClickEventFromMouseEvent(e, ClickEventType.Press)
         _handleDiscreteMouseEvents(e, ClickEventType.Press)
         dispatchDrag({ type: COMPUTE_DRAG, mouseButton: true, point: point, shift: modifiers.shift || false})
     }, [_handleDiscreteMouseEvents])
 
-    const _handleMouseUp = useCallback((e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+    const _handleMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         setHasFocus(true)
         const { point, mouseButton, modifiers } = formClickEventFromMouseEvent(e, ClickEventType.Move)
         _handleDiscreteMouseEvents(e, ClickEventType.Release)
@@ -231,16 +231,16 @@ const CanvasWidget = (props: Props) => {
         dispatchDrag({ type: END_DRAG })
     }, [_handleDiscreteMouseEvents, dispatchDrag])
 
-    const _handleMouseEnter = useCallback((e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+    const _handleMouseEnter = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         _handleMousePresenceEvents(e, MousePresenceEventType.Enter)
     }, [_handleMousePresenceEvents])
 
-    const _handleMouseLeave = useCallback((e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+    const _handleMouseLeave = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         setHasFocus(false)
         _handleMousePresenceEvents(e, MousePresenceEventType.Leave)
     }, [_handleMousePresenceEvents])
 
-    const _handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
+    const _handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
         for (let l of layers) {
             if (l) {
                 l.handleWheelEvent(e)
@@ -280,29 +280,44 @@ const CanvasWidget = (props: Props) => {
         }
     }
 
+
+    // useCheckForChanges('Rendered layers', {
+    //     'layers': layers,
+    //     'width': width,
+    //     'height': height,
+    //     'mouse move': _handleMouseMove,
+    //     'mouse down': _handleMouseDown,
+    //     'mouse up': _handleMouseUp,
+    //     'mouse enter': _handleMouseEnter,
+    //     'mouse leave': _handleMouseLeave,
+    //     'wheel event': _handleWheel
+    // })
+    const renderedLayers = useMemo(() => {
+        console.log(`Rerendering layers.`)
+        return (layers || []).map((L, index) => (
+            <canvas
+                key={'canvas-' + index}
+                style={{position: 'absolute', left: 0, top: 0}}
+                width={width}
+                height={height}
+            />
+        ))
+    }, [layers, width, height])
+
     return (
         <div
             ref={divRef}
             style={{position: 'relative', width, height, left: 0, top: 0}}
             onKeyDown={_handleKeyPress}
             tabIndex={0} // tabindex needed to handle keypress
+            onMouseMove={_handleMouseMove}
+            onMouseDown={_handleMouseDown}
+            onMouseUp={_handleMouseUp}
+            onMouseEnter={_handleMouseEnter}
+            onMouseLeave={_handleMouseLeave}
+            onWheel={_handleWheel}
         >
-            {
-                (layers || []).map((L, index) => (
-                    <canvas
-                        key={'canvas-' + index}
-                        style={{position: 'absolute', left: 0, top: 0}}
-                        width={width}
-                        height={height}
-                        onMouseMove={_handleMouseMove}
-                        onMouseDown={_handleMouseDown}
-                        onMouseUp={_handleMouseUp}
-                        onMouseEnter={_handleMouseEnter}
-                        onMouseLeave={_handleMouseLeave}
-                        onWheel={_handleWheel}
-                    />
-                ))
-            }
+            { renderedLayers }
             {/* {
                 this.props.menuOpts ? (
                     <CanvasWidgetMenu visible={this.state.menuVisible}

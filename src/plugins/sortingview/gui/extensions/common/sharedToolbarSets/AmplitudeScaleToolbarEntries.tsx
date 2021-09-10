@@ -20,7 +20,8 @@ const AmplitudeScaleToolbarEntries = (props: AmplitudeScaleToolbarProps): Toolba
             callback: _handleScaleAmplitudeUp,
             title: 'Scale amplitude up [up arrow]',
             icon: <FaArrowUp />,
-            keyCode: 38
+            // keyCode: 38 // these don't work anyway and they're wrecking memoization.
+            // try reimplementing at the overall view level
         },
         {
             type: 'button',
@@ -33,7 +34,7 @@ const AmplitudeScaleToolbarEntries = (props: AmplitudeScaleToolbarProps): Toolba
             callback: _handleScaleAmplitudeDown,
             title: 'Scale amplitude down [down arrow]',
             icon: <FaArrowDown />,
-            keyCode: 40
+            // keyCode: 40
         },
         {
             type: 'text',

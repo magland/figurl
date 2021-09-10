@@ -3,12 +3,12 @@ import { Table, TableBody, TableCell, TableRow } from '@material-ui/core';
 import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView';
 import useChannel from 'figurl/kachery-react/useChannel';
 import usePureCalculationTask from 'figurl/kachery-react/usePureCalculationTask';
+import { KeypressMap } from 'figurl/labbox-react/components/CanvasWidget';
 import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds';
 import React, { FunctionComponent, useMemo } from 'react';
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelection, SortingSelectionDispatch } from '../../../pluginInterface';
 import WaveformWidget, { defaultWaveformOpts } from '../../averagewaveforms/AverageWaveformsView/WaveformWidget';
 import { ElectrodeOpts } from '../../common/sharedCanvasLayers/electrodesLayer';
-import { ActionItem, DividerItem } from '../../common/Toolbars';
 
 type PlotData = {
     average_waveform: number[][]
@@ -37,14 +37,14 @@ type Props = {
     width: number
     height: number
     noiseLevel: number
-    customActions?: (ActionItem | DividerItem)[]
+    keypressMap?: KeypressMap
     snippetLen?: [number, number]
     sortingSelector?: string
 }
 
 // const calculationPool = createCalculationPool({maxSimultaneous: 6})
 
-const PairWaveformView: FunctionComponent<Props> = ({ sorting, curation, recording, unitIds, selection, selectionDispatch, width, height, noiseLevel, customActions, snippetLen, sortingSelector }) => {
+const PairWaveformView: FunctionComponent<Props> = ({ sorting, curation, recording, unitIds, selection, selectionDispatch, width, height, noiseLevel, keypressMap, snippetLen, sortingSelector }) => {
     const unitIdsX = useMemo(() => (unitIds.map(unitId => (applyMergesToUnit(unitId, curation, selection.applyMerges)))), [unitIds, curation, selection])
     const unitId1 = unitIdsX[0]
     const unitId2 = unitIdsX[1]
@@ -130,7 +130,7 @@ const PairWaveformView: FunctionComponent<Props> = ({ sorting, curation, recordi
                             height={height}
                             ampScaleFactor={selection.ampScaleFactor || 1}
                             selectedElectrodeIds={selection.selectedElectrodeIds || []}
-                            customActions={customActions}
+                            keypressMap={keypressMap}
                             selectionDispatch={selectionDispatch}
                             electrodeOpts={electrodeOpts}
                             waveformOpts={defaultWaveformOpts}
@@ -148,7 +148,7 @@ const PairWaveformView: FunctionComponent<Props> = ({ sorting, curation, recordi
                             height={height}
                             ampScaleFactor={selection.ampScaleFactor || 1}
                             selectedElectrodeIds={selection.selectedElectrodeIds || []}
-                            customActions={customActions}
+                            keypressMap={keypressMap}
                             selectionDispatch={selectionDispatch}
                             electrodeOpts={electrodeOpts}
                             waveformOpts={defaultWaveformOpts}
