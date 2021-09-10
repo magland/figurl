@@ -1,6 +1,5 @@
-import CanvasWidget from 'figurl/labbox-react/components/CanvasWidget'
+import CanvasWidget, { useLayer, useLayers } from 'figurl/labbox-react/components/CanvasWidget'
 import { CanvasPainter } from 'figurl/labbox-react/components/CanvasWidget/CanvasPainter'
-import { useLayer, useLayers } from 'figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer'
 import TimeWidgetToolbarEntries from 'plugins/sortingview/gui/extensions/common/sharedToolbarSets/TimeWidgetToolbarEntries'
 import { Divider } from 'plugins/sortingview/gui/extensions/common/Toolbars'
 import ViewToolbar from 'plugins/sortingview/gui/extensions/common/ViewToolbar'

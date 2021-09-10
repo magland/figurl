@@ -1,5 +1,4 @@
-import CanvasWidget from "figurl/labbox-react/components/CanvasWidget"
-import { useLayer, useLayers } from "figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer"
+import CanvasWidget, { useLayer, useLayers } from "figurl/labbox-react/components/CanvasWidget"
 import { TimeseriesSelection, TimeseriesSelectionDispatch } from "plugins/sortingview/ExperitimeTimeseriesPlugin/interface/TimeseriesSelection"
 import React, { useMemo } from "react"
 import { ChannelGeometryLayerProps, createChannelGeometryLayer } from "./channelGeometryLayer"

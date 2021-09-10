@@ -2,13 +2,12 @@
 import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView'
 import useChannel from 'figurl/kachery-react/useChannel'
 import usePureCalculationTask from 'figurl/kachery-react/usePureCalculationTask'
+import { KeypressMap } from 'figurl/labbox-react/components/CanvasWidget'
 import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds'
 import React, { FunctionComponent, useMemo } from 'react'
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelectionDispatch } from '../../../pluginInterface'
 import { ElectrodeOpts } from '../../common/sharedCanvasLayers/electrodesLayer'
-import { AverageWaveformAction } from './AverageWaveformsView'
 import WaveformWidget, { defaultWaveformOpts } from './WaveformWidget'
-
 
 export type PlotData = {
     average_waveform: number[][]
@@ -26,7 +25,7 @@ type Props = {
     width: number
     height: number
     noiseLevel: number
-    customActions?: AverageWaveformAction[]
+    keypressMap: KeypressMap
     snippetLen?: [number, number]
     visibleElectrodeIds?: number[]
     selectedElectrodeIds?: number[]
@@ -37,7 +36,7 @@ type Props = {
 
 // const calculationPool = createCalculationPool({maxSimultaneous: 6})
 
-const AverageWaveformView: FunctionComponent<Props> = ({ sorting, curation, recording, unitId, selectionDispatch, width, height, noiseLevel, customActions, snippetLen, visibleElectrodeIds, selectedElectrodeIds, ampScaleFactor, applyMerges, waveformsMode }) => {
+const AverageWaveformView: FunctionComponent<Props> = ({ sorting, curation, recording, unitId, selectionDispatch, width, height, noiseLevel, keypressMap, snippetLen, visibleElectrodeIds, selectedElectrodeIds, ampScaleFactor, applyMerges, waveformsMode }) => {
 
     const electrodeOpts: ElectrodeOpts = useMemo(() => ({
         showLabels: true,
@@ -83,7 +82,7 @@ const AverageWaveformView: FunctionComponent<Props> = ({ sorting, curation, reco
             height={height}
             selectedElectrodeIds={selectedElectrodeIds || []}
             ampScaleFactor={ampScaleFactor || 1}
-            customActions={customActions}
+            keypressMap={keypressMap}
             selectionDispatch={selectionDispatch}
             electrodeOpts={electrodeOpts}
             waveformOpts={defaultWaveformOpts}

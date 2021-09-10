@@ -1,6 +1,12 @@
-import CanvasWidget from './CanvasWidget';
-import { TransformationMatrix, Vec2 } from './Geometry';
-export { PainterPath } from './CanvasPainter';
+import CanvasWidget from './CanvasWidget'
+import { TransformationMatrix, Vec2 } from './Geometry'
+export { PainterPath } from './CanvasPainter'
+export { default as CanvasWidget } from './CanvasWidget'
+export { CanvasWidgetLayer, ClickEventType } from './CanvasWidgetLayer'
+export type { CanvasDragEvent, ClickEvent, KeyboardEvent, KeyboardEventHandler, KeypressMap } from './CanvasWidgetLayer'
+export type { RectangularRegion } from './Geometry'
+export { useKeymap } from './useKeymap'
+export { useLayer, useLayers } from './useLayer'
 
 export const funcToTransform = (transformation: (p: Vec2) => Vec2): TransformationMatrix => {
     const p00 = transformation([0, 0])

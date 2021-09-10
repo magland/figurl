@@ -1,15 +1,17 @@
-import { IconButton } from '@material-ui/core';
-import { Help } from '@material-ui/icons';
-import { useVisible } from 'figurl/labbox-react';
-import Splitter from 'figurl/labbox-react/components/Splitter/Splitter';
-import { ActionItem, DividerItem } from 'plugins/sortingview/gui/extensions/common/Toolbars';
-import ViewToolbar from 'plugins/sortingview/gui/extensions/common/ViewToolbar';
-import { SortingSelection, SortingSelectionDispatch } from 'plugins/sortingview/gui/pluginInterface';
-import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
-import AverageWaveformNumpyView from './AverageWaveformNumpyView';
-import { ElectrodeChannel, Waveform } from './AverageWaveformsNumpyPlugin';
-import SortingUnitPlotGridNumpy from './SortingUnitPlotGridNumpy';
+import { IconButton } from '@material-ui/core'
+import { Help } from '@material-ui/icons'
+import { useVisible } from 'figurl/labbox-react'
+import { KeypressMap } from 'figurl/labbox-react/components/CanvasWidget'
+import Splitter from 'figurl/labbox-react/components/Splitter/Splitter'
+import AmplitudeScaleToolbarEntries from 'plugins/sortingview/gui/extensions/common/sharedToolbarSets/AmplitudeScaleToolbarEntries'
+import { ActionItem, DividerItem } from 'plugins/sortingview/gui/extensions/common/Toolbars'
+import ViewToolbar from 'plugins/sortingview/gui/extensions/common/ViewToolbar'
+import { SortingSelection, SortingSelectionDispatch } from 'plugins/sortingview/gui/pluginInterface'
+import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FaArrowDown, FaArrowUp } from 'react-icons/fa'
+import AverageWaveformNumpyView from './AverageWaveformNumpyView'
+import { ElectrodeChannel, Waveform } from './AverageWaveformsNumpyPlugin'
+import SortingUnitPlotGridNumpy from './SortingUnitPlotGridNumpy'
 
 export type AverageWaveformAction = ActionItem  | DividerItem
 
@@ -30,6 +32,16 @@ const AverageWaveformsNumpyView: FunctionComponent<Props> = (props) => {
     const boxHeight = 250
     const boxWidth = 180
     const [scalingActions, setScalingActions] = useState<AverageWaveformAction[] | null>(null)
+    const ampScaleFactor = useMemo(() => (1), []) // TODO: This should probably come from somewhere but we have no selection?
+
+    const amplitudeScaleControls = useMemo(() => {
+        return AmplitudeScaleToolbarEntries({selectionDispatch, ampScaleFactor})
+    }, [selectionDispatch, ampScaleFactor])
+
+    const keypressMap: KeypressMap = useMemo(() => {
+        return Object.assign({}, ...amplitudeScaleControls.map((c) => (c.type === 'button' && c.keyCode ? {[c.keyCode]: c.callback } : {})))
+    }, [amplitudeScaleControls])
+
     const unitComponent = useMemo(() => (unitId: number) => (
         <AverageWaveformNumpyView
             electrodeChannels={electrodeChannels}
@@ -40,9 +52,9 @@ const AverageWaveformsNumpyView: FunctionComponent<Props> = (props) => {
             width={boxWidth}
             height={boxHeight}
             noiseLevel={noiseLevel}
-            customActions={scalingActions || []}
+            keypressMap={keypressMap}
         />
-    ), [electrodeChannels, waveforms, selection, selectionDispatch, noiseLevel, scalingActions])
+    ), [electrodeChannels, waveforms, selection, selectionDispatch, noiseLevel, keypressMap])
 
     const unitIds = useMemo(() => (
         waveforms.map(w => (w.unitId))

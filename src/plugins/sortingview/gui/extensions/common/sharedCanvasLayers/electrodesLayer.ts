@@ -1,9 +1,8 @@
-import { CanvasPainter } from "figurl/labbox-react/components/CanvasWidget/CanvasPainter";
-import { CanvasDragEvent, CanvasWidgetLayer, ClickEvent, ClickEventType, DiscreteMouseEventHandler, DragHandler } from "figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer";
-import { pointIsInEllipse, RectangularRegion, rectangularRegionsIntersect } from "figurl/labbox-react/components/CanvasWidget/Geometry";
-import { RecordingSelectionDispatch } from '../../../pluginInterface';
-import { ActionItem, DividerItem, TextItem, ToggleableItem } from "../Toolbars";
-import setupElectrodes, { ElectrodeBox } from './setupElectrodes';
+import { CanvasPainter } from "figurl/labbox-react/components/CanvasWidget/CanvasPainter"
+import { CanvasDragEvent, CanvasWidgetLayer, ClickEvent, ClickEventType, DiscreteMouseEventHandler, DragHandler } from "figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer"
+import { pointIsInEllipse, RectangularRegion, rectangularRegionsIntersect, TransformationMatrix } from "figurl/labbox-react/components/CanvasWidget/Geometry"
+import { RecordingSelectionDispatch } from '../../../pluginInterface'
+import { ElectrodeBox } from './setupElectrodes'
 
 export type Electrode = {
     id: number
@@ -23,18 +22,16 @@ export type ElectrodeOpts = {
 }
 
 export type ElectrodeLayerProps = {
-    waveform?: number[][]
+    transform: TransformationMatrix
+    electrodeBoxes?: ElectrodeBox[]
+    radius: number
+    pixelRadius: number
     layoutMode: 'geom' | 'vertical'
-    noiseLevel: number
-    electrodeIds: number[]
-    electrodeLocations: number[][]
-    samplingFrequency: number
     width: number
     height: number
     selectedElectrodeIds: number[]
     selectionDispatch: RecordingSelectionDispatch
     electrodeOpts: ElectrodeOpts
-    customActions?: (ActionItem | ToggleableItem | DividerItem | TextItem )[]
 }
 
 type LayerState = {
@@ -191,10 +188,8 @@ export const createElectrodesLayer = () => {
     }
     const onPropsChange = (layer: CanvasWidgetLayer<ElectrodeLayerProps, LayerState>, props: ElectrodeLayerProps) => {
         const state = layer.getState()
-        const { width, height, electrodeLocations, electrodeIds, layoutMode } = props
-        const { electrodeBoxes, transform, radius, pixelRadius } = setupElectrodes({width, height, electrodeLocations, electrodeIds, layoutMode, maxElectrodePixelRadius: props.electrodeOpts.maxElectrodePixelRadius})
-        layer.setTransformMatrix(transform)
-        layer.setState({...state, electrodeBoxes, radius, pixelRadius})
+        layer.setTransformMatrix(props.transform)
+        layer.setState({...state, electrodeBoxes: (props.electrodeBoxes || []), radius: props.radius, pixelRadius: props.pixelRadius})
         layer.scheduleRepaint()
     }
     return new CanvasWidgetLayer<ElectrodeLayerProps, LayerState>(

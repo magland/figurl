@@ -1,8 +1,8 @@
-import CanvasWidget from "figurl/labbox-react/components/CanvasWidget"
-import { useLayer, useLayers } from "figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer"
+import CanvasWidget, { useLayer, useLayers } from "figurl/labbox-react/components/CanvasWidget"
 import React, { useMemo } from "react"
 import { RecordingSelectionDispatch } from "../../../pluginInterface"
 import { createElectrodesLayer, Electrode, ElectrodeLayerProps } from "../../common/sharedCanvasLayers/electrodesLayer"
+import setupElectrodes from '../../common/sharedCanvasLayers/setupElectrodes'
 
 // Okay, so after some hoop-jumping, we've learned the RecordingInfo has:
 // - sampling frequency (number), - channel_ids (list of number),
@@ -23,10 +23,28 @@ const defaultElectrodeLayerElectrodeOpts = {
 }
 
 const ElectrodeGeometryWidget = (props: WidgetProps) => {
+    const layoutMode = 'geom'
+    const electrodeIds = useMemo(() => {
+        return props.electrodes.map((e) => e.id)
+    }, [props.electrodes])
+    const electrodeLocations = useMemo(() => {
+        return props.electrodes.map((e) => [e.x, e.y])
+    }, [props.electrodes])
+    const electrodesSetup = useMemo(() => {
+        return setupElectrodes({
+            width: props.width,
+            height: props.height,
+            electrodeLocations: electrodeLocations,
+            electrodeIds: electrodeIds,
+            layoutMode: layoutMode})
+    }, [props.width, props.height, electrodeLocations, electrodeIds, layoutMode])
+
     const electrodeLayerProps: ElectrodeLayerProps = useMemo(() => ({
-        layoutMode: 'geom',
-        electrodeIds: props.electrodes.map(e => e.id),
-        electrodeLocations: props.electrodes.map(e => [e.x, e.y]),
+        electrodeBoxes: electrodesSetup.electrodeBoxes,
+        transform: electrodesSetup.transform,
+        radius: electrodesSetup.radius,
+        pixelRadius: electrodesSetup.pixelRadius,
+        layoutMode: layoutMode,
         width: props.width,
         height: props.height,
         selectedElectrodeIds: props.selectedElectrodeIds ?? [],
@@ -34,7 +52,8 @@ const ElectrodeGeometryWidget = (props: WidgetProps) => {
         electrodeOpts: defaultElectrodeLayerElectrodeOpts,
         noiseLevel: 0, // not needed for electrode geometry
         samplingFrequency: 0 // not needed
-    }), [props])
+    }), [props, electrodesSetup])
+
     const layer = useLayer(createElectrodesLayer, electrodeLayerProps)
     const layers = useLayers([layer])
     return (

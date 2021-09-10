@@ -1,6 +1,5 @@
+import CanvasWidget, { useLayer, useLayers } from 'figurl/labbox-react/components/CanvasWidget'
 import { CanvasPainter } from 'figurl/labbox-react/components/CanvasWidget/CanvasPainter'
-import CanvasWidget from 'figurl/labbox-react/components/CanvasWidget/CanvasWidget'
-import { useLayer, useLayers } from 'figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer'
 import ViewToolbar from 'plugins/sortingview/gui/extensions/common/ViewToolbar'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { RecordingSelection, RecordingSelectionDispatch } from '../../../pluginInterface'
