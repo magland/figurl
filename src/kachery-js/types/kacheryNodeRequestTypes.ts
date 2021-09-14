@@ -1,5 +1,6 @@
+import BitwooderDelegationCert, { isBitwooderDelegationCertificate } from "./BitwooderDelegationCert"
 import { AblyTokenRequest, ChannelConfig, isAblyTokenRequest, isChannelConfig, isNodeConfig, NodeConfig } from "./kacheryHubTypes"
-import { ByteCount, ChannelName, FeedId, isArrayOf, isBoolean, isByteCount, isChannelName, isEqualTo, isFeedId, isNodeId, isNodeLabel, isNumber, isOneOf, isSha1Hash, isSignature, isSubfeedHash, isTaskId, isUrlString, isUserId, NodeId, NodeLabel, optional, Sha1Hash, Signature, SubfeedHash, TaskId, UrlString, UserId, _validateObject } from "./kacheryTypes"
+import { ByteCount, ChannelName, FeedId, isArrayOf, isBoolean, isByteCount, isChannelName, isEqualTo, isFeedId, isNodeId, isNodeLabel, isNumber, isOneOf, isPrivateKeyHex, isSha1Hash, isSignature, isSubfeedHash, isTaskId, isUrlString, isUserId, NodeId, NodeLabel, optional, PrivateKeyHex, Sha1Hash, Signature, SubfeedHash, TaskId, UrlString, UserId, _validateObject } from "./kacheryTypes"
 
 export type ReportRequestBody = {
     type: 'report'
@@ -64,6 +65,34 @@ export const isGetChannelConfigResponse = (x: any): x is GetChannelConfigRespons
     return _validateObject(x, {
         found: isBoolean,
         channelConfig: optional(isChannelConfig)
+    })
+}
+
+export type GetBitwooderCertForChannelRequestBody = {
+    type: 'getBitwooderCertForChannel'
+    nodeId: NodeId
+    ownerId: UserId,
+    channelName: ChannelName
+}
+
+export const isGetBitwooderCertForChannelRequestBody = (x: any): x is GetBitwooderCertForChannelRequestBody => {
+    return _validateObject(x, {
+        type: isEqualTo('getBitwooderCertForChannel'),
+        nodeId: isNodeId,
+        ownerId: optional(isUserId), // not needed
+        channelName: isChannelName
+    })
+}
+
+export type GetBitwooderCertForChannelResponse = {
+    cert: BitwooderDelegationCert
+    key: PrivateKeyHex
+}
+
+export const isGetBitwooderCertForChannelResponse = (x: any): x is GetBitwooderCertForChannelResponse => {
+    return _validateObject(x, {
+        cert: isBitwooderDelegationCertificate,
+        key: isPrivateKeyHex
     })
 }
 
@@ -187,11 +216,11 @@ export const isCreateSignedTaskResultUploadUrlResponse = (x: any): x is CreateSi
 }
 
 export type KacheryNodeRequestBody =
-    ReportRequestBody | GetNodeConfigRequestBody | GetPubsubAuthForChannelRequestBody | CreateSignedFileUploadUrlRequestBody | CreateSignedSubfeedMessageUploadUrlRequestBody | CreateSignedTaskResultUploadUrlRequestBody | GetChannelConfigRequestBody
+    ReportRequestBody | GetNodeConfigRequestBody | GetBitwooderCertForChannelRequestBody | GetPubsubAuthForChannelRequestBody | CreateSignedFileUploadUrlRequestBody | CreateSignedSubfeedMessageUploadUrlRequestBody | CreateSignedTaskResultUploadUrlRequestBody | GetChannelConfigRequestBody
 
 export const isKacheryNodeRequestBody = (x: any): x is KacheryNodeRequestBody => {
     return isOneOf([
-        isReportRequestBody, isGetNodeConfigRequestBody, isGetPubsubAuthForChannelRequestBody, isCreateSignedFileUploadUrlRequestBody, isCreateSignedSubfeedMessageUploadUrlRequestBody, isCreateSignedTaskResultUploadUrlRequestBody, isGetChannelConfigRequestBody
+        isReportRequestBody, isGetNodeConfigRequestBody, isGetBitwooderCertForChannelRequestBody, isGetPubsubAuthForChannelRequestBody, isCreateSignedFileUploadUrlRequestBody, isCreateSignedSubfeedMessageUploadUrlRequestBody, isCreateSignedTaskResultUploadUrlRequestBody, isGetChannelConfigRequestBody
     ])(x)
 }
 

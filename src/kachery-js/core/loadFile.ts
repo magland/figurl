@@ -2,6 +2,7 @@ import DataStreamy, { DataStreamyProgress } from '../util/DataStreamy'
 import { formatByteCount, sha1MatchesFileKey } from '../util/util'
 import KacheryNode from './KacheryNode'
 import { byteCount, ByteCount, byteCountToNumber, ChannelName, elapsedSince, FileKey, FileManifestChunk, isFileManifest, LocalFilePath, nowTimestamp, Sha1Hash, UrlString } from '../types/kacheryTypes'
+import logger from "winston";
 
 
 export const loadFileAsync = async (node: KacheryNode, fileKey: FileKey, opts: {label: string}): Promise<{found: boolean, size: ByteCount, localFilePath: LocalFilePath | null}> => {
@@ -84,7 +85,7 @@ export const loadFile = async (node: KacheryNode, fileKey: FileKey, opts: {label
             manifestR = await loadFileAsync(node, manifestFileKey, {label: `${opts.label} manifest`})
         }
         catch(err) {
-            console.warn(`Manifest not found: ${manifestSha1}`)
+            logger.warn(`Manifest not found: ${manifestSha1}`)
             ret.producer().error(err)
             return ret
         }
@@ -149,7 +150,7 @@ export const loadFile = async (node: KacheryNode, fileKey: FileKey, opts: {label
                             endByte: chunk.end
                         }
                     }
-                    console.info(`${opts.label}: Handling chunk ${chunkIndex} of ${manifest.chunks.length}`)
+                    logger.info(`${opts.label}: Handling chunk ${chunkIndex} of ${manifest.chunks.length}`)
                     const label0 = `${opts.label} ch ${chunkIndex}`
                     const ds = await loadFile(node, chunkFileKey, {label: label0, _numRetries: 2})
                     chunkDataStreams.push(ds)
@@ -164,12 +165,12 @@ export const loadFile = async (node: KacheryNode, fileKey: FileKey, opts: {label
                         ds.onFinished(() => {
                             numComplete ++
                             if (numComplete === manifest.chunks.length) {
-                                console.info(`${opts.label}: Concatenating chunks`)
+                                logger.info(`${opts.label}: Concatenating chunks`)
                                 _concatenateChunks().then(() => {
                                     const bytesLoaded = _calculateTotalBytesLoaded()
                                     const elapsedSec = elapsedSince(entireFileTimestamp) / 1000
                                     const rate = (byteCountToNumber(bytesLoaded) / 1e6) / elapsedSec
-                                    console.info(`${opts.label}: Downloaded ${formatByteCount(bytesLoaded)} in ${elapsedSec} sec [${rate.toFixed(3)} MiB/sec]`)
+                                    logger.info(`${opts.label}: Downloaded ${formatByteCount(bytesLoaded)} in ${elapsedSec} sec [${rate.toFixed(3)} MiB/sec]`)
                                     ret.producer().end()
                                 }).catch((err: Error) => {
                                     reject(err)

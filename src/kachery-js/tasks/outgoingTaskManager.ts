@@ -1,3 +1,4 @@
+import logger from "winston";
 import { RegisteredTaskFunction } from "../types/kacheryHubTypes";
 import { ChannelName, ErrorMessage, nowTimestamp, TaskFunctionId, TaskId, TaskStatus, Timestamp } from "../types/kacheryTypes";
 import GarbageMap from "../util/GarbageMap";
@@ -89,7 +90,7 @@ export default class OutgoingTaskManager {
                 })
             }
             else {
-                console.warn('Mismatch in channelName in reportRegisteredTaskFunctions')
+                logger.warn('Mismatch in channelName in reportRegisteredTaskFunctions')
             }
         }
         if (somethingChanged) {

@@ -499,7 +499,7 @@ export const isChannelName = (x: any): x is ChannelName => {
     let result = true
     x.split(".").forEach((element) => {
         if (element.length === 0) result = false
-        if (!/^[a-zA-Z0-9@_-]([a-zA-Z0-9@_-]*[a-zA-Z0-9@_-])?$/.test(element)) result = false
+        if (!/^[a-zA-Z0-9_-]([a-zA-Z0-9_-]*[a-zA-Z0-9_-])?$/.test(element)) result = false
     })
     return result
 }
@@ -678,8 +678,8 @@ export const feedName = (x: string): FeedName => {
 export interface FeedSubfeedId extends String {
     __feedSubfeedId__: never; // phantom
 }
-export const feedSubfeedId = (feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName | undefined): FeedSubfeedId => {
-    return (feedId.toString() + ':' + subfeedHash.toString() + ':' + (channelName?.toString() || '')) as any as FeedSubfeedId; 
+export const feedSubfeedId = (feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName | '*local*'): FeedSubfeedId => {
+    return (feedId.toString() + ':' + subfeedHash.toString() + ':' + channelName.toString()) as any as FeedSubfeedId; 
 }
 export const isFeedSubfeedId = (x: any): x is FeedSubfeedId => {
     if (!isString(x)) return false;
@@ -784,15 +784,15 @@ export const messageCount = (x: number): MessageCount => {
 export interface SubfeedWatch {
     feedId: FeedId,
     subfeedHash: SubfeedHash,
-    channelName: ChannelName,
     position: SubfeedPosition
+    channelName: ChannelName
 }
 export const isSubfeedWatch = (x: any): x is SubfeedWatch => {
     return _validateObject(x, {
         feedId: isFeedId,
         subfeedHash: isSubfeedHash,
-        channelName: isChannelName,
-        position: isSubfeedPosition
+        position: isSubfeedPosition,
+        channelName: isString
     });
 }
 
@@ -966,4 +966,16 @@ export const publicKeyHexToNodeId = (x: PublicKeyHex) : NodeId => {
 export type MutableRecord = {
     key: JSONValue
     value: JSONValue
+}
+
+export type UserConfig = {
+    admin?: boolean
+}
+
+export const isUserConfig = (x: any): x is UserConfig => {
+    return _validateObject(x, {
+        admin: optional(isBoolean)
+    }, {
+        allowAdditionalFields: true
+    })
 }

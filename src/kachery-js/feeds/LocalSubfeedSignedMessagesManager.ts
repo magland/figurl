@@ -4,7 +4,6 @@ import { FeedId, JSONObject, messageCount, PublicKey, Signature, SignedSubfeedMe
 
 class LocalSubfeedSignedMessagesManager {
     #signedMessages: SignedSubfeedMessage[] | null = null // in-memory cache
-    #appending = false
     constructor(private localFeedManager: LocalFeedManagerInterface, private feedId: FeedId, private subfeedHash: SubfeedHash, private publicKey: PublicKey) {
 
     }
@@ -62,29 +61,28 @@ class LocalSubfeedSignedMessagesManager {
         }
         return this.#signedMessages[i]
     }
-    async appendSignedMessages(signedMessagesToAppend: SignedSubfeedMessage[]) {
+    async addSignedMessages(signedMessagesToAdd: SignedSubfeedMessage[]) {
         if (this.#signedMessages === null) {
             /* istanbul ignore next */
             throw Error('#signedMessages is null. Perhaps appendSignedMessages was called before subfeed was initialized.');
         }
-        const firstAppendMessageNumber = signedMessagesToAppend.length === 0 ? null : signedMessagesToAppend[0].body.messageNumber
+        const firstAppendMessageNumber = signedMessagesToAdd.length === 0 ? null : signedMessagesToAdd[0].body.messageNumber
         const lastExistingMessageNumber = this.#signedMessages.length === 0 ? null : this.#signedMessages[this.#signedMessages.length - 1].body.messageNumber
         if (firstAppendMessageNumber !== null) {
             if (lastExistingMessageNumber === null) {       
                 if (firstAppendMessageNumber !== 0) throw Error('Unexpected in appendSignedMessages: first message number to append does not equal zero')
             }
             else {
-                if (firstAppendMessageNumber !== lastExistingMessageNumber + 1) throw Error(`Unexpected in appendSignedMessages: unexpcted first message number for appending ${firstAppendMessageNumber} <> ${lastExistingMessageNumber + 1}`)
+                if (firstAppendMessageNumber > lastExistingMessageNumber + 1) throw Error(`Unexpected in appendSignedMessages: unexpcted first message number for appending ${firstAppendMessageNumber} > ${lastExistingMessageNumber + 1}`)
             }
         }
-        if (this.#appending) throw Error('Cannot append messages while messages are being appended.')
-        this.#appending = true
         // CHAIN:append_messages:step(6)
-        await this.localFeedManager.appendSignedMessagesToSubfeed(firstAppendMessageNumber as number, this.feedId, this.subfeedHash, signedMessagesToAppend)
-        for (let sm of signedMessagesToAppend) {
-            this.#signedMessages.push(sm)
+        await this.localFeedManager.addSignedMessagesToSubfeed(this.feedId, this.subfeedHash, signedMessagesToAdd)
+        for (let sm of signedMessagesToAdd) {
+            if (sm.body.messageNumber === this.#signedMessages.length) {
+                this.#signedMessages.push(sm)
+            }
         }
-        this.#appending = false
     }
 }
 

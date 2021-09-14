@@ -7,9 +7,12 @@ import NodeStats from './NodeStats'
 import { KacheryNodeRequestBody } from '../types/kacheryNodeRequestTypes'
 import { ByteCount, ChannelName, FileKey, isArrayOf, isString, JSONValue, NodeId, NodeLabel, nowTimestamp, Sha1Hash, Signature, UserId } from '../types/kacheryTypes'
 import { KacheryHubPubsubMessageBody } from '../types/pubsubMessages'
+import { BitwooderResourceRequest, BitwooderResourceResponse } from 'kachery-js/types/BitwooderResourceRequest'
+import logger from "winston";
 
 export interface KacheryNodeOpts {
     kacheryHubUrl: string
+    bitwooderUrl: string
     verifySubfeedMessageSignatures: boolean
 }
 
@@ -27,6 +30,7 @@ class KacheryNode {
         verbose: number,
         nodeId: NodeId,
         sendKacheryNodeRequest: (requestBody: KacheryNodeRequestBody) => Promise<JSONValue>,
+        sendBitwooderResourceRequest: (request: BitwooderResourceRequest) => Promise<BitwooderResourceResponse>,
         signPubsubMessage: (messageBody: KacheryHubPubsubMessageBody) => Promise<Signature>,
         label: NodeLabel,
         ownerId?: UserId,
@@ -46,7 +50,17 @@ class KacheryNode {
             }
         })
 
-        this.#kacheryHubInterface = new KacheryHubInterface({nodeId: this.#nodeId, sendKacheryNodeRequest: p.sendKacheryNodeRequest, signPubsubMessage: p.signPubsubMessage, ownerId: p.ownerId, nodeLabel: p.label, kacheryHubUrl: p.opts.kacheryHubUrl, nodeStats: this.#stats})
+        this.#kacheryHubInterface = new KacheryHubInterface({
+            nodeId: this.#nodeId,
+            sendKacheryNodeRequest: p.sendKacheryNodeRequest,
+            sendBitwooderResourceRequest: p.sendBitwooderResourceRequest,
+            signPubsubMessage: p.signPubsubMessage,
+            ownerId: p.ownerId,
+            nodeLabel: p.label,
+            kacheryHubUrl: p.opts.kacheryHubUrl,
+            bitwooderUrl: p.opts.bitwooderUrl,
+            nodeStats: this.#stats
+        })
 
         this.#kacheryHubInterface.onIncomingFileRequest(({fileKey, channelName, fromNodeId}) => {
             this._handleIncomingFileRequest({fileKey, channelName, fromNodeId})
@@ -102,7 +116,7 @@ class KacheryNode {
     verifyClientAuthCode(code: string, opts: {browserAccess: boolean}) {
         if (code === this.#clientAuthCode.current) return true
         if ((this.#clientAuthCode.previous) && (code === this.#clientAuthCode.previous)) return true
-        console.info(`${nowTimestamp}: Incorrect client auth code: ${code} <> ${this.#clientAuthCode.current} ${this.#clientAuthCode.current}`)
+        logger.warn(`Incorrect client auth code: ${code} <> ${this.#clientAuthCode.current} ${this.#clientAuthCode.current}`)
         if (!opts.browserAccess) {
             return false
         }

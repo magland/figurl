@@ -21,7 +21,7 @@ class RemoteSubfeedMessageDownloader {
             // need to check once again the number of local messages (it might have channges)
             let i = this.subfeed.getNumLocalMessages()
             if ((i >= numLocalMessages) && (Number(i) < Number(numLocalMessages) + signedMessages.length)) {
-                await this.subfeed.appendSignedMessages(signedMessages.slice(Number(i) - Number(numLocalMessages)))
+                await this.subfeed.addSignedMessages(signedMessages.slice(Number(i) - Number(numLocalMessages)))
             }
         }
     }

@@ -2,6 +2,7 @@ import axios from "axios"
 import NodeStats from "./NodeStats"
 import { ChannelName, JSONValue, urlString } from "../types/kacheryTypes"
 import cacheBust from "../util/cacheBust"
+import logger from "winston";
 
 export type GoogleObjectStorageClientOpts = {
     bucketName: string
@@ -35,7 +36,7 @@ class GoogleObjectStorageClient {
             ret = JSON.parse(new TextDecoder().decode(data)) as any as JSONValue
         }
         catch(err) {
-            console.warn(`Problem parsing JSON for object: ${name}`)
+            logger.warn(`Problem parsing JSON for object: ${name}`)
             return null
         }
         return ret

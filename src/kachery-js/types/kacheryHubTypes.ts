@@ -1,4 +1,4 @@
-import { ChannelName, ErrorMessage, isArrayOf, isBoolean, isChannelName, isEqualTo, isErrorMessage, isNodeId, isNodeLabel, isNumber, isOneOf, isSha1Hash, isSignature, isString, isTaskFunctionId, isTaskFunctionType, isTaskId, isTaskKwargs, isTimestamp, isUserId, NodeId, NodeLabel, optional, Sha1Hash, Signature, TaskFunctionId, TaskFunctionType, TaskId, TaskKwargs, Timestamp, UserId, _validateObject } from "./kacheryTypes"
+import { ChannelName, ErrorMessage, isArrayOf, isBoolean, isChannelName, isEqualTo, isErrorMessage, isNodeId, isNodeLabel, isNumber, isOneOf, isSha1Hash, isSignature, isString, isTaskFunctionId, isTaskFunctionType, isTaskId, isTaskKwargs, isTimestamp, isUserConfig, isUserId, NodeId, NodeLabel, optional, Sha1Hash, Signature, TaskFunctionId, TaskFunctionType, TaskId, TaskKwargs, Timestamp, UserConfig, UserId, _validateObject } from "./kacheryTypes"
 
 export type GoogleServiceAccountCredentials = {
     type: 'service_account',
@@ -139,6 +139,9 @@ export const isPasscodeChannelAuthorization = (x: any): x is PasscodeChannelAuth
 export type ChannelConfig = {
     channelName: ChannelName
     ownerId: UserId
+    bitwooderResourceId?: string
+    bitwooderResourceKey?: string
+    bucketBaseUrl?: string
     bucketUri?: string
     googleServiceAccountCredentials?: string | '*private*'
     ablyApiKey?: string | '*private*'
@@ -151,13 +154,16 @@ export const isChannelConfig = (x: any): x is ChannelConfig => {
     return _validateObject(x, {
         channelName: isChannelName,
         ownerId: isUserId,
+        bitwooderResourceId: optional(isString),
+        bitwooderResourceKey: optional(isString),
+        bucketBaseUrl: optional(isString),
         bucketUri: optional(isString),
         googleServiceAccountCredentials: optional(isOneOf([isString, isEqualTo('*private*')])),
         ablyApiKey: optional(isOneOf([isString, isEqualTo('*private*')])),
         deleted: optional(isBoolean),
         authorizedNodes: optional(isArrayOf(isNodeChannelAuthorization)),
         authorizedPasscodes: optional(isArrayOf(isPasscodeChannelAuthorization))
-    })
+    }, {allowAdditionalFields: true})
 }
 
 export type NodeReport = {
@@ -190,8 +196,14 @@ export type NodeChannelMembership = {
         provideTasks?: boolean
     }
     validChannelPasscodes?: Passcode[], // obtained by cross-referencing the channels collection
+
+    // old
     channelBucketUri?: string // obtained by cross-referencing the channels collection
     authorization?: NodeChannelAuthorization // obtained by cross-referencing the channels collection
+    
+    // new
+    channelResourceId?: string // obtained by cross-referencing the channels collection
+    channelBucketBaseUrl?: string // obtained by cross-referencing the channels collection
 }
 
 const isNodeChannelMembership = (x: any): x is NodeChannelMembership => {
@@ -212,7 +224,9 @@ const isNodeChannelMembership = (x: any): x is NodeChannelMembership => {
         }, {allowAdditionalFields: true})),
         validChannelPasscodes: optional(isArrayOf(isPasscode)),
         channelBucketUri: optional(isString),
-        authorization: optional(isNodeChannelAuthorization)
+        authorization: optional(isNodeChannelAuthorization),
+        channelResourceId: optional(isString),
+        channelBucketBaseUrl: optional(isString)
     })
 }
 
@@ -260,6 +274,20 @@ export type GetChannelsForUserRequest = {
 export const isGetChannelsForUserRequest = (x: any): x is GetChannelsForUserRequest => {
     return _validateObject(x, {
         type: isEqualTo('getChannelsForUser'),
+        userId: isUserId,
+        auth: isAuth
+    })
+}
+
+export type GetAllChannelsRequest = {
+    type: 'getAllChannels'
+    userId: UserId
+    auth: Auth
+}
+
+export const isGetAllChannelsRequest = (x: any): x is GetAllChannelsRequest => {
+    return _validateObject(x, {
+        type: isEqualTo('getAllChannels'),
         userId: isUserId,
         auth: isAuth
     })
@@ -335,6 +363,30 @@ export const isGetNodeForUserResponse = (x: any): x is GetNodeForUserResponse =>
     })
 }
 
+export type GetUserConfigRequest = {
+    type: 'getUserConfig'
+    userId: UserId
+    auth: Auth
+}
+
+export const isGetUserConfigRequest = (x: any): x is GetUserConfigRequest => {
+    return _validateObject(x, {
+        type: isEqualTo('getUserConfig'),
+        userId: isUserId,
+        auth: isAuth
+    })
+}
+
+export type GetUserConfigResponse = {
+    userConfig: UserConfig
+}
+
+export const isGetUserConfigResponse = (x: any): x is GetUserConfigResponse => {
+    return _validateObject(x, {
+        userConfig: isUserConfig
+    })
+}
+
 export type GetChannelRequest = {
     type: 'getChannel'
     channelName: ChannelName
@@ -347,6 +399,28 @@ export const isGetChannelRequest = (x: any): x is GetChannelRequest => {
         channelName: isChannelName,
         auth: isAuth
     })
+}
+
+export type GetChannelStatsRequest = {
+    type: 'getChannelStats'
+    channelName: ChannelName
+    auth: Auth
+}
+
+export const isGetChannelStatsRequest = (x: any): x is GetChannelStatsRequest => {
+    return _validateObject(x, {
+        type: isEqualTo('getChannelStats'),
+        channelName: isChannelName,
+        auth: isAuth
+    })
+}
+
+export type GetChannelStatsResponse = {
+    channelStats: {[key: string]: number}
+}
+
+export const isGetChannelStatsResponse = (x: any): x is GetChannelStatsResponse => {
+    return true
 }
 
 export type TestChannelRequest = {
@@ -526,7 +600,7 @@ export const isDeletePasscodeChannelAuthorizationRequest = (x: any): x is Delete
 export type UpdateChannelPropertyRequest = {
     type: 'updateChannelProperty'
     channelName: ChannelName
-    propertyName: 'bucketUri' | 'ablyApiKey' | 'googleServiceAccountCredentials'
+    propertyName: 'bitwooderResourceKey' | 'bucketUri' | 'ablyApiKey' | 'googleServiceAccountCredentials'
     propertyValue: string
     auth: Auth
 }
@@ -535,7 +609,7 @@ export const isUpdateChannelPropertyRequest = (x: any): x is UpdateChannelProper
     return _validateObject(x, {
         type: isEqualTo('updateChannelProperty'),
         channelName: isChannelName,
-        propertyName: isOneOf(['bucketUri', 'ablyApiKey', 'googleServiceAccountCredentials'].map(x => isEqualTo(x))),
+        propertyName: isOneOf(['bitwooderResourceKey', 'bucketUri', 'ablyApiKey', 'googleServiceAccountCredentials'].map(x => isEqualTo(x))),
         propertyValue: isString,
         auth: isAuth
     })
@@ -602,6 +676,7 @@ export const isNodeReportRequest = (x: any): x is NodeReportRequest => {
 export type KacheryHubRequest =
     AddAuthorizedNodeRequest |
     AddAuthorizedPasscodeRequest |
+    GetAllChannelsRequest |
     AddChannelRequest |
     AddNodeRequest |
     AddNodeChannelMembershipRequest |
@@ -611,8 +686,10 @@ export type KacheryHubRequest =
     DeleteNodeChannelAuthorizationRequest |
     DeletePasscodeChannelAuthorizationRequest |
     GetChannelRequest |
+    GetChannelStatsRequest |
     GetChannelsForUserRequest |
-    GetNodeForUserRequest | 
+    GetNodeForUserRequest |
+    GetUserConfigRequest | 
     GetNodesForUserRequest |
     UpdateChannelPropertyRequest |
     UpdateNodeChannelMembershipRequest |
@@ -623,6 +700,7 @@ export const isKacheryHubRequest = (x: any): x is KacheryHubRequest => {
     return isOneOf([
         isAddAuthorizedNodeRequest,
         isAddAuthorizedPasscodeRequest,
+        isGetAllChannelsRequest,
         isAddChannelRequest,
         isAddNodeRequest,
         isAddNodeChannelMembershipRequest,
@@ -631,9 +709,11 @@ export const isKacheryHubRequest = (x: any): x is KacheryHubRequest => {
         isDeleteNodeChannelMembershipRequest,
         isDeleteNodeChannelAuthorizationRequest,
         isDeletePasscodeChannelAuthorizationRequest,
+        isGetChannelStatsRequest,
         isGetChannelRequest,
         isGetChannelsForUserRequest,
-        isGetNodeForUserRequest, 
+        isGetNodeForUserRequest,
+        isGetUserConfigRequest,
         isGetNodesForUserRequest,
         isUpdateChannelPropertyRequest,
         isUpdateNodeChannelMembershipRequest,

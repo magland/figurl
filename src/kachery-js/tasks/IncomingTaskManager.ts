@@ -26,6 +26,8 @@ export default class IncomingTaskManager {
     #pendingTaskRequests: PendingTaskRequest[] = []
     #processScheduled = false
     async registerTaskFunctions(args: {taskFunctions: RegisteredTaskFunction[], backendId: string | null, timeoutMsec: DurationMsec}): Promise<RequestedTask[]> {
+        // Register task functions (initiated from the python client)
+        // this will return once a task as been requested or once we have timed out
         const {taskFunctions, backendId, timeoutMsec} = args
         return new Promise<RequestedTask[]>((resolve, reject) => {
             let complete = false
@@ -38,7 +40,7 @@ export default class IncomingTaskManager {
             }
             const tfg: RegisteredTaskFunctionGroup = {
                 taskFunctions,
-                backendId,
+                backendId, // the backend ID of the registered task functions
                 incomingRequestedTasksCallback: (incomingRequestedTasks) => {
                     if (complete) throw Error('Unexpected complete')
                     _return(incomingRequestedTasks)
@@ -114,12 +116,13 @@ export default class IncomingTaskManager {
         }, 100)
     }
     _processPendingTaskRequests(backendId: string | null) {
+        // process any pending task requests for the given backendId
         const newList: PendingTaskRequest[] = []
         for (let x of this.#pendingTaskRequests) {
             let remove = false
             const elapsed = elapsedSince(x.timestamp)
             if (elapsed < 1000 * 4) {
-                const g = this._findRegisteredTaskFunctionGroupForTaskFunction(x.requestedTask.taskFunctionId, x.requestedTask.channelName, backendId)
+                const g = this._findRegisteredTaskFunctionGroupForTaskFunction(x.requestedTask.taskFunctionId, x.requestedTask.channelName, x.requestedTask.backendId)
                 if (g) {
                     g.internalRequestedTaskList.push(x.requestedTask)
                     remove = true
