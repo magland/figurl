@@ -213,7 +213,7 @@ const isNodeChannelMembership = (x: any): x is NodeChannelMembership => {
         validChannelPasscodes: optional(isArrayOf(isPasscode)),
         channelBucketUri: optional(isString),
         authorization: optional(isNodeChannelAuthorization)
-    })
+    }, {allowAdditionalFields: true})
 }
 
 export type NodeConfig = {

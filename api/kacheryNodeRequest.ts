@@ -19,7 +19,6 @@ module.exports = (req: VercelRequest, res: VercelResponse) => {
         res.status(400).send(`Invalid request body: ${JSON.stringify(requestBody)}`)
         return
     }
-
     ;(async () => {
         let okay = false
         if (requestBody.type === 'getChannelConfig') {
