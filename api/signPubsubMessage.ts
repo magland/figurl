@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
-import { signMessage } from '../src/kachery-js/crypto/signatures'
-import { JSONValue } from '../src/kachery-js/types/kacheryTypes'
-import { isKacheryHubPubsubMessageBody } from '../src/kachery-js/types/pubsubMessages'
+import { signMessage } from '../src/commonInterface/crypto/signatures'
+import { JSONValue } from '../src/commonInterface/kacheryTypes'
+import { isKacheryHubPubsubMessageBody } from '../src/kacheryInterface/pubsubMessages'
 import getKeyPair from '../apiHelpers/common/getKeyPair'
 
 const keyPair = getKeyPair()

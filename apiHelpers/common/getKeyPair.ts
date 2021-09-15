@@ -1,5 +1,5 @@
-import { hexToPublicKey } from "../../src/kachery-js/crypto/signatures"
-import { isNodeId, isPrivateKey, KeyPair, nodeIdToPublicKeyHex } from "../../src/kachery-js/types/kacheryTypes"
+import { hexToPublicKey } from "../../src/commonInterface/crypto/signatures"
+import { isNodeId, isPrivateKey, KeyPair, nodeIdToPublicKeyHex } from "../../src/commonInterface/kacheryTypes"
 
 const nodeId = process.env.REACT_APP_KACHERY_NODE_ID
 const privateKey = process.env.KACHERY_NODE_PRIVATE_KEY

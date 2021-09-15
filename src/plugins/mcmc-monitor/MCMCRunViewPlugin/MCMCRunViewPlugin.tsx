@@ -1,5 +1,5 @@
 import { FigurlPlugin } from "figurl/types"
-import { isNumber, isString, _validateObject } from "kachery-js/types/kacheryTypes"
+import { isNumber, isString, _validateObject } from "commonInterface/kacheryTypes"
 import MCMCRunView from "./MCMCRunView"
 
 export type MCMCRunViewData = {

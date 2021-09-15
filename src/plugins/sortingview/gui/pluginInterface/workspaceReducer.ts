@@ -1,4 +1,4 @@
-import { UserId } from "kachery-js/types/kacheryTypes"
+import { UserId } from "commonInterface/kacheryTypes"
 import { Recording } from "./Recording"
 import { Sorting } from "./Sorting"
 import { SortingCuration, SortingCurationAction } from "./SortingCuration"

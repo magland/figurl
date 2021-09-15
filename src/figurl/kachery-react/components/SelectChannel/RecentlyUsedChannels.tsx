@@ -1,7 +1,7 @@
 import React from 'react'
 import { FunctionComponent } from "react"
 import Hyperlink from 'figurl/labbox-react/components/Hyperlink/Hyperlink'
-import { ChannelName } from 'kachery-js/types/kacheryTypes'
+import { ChannelName } from 'commonInterface/kacheryTypes'
 import { loadChannelItems } from './channelItemsReducer'
 
 type Props = {

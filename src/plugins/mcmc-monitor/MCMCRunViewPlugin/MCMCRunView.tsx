@@ -1,9 +1,9 @@
 import { useChannel, useKacheryNode, usePureCalculationTask, useSubfeedReducer } from 'figurl/kachery-react';
 import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView';
 import { parseSubfeedUri } from 'figurl/kachery-react/useSubfeed';
-import { KacheryNode } from 'kachery-js';
-import Subfeed from 'kachery-js/feeds/Subfeed';
-import { ChannelName, messageCount, subfeedPosition, unscaledDurationMsec } from 'kachery-js/types/kacheryTypes';
+import KacheryNode from 'kacheryInterface/core/KacheryNode';
+import Subfeed from 'kacheryInterface/feeds/Subfeed';
+import { ChannelName, messageCount, subfeedPosition, unscaledDurationMsec } from 'commonInterface/kacheryTypes';
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import ChainsTable from './ChainsTable';
 import IterationsPlot from './IterationsPlot';

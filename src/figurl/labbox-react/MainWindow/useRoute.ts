@@ -1,5 +1,5 @@
 import { FigureObject } from 'figurl/types'
-import { ChannelName, isSha1Hash, isString, JSONStringifyDeterministic, Sha1Hash } from 'kachery-js/types/kacheryTypes'
+import { ChannelName, isSha1Hash, isString, JSONStringifyDeterministic, Sha1Hash } from 'commonInterface/kacheryTypes'
 import QueryString from 'querystring'
 import { useCallback, useMemo } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'

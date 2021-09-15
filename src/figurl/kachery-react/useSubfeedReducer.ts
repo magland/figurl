@@ -1,5 +1,5 @@
-import Subfeed from 'kachery-js/feeds/Subfeed'
-import { FeedId, JSONStringifyDeterministic, SubfeedHash, SubfeedMessage } from 'kachery-js/types/kacheryTypes'
+import Subfeed from 'kacheryInterface/feeds/Subfeed'
+import { FeedId, JSONStringifyDeterministic, SubfeedHash, SubfeedMessage } from 'commonInterface/kacheryTypes'
 import { useEffect, useMemo, useState } from 'react'
 import useSubfeed, { parseSubfeedUri } from './useSubfeed'
 

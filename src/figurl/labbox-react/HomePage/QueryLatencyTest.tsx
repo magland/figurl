@@ -1,5 +1,5 @@
 import { Button } from '@material-ui/core'
-import { nowTimestamp, Timestamp } from 'kachery-js/types/kacheryTypes'
+import { nowTimestamp, Timestamp } from 'commonInterface/kacheryTypes'
 import { useChannel, useKacheryNode } from 'figurl/kachery-react'
 import runQueryTaskAsync from 'figurl/kachery-react/runQueryTaskAsync'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'

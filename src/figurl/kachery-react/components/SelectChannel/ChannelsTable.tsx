@@ -2,7 +2,7 @@ import { Button } from '@material-ui/core';
 import Hyperlink from 'figurl/labbox-react/components/Hyperlink/Hyperlink';
 import NiceTable from 'figurl/labbox-react/components/NiceTable/NiceTable';
 import { useBackendId } from 'figurl/useFigurlPlugins';
-import { ChannelName } from 'kachery-js/types/kacheryTypes';
+import { ChannelName } from 'commonInterface/kacheryTypes';
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import { ChannelItem, ChannelItemsAction } from './channelItemsReducer';
 

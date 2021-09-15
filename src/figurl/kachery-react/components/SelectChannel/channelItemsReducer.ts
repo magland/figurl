@@ -1,4 +1,4 @@
-import { ChannelName } from "kachery-js/types/kacheryTypes"
+import { ChannelName } from "commonInterface/kacheryTypes"
 
 const hardCodedChannelItems: ChannelItem[] = [
 ]

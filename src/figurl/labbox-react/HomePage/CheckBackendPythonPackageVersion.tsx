@@ -1,6 +1,6 @@
 import { useChannel, useQueryTask } from 'figurl/kachery-react'
 import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView'
-import { TaskFunctionId } from 'kachery-js/types/kacheryTypes'
+import { TaskFunctionId } from 'commonInterface/kacheryTypes'
 import React, { FunctionComponent } from 'react'
 import CheckRegisteredTaskFunctions from './CheckRegisteredTaskFunctions'
 

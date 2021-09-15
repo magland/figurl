@@ -2,7 +2,7 @@ import { initiateTask, useChannel, useKacheryNode } from 'figurl/kachery-react';
 import useSubfeedReducer from 'figurl/kachery-react/useSubfeedReducer';
 import { usePlugins } from 'figurl/labbox-react';
 import Hyperlink from 'figurl/labbox-react/components/Hyperlink/Hyperlink';
-import { JSONObject, sha1OfObject, SubfeedHash } from 'kachery-js/types/kacheryTypes';
+import { JSONObject, sha1OfObject, SubfeedHash } from 'commonInterface/kacheryTypes';
 import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { parseWorkspaceUri } from '../../../../gui/pluginInterface/misc';
 import { SortingCurationAction } from '../../../../gui/pluginInterface/SortingCuration';

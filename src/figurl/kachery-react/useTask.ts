@@ -1,4 +1,4 @@
-import { JSONStringifyDeterministic, TaskFunctionId, TaskFunctionType, TaskKwargs } from "kachery-js/types/kacheryTypes";
+import { JSONStringifyDeterministic, TaskFunctionId, TaskFunctionType, TaskKwargs } from "commonInterface/kacheryTypes";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import initiateTask, { Task } from "./initiateTask";
 import useChannel from "./useChannel";

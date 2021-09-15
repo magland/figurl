@@ -1,5 +1,5 @@
 import { FigurlPlugin } from "figurl/types";
-import { _validateObject } from "kachery-js/types/kacheryTypes";
+import { _validateObject } from "commonInterface/kacheryTypes";
 import { FunctionComponent, useMemo } from 'react';
 import { VegaLite } from 'react-vega'
 

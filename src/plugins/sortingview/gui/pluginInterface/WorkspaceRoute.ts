@@ -1,4 +1,4 @@
-import { ChannelName, isFeedId } from 'kachery-js/types/kacheryTypes'
+import { ChannelName, isFeedId } from 'commonInterface/kacheryTypes'
 import { parseWorkspaceUri } from './misc'
 import QueryString from 'querystring'
 

@@ -1,5 +1,5 @@
 import { FigurlPlugin } from "figurl/types";
-import { isArrayOf, isNumber, isString, optional, _validateObject } from "kachery-js/types/kacheryTypes";
+import { isArrayOf, isNumber, isString, optional, _validateObject } from "commonInterface/kacheryTypes";
 import AverageWaveformsView from "plugins/sortingview/gui/extensions/averagewaveforms/AverageWaveformsView/AverageWaveformsView";
 import { Recording, Sorting, SortingInfo, SortingSelection, sortingSelectionReducer } from "plugins/sortingview/gui/pluginInterface";
 import { useRecordingInfo } from "plugins/sortingview/gui/pluginInterface/useRecordingInfo";

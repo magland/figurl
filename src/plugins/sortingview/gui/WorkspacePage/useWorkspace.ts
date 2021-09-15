@@ -1,4 +1,4 @@
-import { FeedId, sha1OfString, SubfeedHash, TaskFunctionId } from "kachery-js/types/kacheryTypes"
+import { FeedId, sha1OfString, SubfeedHash, TaskFunctionId } from "commonInterface/kacheryTypes"
 import { initiateTask, useChannel, useKacheryNode, useSubfeedReducer } from "figurl/kachery-react"
 import useGoogleSignInClient from "figurl/labbox-react/googleSignIn/useGoogleSignInClient"
 import { useCallback } from "react"

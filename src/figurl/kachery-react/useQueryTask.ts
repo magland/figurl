@@ -1,4 +1,4 @@
-import { TaskFunctionId, TaskKwargs } from "kachery-js/types/kacheryTypes";
+import { TaskFunctionId, TaskKwargs } from "commonInterface/kacheryTypes";
 import useTask from "./useTask";
 
 const useQueryTask = <ReturnType>(functionId: TaskFunctionId | string | undefined, kwargs: TaskKwargs | {[key: string]: any}, opts: {useCache?: boolean, fallbackToCache?: boolean}) => {

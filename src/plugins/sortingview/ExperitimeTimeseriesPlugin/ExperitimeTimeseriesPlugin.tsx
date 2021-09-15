@@ -1,7 +1,7 @@
 import { useChannel, usePureCalculationTask } from "figurl/kachery-react";
 import TaskStatusView from "figurl/kachery-react/components/TaskMonitor/TaskStatusView";
 import { FigurlPlugin } from "figurl/types";
-import { isString, _validateObject } from "kachery-js/types/kacheryTypes";
+import { isString, _validateObject } from "commonInterface/kacheryTypes";
 import { useEffect } from "react";
 import { useReducer } from "react";
 import { FunctionComponent } from "react";

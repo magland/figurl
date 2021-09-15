@@ -1,6 +1,6 @@
 import { initiateTask, useChannel, useFetchCache, useKacheryNode } from "figurl/kachery-react"
-import { KacheryNode } from "kachery-js"
-import { ChannelName } from "kachery-js/types/kacheryTypes"
+import KacheryNode from "kacheryInterface/core/KacheryNode"
+import { ChannelName } from "commonInterface/kacheryTypes"
 import { useMemo } from "react"
 import sortingviewTaskFunctionIds from "../../sortingviewTaskFunctionIds"
 import { TimeseriesInfo } from "../interface/TimeseriesInfo"

@@ -1,4 +1,4 @@
-import { FeedId, isFeedId } from "kachery-js/types/kacheryTypes"
+import { FeedId, isFeedId } from "commonInterface/kacheryTypes"
 
 export const parseWorkspaceUri = (workspaceUri: string | undefined): {feedId: FeedId | undefined, feedUri: string | undefined, workspaceName: string | undefined} => {
     const undefinedResult = {feedId: undefined, feedUri: undefined, workspaceName: undefined}

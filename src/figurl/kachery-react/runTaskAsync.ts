@@ -1,5 +1,5 @@
-import { KacheryNode } from "kachery-js"
-import { ChannelName, TaskFunctionId, TaskFunctionType, TaskKwargs } from "kachery-js/types/kacheryTypes"
+import KacheryNode from "kacheryInterface/core/KacheryNode"
+import { ChannelName, TaskFunctionId, TaskFunctionType, TaskKwargs } from "commonInterface/kacheryTypes"
 import initiateTask from "./initiateTask"
 
 const runTaskAsync = async <ReturnType>(kacheryNode: KacheryNode, functionId: TaskFunctionId | string, kwargs: TaskKwargs | { [key: string]: any }, functionType: TaskFunctionType, opts: { channelName: ChannelName, backendId: string | null, queryUseCache?: boolean }): Promise<ReturnType> => {
