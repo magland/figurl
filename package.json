@@ -40,7 +40,8 @@
     "vega": "^5.20.2",
     "vega-lite": "^5.1.0",
     "vega-util": "^1.16.1",
-    "web-vitals": "^1.0.1"
+    "web-vitals": "^1.0.1",
+    "winston": "^3.3.3"
   },
   "scripts": {
     "start": "BROWSER=none react-scripts start",

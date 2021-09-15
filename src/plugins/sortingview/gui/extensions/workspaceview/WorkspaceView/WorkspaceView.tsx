@@ -15,7 +15,7 @@ export interface HistoryInterface {
   push: (x: LocationInterface) => void
 }
 
-const WorkspaceView: FunctionComponent<WorkspaceViewProps> = ({ workspace, workspaceDispatch, workspaceRoute, workspaceRouteDispatch, width=500, height=500 }) => {
+const WorkspaceView: FunctionComponent<WorkspaceViewProps> = ({ workspace, workspaceDispatch, workspaceRoute, workspaceRouteDispatch, width=500, height=500, workspaceUri }) => {
   const handleDeleteRecordings = useCallback((recordingIds: string[]) => {
     workspaceDispatch && workspaceDispatch({
       type: 'DELETE_RECORDINGS',
@@ -68,6 +68,7 @@ const WorkspaceView: FunctionComponent<WorkspaceViewProps> = ({ workspace, works
             workspaceRoute={workspaceRoute}
             workspaceRouteDispatch={workspaceRouteDispatch}
             snippetLen={workspace.snippetLen}
+            workspaceUri={workspaceUri}
           />
         )
       }
@@ -83,6 +84,7 @@ const WorkspaceView: FunctionComponent<WorkspaceViewProps> = ({ workspace, works
             workspaceRoute={workspaceRoute}
             workspaceRouteDispatch={workspaceRouteDispatch}
             snippetLen={workspace.snippetLen}
+            workspaceUri={workspaceUri}
           />
         )
       }

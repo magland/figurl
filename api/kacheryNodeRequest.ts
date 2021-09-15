@@ -9,9 +9,9 @@ import getNodeId from '../apiHelpers/common/getNodeId'
 const keyPair = getKeyPair()
 const nodeId = getNodeId()
 
-// const kacheryHubUrl = 'https://kacheryhub.org'
+const kacheryHubUrl = 'https://kacheryhub.org'
 // const kacheryHubUrl = 'http://localhost:3000'
-const kacheryHubUrl = 'https://kacheryhub-magland-spikeforest.vercel.app'
+// const kacheryHubUrl = 'https://kacheryhub-magland-spikeforest.vercel.app'
 
 module.exports = (req: VercelRequest, res: VercelResponse) => {
     const {body: requestBody} = req

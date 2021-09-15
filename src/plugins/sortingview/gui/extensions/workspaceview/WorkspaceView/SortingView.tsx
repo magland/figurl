@@ -31,11 +31,12 @@ interface Props {
   workspaceRouteDispatch: WorkspaceRouteDispatch
   readOnly: boolean
   snippetLen?: [number, number]
+  workspaceUri: string
   // onSetExternalUnitMetrics: (a: { sortingId: string, externalUnitMetrics: ExternalSortingUnitMetric[] }) => void
 }
 
 const SortingView: React.FunctionComponent<Props> = (props) => {
-  const { workspaceRoute, readOnly, sorting, recording, workspaceRouteDispatch, snippetLen } = props
+  const { workspaceRoute, readOnly, sorting, recording, workspaceRouteDispatch, snippetLen, workspaceUri } = props
   // const [externalUnitMetricsStatus, setExternalUnitMetricsStatus] = useState<CalcStatus>('waiting');
   //const initialSortingSelection: SortingSelection = {currentTimepoint: 1000, animation: {currentTimepointVelocity: 100, lastUpdateTimestamp: Number(new Date())}}
   const initialSortingSelection: SortingSelection = {}
@@ -69,14 +70,14 @@ const SortingView: React.FunctionComponent<Props> = (props) => {
       backendId,
       functionId: sortingviewTaskFunctionIds.sortingCurationAction,
       kwargs: {
-        workspace_uri: workspaceRoute.workspaceUri,
+        workspace_uri: workspaceUri,
         sorting_id: sortingId,
         action: a
       },
       functionType: 'action',
       onStatusChanged: () => {}
     })
-  }, [kacheryNode, channelName, backendId, workspaceRoute.workspaceUri, sortingId])
+  }, [kacheryNode, channelName, backendId, sortingId, workspaceUri])
   // const curationDispatch = undefined
   // const [curation, curationDispatch2] = useReducer(sortingCurationReducer, useMemo(() => ({}), []))
   // const handleCurationSubfeedMessages = useCallback((messages: any[]) => {

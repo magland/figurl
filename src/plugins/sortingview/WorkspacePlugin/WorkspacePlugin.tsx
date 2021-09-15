@@ -84,6 +84,7 @@ const WorkspaceComponent: FunctionComponent<Props> = ({data, width, height}) => 
                     workspaceRouteDispatch={workspaceRouteDispatch}
                     width={width - horizontalPadding * 2}
                     height={height - workspaceNavigationHeight - paddingTop}
+                    workspaceUri={workspaceUri}
                 />
             </div>
         </MountainViewSetup>
