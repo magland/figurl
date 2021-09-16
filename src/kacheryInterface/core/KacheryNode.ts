@@ -1,4 +1,4 @@
-import { BitwooderResourceRequest, BitwooderResourceResponse } from 'bitwooderInterface/BitwooderResourceRequest'
+import { BitwooderResourceRequest, BitwooderResourceResponse } from '../../bitwooderInterface/BitwooderResourceRequest'
 import logger from "winston"
 import FeedManager from '../feeds/FeedManager'
 import FileUploader, { SignedFileUploadUrlCallback } from '../FileUploader/FileUploader'

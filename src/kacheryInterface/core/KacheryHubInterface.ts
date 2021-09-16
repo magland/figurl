@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BitwooderResourceRequest, BitwooderResourceResponse } from "bitwooderInterface/BitwooderResourceRequest";
+import { BitwooderResourceRequest, BitwooderResourceResponse } from "../../bitwooderInterface/BitwooderResourceRequest";
 import logger from "winston";
 import KacheryHubClient, { IncomingKacheryHubPubsubMessage } from "../kacheryHubClient/KacheryHubClient";
 import IncomingTaskManager, { ProbeTaskFunctionsResult } from "../tasks/IncomingTaskManager";

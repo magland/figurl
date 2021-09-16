@@ -76,6 +76,8 @@ const SortingView: React.FunctionComponent<Props> = (props) => {
       functionType: 'action',
       onStatusChanged: () => {}
     })
+    // this might be how we can do offline-first curation (get curationSubfeed from useSubfeedReducerS)
+    // curationSubfeed.appendOfflineMessages([a]) // this would need to be implemented
   }, [kacheryNode, channelName, backendId, sortingId, workspaceUri])
   // const curationDispatch = undefined
   // const [curation, curationDispatch2] = useReducer(sortingCurationReducer, useMemo(() => ({}), []))
