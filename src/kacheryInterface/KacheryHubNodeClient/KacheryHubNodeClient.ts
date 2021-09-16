@@ -1,8 +1,8 @@
 import axios from "axios"
-import { publicKeyToHex, signMessage } from "commonInterface/crypto/signatures"
-import { NodeConfig } from "kacheryInterface/kacheryHubTypes"
-import { GetNodeConfigRequestBody, isGetNodeConfigResponse, KacheryNodeRequest } from 'kacheryInterface/kacheryNodeRequestTypes'
-import { JSONValue, KeyPair, publicKeyHexToNodeId, UserId } from "commonInterface/kacheryTypes"
+import { publicKeyToHex, signMessage } from "../../commonInterface/crypto/signatures"
+import { NodeConfig } from "../../kacheryInterface/kacheryHubTypes"
+import { GetNodeConfigRequestBody, isGetNodeConfigResponse, KacheryNodeRequest } from '../../kacheryInterface/kacheryNodeRequestTypes'
+import { JSONValue, KeyPair, publicKeyHexToNodeId, UserId } from "../../commonInterface/kacheryTypes"
 
 class KacheryHubNodeClient {
     #initialized = false

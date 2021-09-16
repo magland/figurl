@@ -6,11 +6,11 @@ import IncomingTaskManager, { ProbeTaskFunctionsResult } from "../tasks/Incoming
 import OutgoingTaskManager from "../tasks/outgoingTaskManager";
 import { NodeConfig, RegisteredTaskFunction, RequestedTask } from "../kacheryHubTypes";
 import { KacheryNodeRequestBody } from "../kacheryNodeRequestTypes";
-import { ByteCount, ChannelName, DurationMsec, durationMsecToNumber, elapsedSince, errorMessage, ErrorMessage, FeedId, FileKey, fileKeyHash, isMessageCount, isSignedSubfeedMessage, JSONValue, MessageCount, NodeId, NodeLabel, nowTimestamp, pathifyHash, pubsubChannelName, PubsubChannelName, scaledDurationMsec, Sha1Hash, Signature, SignedSubfeedMessage, SubfeedHash, SubfeedPosition, TaskFunctionId, TaskFunctionType, TaskId, TaskKwargs, TaskStatus, toTaskId, urlString, UrlString, UserId, _validateObject } from "commonInterface/kacheryTypes";
+import { ByteCount, ChannelName, DurationMsec, durationMsecToNumber, elapsedSince, errorMessage, ErrorMessage, FeedId, FileKey, fileKeyHash, isMessageCount, isSignedSubfeedMessage, JSONValue, MessageCount, NodeId, NodeLabel, nowTimestamp, pathifyHash, pubsubChannelName, PubsubChannelName, scaledDurationMsec, Sha1Hash, Signature, SignedSubfeedMessage, SubfeedHash, SubfeedPosition, TaskFunctionId, TaskFunctionType, TaskId, TaskKwargs, TaskStatus, toTaskId, urlString, UrlString, UserId, _validateObject } from "../../commonInterface/kacheryTypes";
 import { KacheryHubPubsubMessageBody, KacheryHubPubsubMessageData, ProbeTaskFunctionsBody, RequestFileMessageBody, RequestSubfeedMessageBody, RequestTaskMessageBody, UpdateSubfeedMessageCountMessageBody, UpdateTaskStatusMessageBody, UploadFileStatusMessageBody } from "../pubsubMessages";
-import cacheBust from "commonInterface/util/cacheBust";
-import computeTaskHash from "commonInterface/util/computeTaskHash";
-import randomAlphaString from "commonInterface/util/randomAlphaString";
+import cacheBust from "../../commonInterface/util/cacheBust";
+import computeTaskHash from "../../commonInterface/util/computeTaskHash";
+import randomAlphaString from "../../commonInterface/util/randomAlphaString";
 import NodeStats from "./NodeStats";
 
 type IncomingFileRequestCallback = (args: {fileKey: FileKey, fromNodeId: NodeId, channelName: ChannelName}) => void

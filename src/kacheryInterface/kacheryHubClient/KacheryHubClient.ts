@@ -1,13 +1,13 @@
 import Ably from 'ably';
 import BitwooderDelegationCert from 'bitwooderInterface/BitwooderDelegationCert';
 import logger from "winston";
-import { hexToPrivateKey, hexToPublicKey, signMessage, verifySignature } from 'commonInterface/crypto/signatures';
+import { hexToPrivateKey, hexToPublicKey, signMessage, verifySignature } from '../../commonInterface/crypto/signatures';
 import { BitwooderResourceRequest, BitwooderResourceResponse, GetAblyTokenRequestRequest, GetUploadUrlsRequest } from 'bitwooderInterface/BitwooderResourceRequest';
 import { PubsubAuth } from "../kacheryHubTypes";
 import { GetBitwooderCertForChannelRequestBody, GetChannelConfigRequestBody, GetNodeConfigRequestBody, isGetBitwooderCertForChannelResponse, isGetChannelConfigResponse, isGetNodeConfigResponse, KacheryNodeRequestBody, ReportRequestBody } from "../kacheryNodeRequestTypes";
-import { ByteCount, ChannelName, FeedId, JSONValue, NodeId, nodeIdToPublicKeyHex, NodeLabel, PrivateKeyHex, PubsubChannelName, Sha1Hash, SubfeedHash, TaskId, urlString, UserId } from "commonInterface/kacheryTypes";
-import { isKacheryHubPubsubMessageData, KacheryHubPubsubMessageBody } from 'kacheryInterface/pubsubMessages';
-import randomAlphaString from 'commonInterface/util/randomAlphaString';
+import { ByteCount, ChannelName, FeedId, JSONValue, NodeId, nodeIdToPublicKeyHex, NodeLabel, PrivateKeyHex, PubsubChannelName, Sha1Hash, SubfeedHash, TaskId, urlString, UserId } from "../../commonInterface/kacheryTypes";
+import { isKacheryHubPubsubMessageData, KacheryHubPubsubMessageBody } from '../../kacheryInterface/pubsubMessages';
+import randomAlphaString from '../../commonInterface/util/randomAlphaString';
 import { AblyAuthCallback, AblyAuthCallbackCallback } from "./AblyPubsubClient";
 import createPubsubClient, { PubsubClient, PubsubMessage } from "./createPubsubClient";
 
