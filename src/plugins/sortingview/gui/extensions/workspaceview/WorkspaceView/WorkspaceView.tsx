@@ -34,7 +34,7 @@ const WorkspaceView: FunctionComponent<WorkspaceViewProps> = ({ workspace, works
     case 'workspace': return (
       <WorkspaceHomeView
         onDeleteRecordings={workspaceDispatch ? handleDeleteRecordings : undefined}
-        {...{ width, height, workspace, workspaceRoute, workspaceRouteDispatch }}
+        {...{ width, height, workspace, workspaceRoute, workspaceRouteDispatch, workspaceUri }}
       />
     )
     case 'recording': {
@@ -65,10 +65,9 @@ const WorkspaceView: FunctionComponent<WorkspaceViewProps> = ({ workspace, works
             width={width}
             height={height}
             readOnly={workspaceDispatch ? false : true}
-            workspaceRoute={workspaceRoute}
+            workspaceUri={workspaceUri}
             workspaceRouteDispatch={workspaceRouteDispatch}
             snippetLen={workspace.snippetLen}
-            workspaceUri={workspaceUri}
           />
         )
       }
@@ -81,7 +80,6 @@ const WorkspaceView: FunctionComponent<WorkspaceViewProps> = ({ workspace, works
             width={width}
             height={height}
             readOnly={workspaceDispatch ? false : true}
-            workspaceRoute={workspaceRoute}
             workspaceRouteDispatch={workspaceRouteDispatch}
             snippetLen={workspace.snippetLen}
             workspaceUri={workspaceUri}
@@ -110,6 +108,7 @@ const WorkspaceView: FunctionComponent<WorkspaceViewProps> = ({ workspace, works
           workspaceRoute={workspaceRoute}
           workspaceRouteDispatch={workspaceRouteDispatch}
           snippetLen={workspace.snippetLen}
+          workspaceUri={workspaceUri}
         />
       )
     }

@@ -1,15 +1,15 @@
+import { JSONObject, sha1OfObject, SubfeedHash } from 'commonInterface/kacheryTypes';
 import { initiateTask, useChannel, useKacheryNode } from 'figurl/kachery-react';
 import useSubfeedReducer from 'figurl/kachery-react/useSubfeedReducer';
 import { usePlugins } from 'figurl/labbox-react';
 import Hyperlink from 'figurl/labbox-react/components/Hyperlink/Hyperlink';
-import { JSONObject, sha1OfObject, SubfeedHash } from 'commonInterface/kacheryTypes';
 import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { parseWorkspaceUri } from '../../../../gui/pluginInterface/misc';
 import { SortingCurationAction } from '../../../../gui/pluginInterface/SortingCuration';
 import { useRecordingInfo } from '../../../../gui/pluginInterface/useRecordingInfo';
 import { useSortingInfo } from '../../../../gui/pluginInterface/useSortingInfo';
 import sortingviewTaskFunctionIds from '../../../../sortingviewTaskFunctionIds';
-import { LabboxPlugin, Recording, Sorting, SortingInfo, SortingSelection, sortingSelectionReducer, sortingViewPlugins, WorkspaceRoute, WorkspaceRouteDispatch } from '../../../pluginInterface';
+import { LabboxPlugin, Recording, Sorting, SortingInfo, SortingSelection, sortingSelectionReducer, sortingViewPlugins, WorkspaceRouteDispatch } from '../../../pluginInterface';
 import { sortingCurationReducer } from '../../../pluginInterface/workspaceReducer';
 
 // const intrange = (a: number, b: number) => {
@@ -27,7 +27,6 @@ interface Props {
   recording: Recording
   width: number,
   height: number,
-  workspaceRoute: WorkspaceRoute
   workspaceRouteDispatch: WorkspaceRouteDispatch
   readOnly: boolean
   snippetLen?: [number, number]
@@ -36,7 +35,7 @@ interface Props {
 }
 
 const SortingView: React.FunctionComponent<Props> = (props) => {
-  const { workspaceRoute, readOnly, sorting, recording, workspaceRouteDispatch, snippetLen, workspaceUri } = props
+  const { workspaceUri, readOnly, sorting, recording, workspaceRouteDispatch, snippetLen } = props
   // const [externalUnitMetricsStatus, setExternalUnitMetricsStatus] = useState<CalcStatus>('waiting');
   //const initialSortingSelection: SortingSelection = {currentTimepoint: 1000, animation: {currentTimepointVelocity: 100, lastUpdateTimestamp: Number(new Date())}}
   const initialSortingSelection: SortingSelection = {}
@@ -56,7 +55,7 @@ const SortingView: React.FunctionComponent<Props> = (props) => {
     }
   }, [recordingInfo?.num_frames])
 
-  const {feedId} = parseWorkspaceUri(workspaceRoute.workspaceUri)
+  const {feedId} = parseWorkspaceUri(workspaceUri)
 
   const curationSubfeedName = useMemo(() => ({name: 'sortingCuration', sortingId}), [sortingId])
   const curationSubfeedHash = sha1OfObject(curationSubfeedName as any as JSONObject) as any as SubfeedHash

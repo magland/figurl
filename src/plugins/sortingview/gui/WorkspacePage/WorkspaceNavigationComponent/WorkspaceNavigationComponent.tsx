@@ -8,6 +8,7 @@ type Props = {
     workspaceRoute: WorkspaceRoute
     workspaceRouteDispatch: WorkspaceRouteDispatch
     height: number
+    workspaceUri: string
 }
 
 const WorkspaceNavigationComponent: FunctionComponent<Props> = (props) => {
@@ -21,8 +22,7 @@ const WorkspaceNavigationComponent: FunctionComponent<Props> = (props) => {
     )
 }
 
-const WorkspacePart: FunctionComponent<Props> = ({workspaceRoute, workspaceRouteDispatch}) => {
-    const {workspaceUri} = workspaceRoute
+const WorkspacePart: FunctionComponent<Props> = ({workspaceUri, workspaceRouteDispatch}) => {
     const handleClick = useCallback(() => {
         workspaceRouteDispatch({
             type: 'gotoWorkspacePage'

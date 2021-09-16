@@ -18,14 +18,14 @@ type Props = {
     width: number
     height: number
     workspaceRouteDispatch: WorkspaceRouteDispatch
+    workspaceUri: string
 }
 
-const WorkspaceHomeView: FunctionComponent<Props> = ({ width, height, workspace, onDeleteRecordings, workspaceRoute, workspaceRouteDispatch }) => {
+const WorkspaceHomeView: FunctionComponent<Props> = ({ width, height, workspace, onDeleteRecordings, workspaceRoute, workspaceRouteDispatch, workspaceUri }) => {
     const {recordings, sortings} = workspace
     const importInstructionsVisible = useVisible()
     const setWorkspacePermissionsVisible = useVisible()
     const setSnippetLengthVisible = useVisible()
-    const workspaceUri = workspaceRoute.workspaceUri || '<unknown>'
     const loggedInUserEmail = useGoogleSignInClient()?.userId ?? 'user_id@gmail.com'
     return (
         <span>
@@ -34,8 +34,8 @@ const WorkspaceHomeView: FunctionComponent<Props> = ({ width, height, workspace,
                     <pre>{JSON.stringify(userPermissions, null, 4)}</pre>
                 } */}
                 {
-                    workspaceRoute.workspaceUri && (
-                        <h3>{workspaceRoute.workspaceUri}</h3>
+                    workspaceUri && (
+                        <h3>{workspaceUri}</h3>
                     )
                 }
                 {
@@ -58,7 +58,7 @@ const WorkspaceHomeView: FunctionComponent<Props> = ({ width, height, workspace,
                 onClose={importInstructionsVisible.hide}
             >
                 <ImportRecordingsInstructions
-                    workspaceRoute={workspaceRoute}
+                    workspaceUri={workspaceUri}
                 />
             </ModalWindow>
             <MarkdownDialog

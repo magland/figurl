@@ -1,20 +1,19 @@
-import React, { FunctionComponent, useCallback, useState } from 'react';
-import Expandable from "figurl/labbox-react/components/Expandable/Expandable"
+import Expandable from "figurl/labbox-react/components/Expandable/Expandable";
 import Markdown from 'figurl/labbox-react/components/Markdown/Markdown';
-import { WorkspaceRoute } from '../../../pluginInterface';
+import React, { FunctionComponent, useCallback, useState } from 'react';
 import import_example_simulated_recording_py from './importExamples/import_example_simulated_recording.py.gen';
 import import_nwb_recording_py from './importExamples/import_nwb_recording.py.gen';
 import import_spikeforest_recording_py from './importExamples/import_spikeforest_recording.py.gen';
 import instructionsMd from './ImportRecordingsInstructions.md.gen';
 
 type Props = {
-    workspaceRoute: WorkspaceRoute
+    workspaceUri: string
 }
 
-const ImportRecordingsInstructions: FunctionComponent<Props> = ({ workspaceRoute }) => {
+const ImportRecordingsInstructions: FunctionComponent<Props> = ({ workspaceUri }) => {
     const s = (x: string) => {
         return doSubstitute(x, {
-            workspaceUri: workspaceRoute.workspaceUri
+            workspaceUri
         })
     }
     return (

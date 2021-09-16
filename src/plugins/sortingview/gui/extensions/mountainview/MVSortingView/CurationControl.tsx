@@ -12,9 +12,11 @@ type Props = {
     selectionDispatch: SortingSelectionDispatch
 }
 
-const buttonStyle = {
-    paddingTop: 3, paddingBottom: 3, border: 1, borderStyle: 'solid', borderColor: 'gray'
-}
+// const buttonStyle = {
+//     paddingTop: 3, paddingBottom: 3, border: 1, borderStyle: 'solid', borderColor: 'gray'
+// }
+
+const buttonStyle = {}
 
 const CurationControl: FunctionComponent<Props & SizeMeProps> = ({ selection, selectionDispatch, curation, curationDispatch, size }) => {
     const width = size.width || 300
