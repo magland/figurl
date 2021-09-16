@@ -13,7 +13,7 @@ const kacheryHubUrl = 'https://kacheryhub.org'
 // const kacheryHubUrl = 'http://localhost:3000'
 // const kacheryHubUrl = 'https://kacheryhub-magland-spikeforest.vercel.app'
 
-const bitwooderUrl = 'https://bitwooder.vercel.app'
+const bitwooderUrl = 'https://bitwooder.net'
 // const bitwooderUrl = 'http://localhost:3001'
 
 const useSetupKacheryNode = (nodeLabel: NodeLabel): KacheryNode => {

@@ -4,7 +4,7 @@ import { isBitwooderResourceRequest, isBitwooderResourceResponse } from '../src/
 
 // const keyPair = getKeyPair()
 
-const bitwooderUrl = 'https://bitwooder.vercel.app'
+const bitwooderUrl = 'https://bitwooder.net'
 // const bitwooderUrl = 'http://localhost:3001'
 
 

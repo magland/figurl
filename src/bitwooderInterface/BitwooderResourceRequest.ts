@@ -21,7 +21,7 @@ export type GetUploadUrlsRequest = {
 export const isGetUploadUrlsRequest = (x: any): x is GetUploadUrlsRequest => {
     const isPayload = (p: any) => {
         return _validateObject(p, {
-            type: isEqualTo('getUploadUrl'),
+            type: isEqualTo('getUploadUrls'),
             expires: isNumber,
             resourceId: isString,
             filePaths: isArrayOf(isString),
@@ -30,7 +30,7 @@ export const isGetUploadUrlsRequest = (x: any): x is GetUploadUrlsRequest => {
     }
 
     return _validateObject(x, {
-        type: isEqualTo('getUploadUrl'),
+        type: isEqualTo('getUploadUrls'),
         payload: isPayload,
         auth: isBitwooderResourceAuth
     })
