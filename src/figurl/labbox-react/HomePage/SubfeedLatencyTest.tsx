@@ -1,5 +1,5 @@
 import { Button } from '@material-ui/core'
-import { FeedId, nowTimestamp, SubfeedHash, Timestamp } from 'kachery-js/types/kacheryTypes'
+import { FeedId, nowTimestamp, SubfeedHash, Timestamp } from 'commonInterface/kacheryTypes'
 import { useChannel, useKacheryNode, useQueryTask, useSubfeed } from 'figurl/kachery-react'
 import runQueryTaskAsync from 'figurl/kachery-react/runQueryTaskAsync'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'

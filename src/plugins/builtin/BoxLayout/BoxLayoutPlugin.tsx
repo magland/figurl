@@ -1,6 +1,6 @@
 import { Grid } from "@material-ui/core";
 import { FigureObject, FigurlPlugin, isFigureObject } from "figurl/types";
-import { isArrayOf, _validateObject } from "kachery-js/types/kacheryTypes";
+import { isArrayOf, _validateObject } from "commonInterface/kacheryTypes";
 import { FunctionComponent, useMemo } from "react";
 import BoxLayoutItem from "./BoxLayoutItem";
 

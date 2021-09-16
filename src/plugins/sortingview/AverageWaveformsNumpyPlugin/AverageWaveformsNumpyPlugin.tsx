@@ -1,5 +1,5 @@
 import { FigurlPlugin } from "figurl/types";
-import { isArrayOf, isNumber, _validateObject } from "kachery-js/types/kacheryTypes";
+import { isArrayOf, isNumber, _validateObject } from "commonInterface/kacheryTypes";
 import { SortingSelection, sortingSelectionReducer } from "plugins/sortingview/gui/pluginInterface";
 import React, { FunctionComponent, useReducer } from 'react';
 import AverageWaveformsNumpyView from "./AverageWaveformsNumpyView";

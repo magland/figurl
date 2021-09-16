@@ -322,6 +322,7 @@ const TableWidget: FunctionComponent<TableProps> = (props) => {
         return visibleRows.map((row) => {
             return (
                 <ContentRow
+                    key={row.rowId}
                     rowId={row.rowId}
                     selected={selectedRowsSet.has(row.rowId)}
                     onClick={toggleSelectedRowId}

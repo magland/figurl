@@ -1,8 +1,8 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import axios from 'axios'
-import { isKacheryNodeRequestBody, KacheryNodeRequest } from '../src/kachery-js/types/kacheryNodeRequestTypes'
-import { JSONValue } from '../src/kachery-js/types/kacheryTypes'
-import { signMessage } from '../src/kachery-js/crypto/signatures'
+import { isKacheryNodeRequestBody, KacheryNodeRequest } from '../src/kacheryInterface/kacheryNodeRequestTypes'
+import { JSONValue } from '../src/commonInterface/kacheryTypes'
+import { signMessage } from '../src/commonInterface/crypto/signatures'
 import getKeyPair from '../apiHelpers/common/getKeyPair'
 import getNodeId from '../apiHelpers/common/getNodeId'
 
@@ -11,6 +11,7 @@ const nodeId = getNodeId()
 
 const kacheryHubUrl = 'https://kacheryhub.org'
 // const kacheryHubUrl = 'http://localhost:3000'
+// const kacheryHubUrl = 'https://kacheryhub-magland-spikeforest.vercel.app'
 
 module.exports = (req: VercelRequest, res: VercelResponse) => {
     const {body: requestBody} = req
@@ -24,10 +25,13 @@ module.exports = (req: VercelRequest, res: VercelResponse) => {
         if (requestBody.type === 'getChannelConfig') {
             okay = true
         }
-        else if (requestBody.type === 'getPubsubAuthForChannel') {
+        // else if (requestBody.type === 'getPubsubAuthForChannel') {
+        //     okay = true
+        // }
+        else if (requestBody.type === 'getNodeConfig') {
             okay = true
         }
-        else if (requestBody.type === 'getNodeConfig') {
+        else if (requestBody.type === 'getBitwooderCertForChannel') {
             okay = true
         }
         if (!okay) {

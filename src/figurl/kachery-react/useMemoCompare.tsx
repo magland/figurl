@@ -1,4 +1,4 @@
-import { stringifyDeterministicWithSortedKeys } from 'kachery-js/crypto/signatures'
+import { stringifyDeterministicWithSortedKeys } from 'commonInterface/crypto/signatures'
 import { useEffect, useRef } from 'react'
 
 export type ComparatorFn<T> = (a: T, b: T) => boolean

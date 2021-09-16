@@ -45,6 +45,7 @@ const WorkspacePage: FunctionComponent<Props> = ({width, height, workspaceUri}) 
                 workspaceRoute={workspaceRoute}
                 workspaceRouteDispatch={workspaceRouteDispatch}
                 height={workspaceNavigationHeight}
+                workspaceUri={workspaceUri}
             />
             <WorkspaceView
                 workspace={workspace}
@@ -53,6 +54,7 @@ const WorkspacePage: FunctionComponent<Props> = ({width, height, workspaceUri}) 
                 workspaceRouteDispatch={workspaceRouteDispatch}
                 width={width - horizontalPadding * 2}
                 height={height - workspaceNavigationHeight - paddingTop}
+                workspaceUri={workspaceUri}
             />
         </div>
     )

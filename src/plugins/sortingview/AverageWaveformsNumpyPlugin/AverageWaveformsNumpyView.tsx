@@ -5,7 +5,7 @@ import Splitter from 'figurl/labbox-react/components/Splitter/Splitter';
 import { ActionItem, DividerItem } from 'plugins/sortingview/gui/extensions/common/Toolbars';
 import ViewToolbar from 'plugins/sortingview/gui/extensions/common/ViewToolbar';
 import { SortingSelection, SortingSelectionDispatch } from 'plugins/sortingview/gui/pluginInterface';
-import React, { Fragment, FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
 import AverageWaveformNumpyView from './AverageWaveformNumpyView';
 import { ElectrodeChannel, Waveform } from './AverageWaveformsNumpyPlugin';
@@ -93,7 +93,7 @@ const AverageWaveformsNumpyView: FunctionComponent<Props> = (props) => {
                     />
                 }
                 {
-                    <Fragment>
+                    <div>
                         <div>
                             <IconButton onClick={infoVisible.show}><Help /></IconButton>
                         </div>
@@ -109,7 +109,7 @@ const AverageWaveformsNumpyView: FunctionComponent<Props> = (props) => {
                             onClose={infoVisible.hide}
                             source={info}
                         /> */}
-                    </Fragment>
+                    </div>
                 }
             </Splitter>
         </div>

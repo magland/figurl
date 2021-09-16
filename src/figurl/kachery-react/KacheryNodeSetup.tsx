@@ -1,4 +1,4 @@
-import { NodeLabel } from 'kachery-js/types/kacheryTypes';
+import { NodeLabel } from 'commonInterface/kacheryTypes';
 import React from 'react'
 import { FunctionComponent } from "react"
 import KacheryNodeContext from './KacheryNodeContext';

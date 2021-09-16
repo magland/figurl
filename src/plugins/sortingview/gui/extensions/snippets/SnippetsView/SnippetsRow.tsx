@@ -1,6 +1,6 @@
 import { GridList, GridListTile } from '@material-ui/core';
-import { KacheryNode } from 'kachery-js';
-import { ChannelName } from 'kachery-js/types/kacheryTypes';
+import KacheryNode from 'kacheryInterface/core/KacheryNode';
+import { ChannelName } from 'commonInterface/kacheryTypes';
 import { runPureCalculationTaskAsync, useFetchCache } from 'figurl/kachery-react';
 import useChannel from 'figurl/kachery-react/useChannel';
 import useKacheryNode from 'figurl/kachery-react/useKacheryNode';

@@ -1,4 +1,4 @@
-import { ChannelName, JSONStringifyDeterministic } from "kachery-js/types/kacheryTypes"
+import { ChannelName, JSONStringifyDeterministic } from "commonInterface/kacheryTypes"
 
 export type RecentFigure = {
     type: string

@@ -1,7 +1,7 @@
 import SelectChannelDialog from 'figurl/kachery-react/components/SelectChannel/SelectChannelDialog'
 import { RecentFigure, RecentFigures } from 'figurl/RecentFigures'
 import { FigurlPlugin } from 'figurl/types'
-import { ChannelName, TaskFunctionId } from 'kachery-js/types/kacheryTypes'
+import { ChannelName, TaskFunctionId } from 'commonInterface/kacheryTypes'
 import React, { FunctionComponent } from 'react'
 import { useVisible } from '..'
 import ChannelSection from './ChannelSection'

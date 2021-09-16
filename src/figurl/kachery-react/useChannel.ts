@@ -1,5 +1,5 @@
 import { useBackendId } from "figurl/useFigurlPlugins"
-import { ChannelName } from "kachery-js/types/kacheryTypes"
+import { ChannelName } from "commonInterface/kacheryTypes"
 import QueryString from 'querystring'
 import { useCallback, useMemo } from "react"
 import { useHistory, useLocation } from "react-router-dom"

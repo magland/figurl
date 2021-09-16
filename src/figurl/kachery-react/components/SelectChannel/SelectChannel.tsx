@@ -1,5 +1,5 @@
 import { Button, TextField } from '@material-ui/core'
-import { ChannelName, isChannelName, nowTimestamp } from 'kachery-js/types/kacheryTypes'
+import { ChannelName, isChannelName, nowTimestamp } from 'commonInterface/kacheryTypes'
 import useChannel from '../../useChannel'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import channelItemsReducer, { initialChannelItems } from './channelItemsReducer'

@@ -1,4 +1,4 @@
-import { JSONStringifyDeterministic } from "kachery-js/types/kacheryTypes"
+import { JSONStringifyDeterministic } from "commonInterface/kacheryTypes"
 import { useCallback, useMemo, useState } from "react"
 
 // The "sync hive" is where we keep track of the state that is synchronized between figures.

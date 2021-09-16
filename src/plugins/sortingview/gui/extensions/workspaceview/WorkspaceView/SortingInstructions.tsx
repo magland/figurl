@@ -1,20 +1,19 @@
-import React, { FunctionComponent, useCallback, useState } from 'react';
-import Expandable from "figurl/labbox-react/components/Expandable/Expandable"
+import Expandable from "figurl/labbox-react/components/Expandable/Expandable";
 import Markdown from 'figurl/labbox-react/components/Markdown/Markdown';
-import { WorkspaceRoute } from '../../../pluginInterface';
+import React, { FunctionComponent, useCallback, useState } from 'react';
 import spykingcircus_example_py from './sortingExamples/spykingcircus_example.py.gen';
 import instructionsMd from './SortingInstructions.md.gen';
 
 type Props = {
-    workspaceRoute: WorkspaceRoute
+    workspaceUri: string
     recordingId: string
     recordingLabel: string
 }
 
-const SortingInstructions: FunctionComponent<Props> = ({ workspaceRoute, recordingId, recordingLabel }) => {
+const SortingInstructions: FunctionComponent<Props> = ({ workspaceUri, recordingId, recordingLabel }) => {
     const s = (x: string) => {
         return doSubstitute(x, {
-            workspaceUri: workspaceRoute.workspaceUri,
+            workspaceUri,
             recordingId,
             recordingLabel
         })

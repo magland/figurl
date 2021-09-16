@@ -1,8 +1,8 @@
+import { JSONObject, sha1OfObject, SubfeedHash } from 'commonInterface/kacheryTypes';
 import { initiateTask, useChannel, useKacheryNode } from 'figurl/kachery-react';
 import useSubfeedReducer from 'figurl/kachery-react/useSubfeedReducer';
 import { usePlugins } from 'figurl/labbox-react';
 import Hyperlink from 'figurl/labbox-react/components/Hyperlink/Hyperlink';
-import { JSONObject, sha1OfObject, SubfeedHash } from 'kachery-js/types/kacheryTypes';
 import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { parseWorkspaceUri } from '../../../../gui/pluginInterface/misc';
 import { SortingCurationAction } from '../../../../gui/pluginInterface/SortingCuration';
@@ -22,10 +22,11 @@ interface Props {
   workspaceRouteDispatch: WorkspaceRouteDispatch
   readOnly: boolean
   snippetLen?: [number, number]
+  workspaceUri: string
 }
 
 const SortingComparisonView: React.FunctionComponent<Props> = (props) => {
-  const { workspaceRoute, readOnly, sorting1, sorting2, recording, workspaceRouteDispatch, snippetLen } = props
+  const { readOnly, sorting1, sorting2, recording, workspaceRouteDispatch, snippetLen, workspaceUri } = props
   const initialSortingSelection: SortingSelection = {}
   const [selection1, selection1Dispatch] = useReducer(sortingSelectionReducer, initialSortingSelection)
   const [selection2, selection2Dispatch] = useReducer(sortingSelectionReducer, initialSortingSelection)
@@ -46,7 +47,7 @@ const SortingComparisonView: React.FunctionComponent<Props> = (props) => {
     }
   }, [recordingInfo?.num_frames])
 
-  const {feedId} = parseWorkspaceUri(workspaceRoute.workspaceUri)
+  const {feedId} = parseWorkspaceUri(workspaceUri)
 
   const kacheryNode = useKacheryNode()
   const {channelName, backendId} = useChannel()
@@ -62,14 +63,14 @@ const SortingComparisonView: React.FunctionComponent<Props> = (props) => {
       backendId,
       functionId: sortingviewTaskFunctionIds.sortingCurationAction,
       kwargs: {
-        workspace_uri: workspaceRoute.workspaceUri,
+        workspace_uri: workspaceUri,
         sorting_id: sortingId1,
         action: a
       },
       functionType: 'action',
       onStatusChanged: () => {}
     })
-  }, [kacheryNode, channelName, backendId, workspaceRoute.workspaceUri, sortingId1])
+  }, [kacheryNode, channelName, backendId, workspaceUri, sortingId1])
 
   // curation2
   const curationSubfeedName2 = useMemo(() => ({name: 'sortingCuration', sortingId2}), [sortingId2])
@@ -82,14 +83,14 @@ const SortingComparisonView: React.FunctionComponent<Props> = (props) => {
       backendId,
       functionId: sortingviewTaskFunctionIds.sortingCurationAction,
       kwargs: {
-        workspace_uri: workspaceRoute.workspaceUri,
+        workspace_uri: workspaceUri,
         sorting_id: sortingId2,
         action: a
       },
       functionType: 'action',
       onStatusChanged: () => {}
     })
-  }, [kacheryNode, channelName, backendId, workspaceRoute.workspaceUri, sortingId2])
+  }, [kacheryNode, channelName, backendId, workspaceUri, sortingId2])
 
   useEffect(() => {
     if ((!selection1.timeRange) && (recordingInfo)) {

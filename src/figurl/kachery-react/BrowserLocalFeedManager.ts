@@ -1,5 +1,5 @@
-import { FeedId, FeedName, isArrayOf, isSignedSubfeedMessage, JSONValue, PrivateKey, SignedSubfeedMessage, SubfeedHash } from "kachery-js/types/kacheryTypes";
-import { GarbageMap } from "kachery-js";
+import { FeedId, FeedName, isArrayOf, isSignedSubfeedMessage, JSONValue, PrivateKey, SignedSubfeedMessage, SubfeedHash } from "commonInterface/kacheryTypes";
+import GarbageMap from "commonInterface/util/GarbageMap";
 
 class LocalSubfeed {
     #signedMessages: SignedSubfeedMessage[] = []
@@ -17,18 +17,18 @@ class LocalSubfeed {
     async getSignedMessages(): Promise<SignedSubfeedMessage[]> {
         return [...this.#signedMessages] // important to return a copy here
     }
-    async appendSignedMessages(position: number, messages: SignedSubfeedMessage[]) : Promise<void> {
-        if (position < this.#signedMessages.length) {
-            messages = messages.slice(this.#signedMessages.length -position)
-        }
-        else if (position > this.#signedMessages.length) {
-            throw Error(`Invalid position in appendSignedMessages ${position} > ${this.#signedMessages.length} (${this.feedId})`)
-        }
+    async addSignedMessages(messages: SignedSubfeedMessage[]) : Promise<void> {
         if (messages.length === 0) return
+        let somethingAdded = false
         for (let m of messages) {
-            this.#signedMessages.push(m)
+            if (m.body.messageNumber === this.#signedMessages.length) {
+                this.#signedMessages.push(m)
+                somethingAdded = true
+            }
         }
-        localStorageSet(this._localStorageSignedMessagesKey(), this.#signedMessages)
+        if (somethingAdded) {
+            localStorageSet(this._localStorageSignedMessagesKey(), this.#signedMessages)
+        }
     }
     _localStorageSignedMessagesKey() {
         return _getLocalStorageSignedMessagesKey(this.feedId, this.subfeedHash)
@@ -88,14 +88,14 @@ class BrowserLocalFeedManager {
         const sf = f.getSubfeed(subfeedHash)
         return await sf.getSignedMessages()
     }
-    async appendSignedMessagesToSubfeed(position: number, feedId: FeedId, subfeedHash: SubfeedHash, messages: SignedSubfeedMessage[]) : Promise<void> {
+    async addSignedMessagesToSubfeed(feedId: FeedId, subfeedHash: SubfeedHash, messages: SignedSubfeedMessage[]) : Promise<void> {
         if (!this.#localFeeds.has(feedId)) {
             this.#localFeeds.set(feedId, new LocalFeed(feedId))
         }
         const f = this.#localFeeds.get(feedId)
         if (!f) throw Error(`Unexpected: no local feed: ${feedId}`)
         const sf = f.getSubfeed(subfeedHash)
-        await sf.appendSignedMessages(position, messages)
+        await sf.addSignedMessages(messages)
     }
 }
 

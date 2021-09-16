@@ -1,4 +1,4 @@
-import { isNodeId } from "../../src/kachery-js/types/kacheryTypes"
+import { isNodeId } from "../../src/commonInterface/kacheryTypes"
 
 const nodeId = process.env.REACT_APP_KACHERY_NODE_ID
 if (!isNodeId(nodeId)) {

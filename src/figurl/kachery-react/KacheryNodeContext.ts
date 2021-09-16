@@ -1,5 +1,5 @@
 import React from 'react'
-import { KacheryNode } from 'kachery-js'
+import KacheryNode from 'kacheryInterface/core/KacheryNode'
 
 const KacheryNodeContext = React.createContext<KacheryNode | undefined>(undefined)
 

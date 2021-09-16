@@ -1,5 +1,5 @@
-import { GarbageMap } from "kachery-js"
-import { TaskId } from "kachery-js/types/kacheryTypes"
+import GarbageMap from "commonInterface/util/GarbageMap"
+import { TaskId } from "commonInterface/kacheryTypes"
 import { Task } from "./initiateTask"
 
 class TaskManager {

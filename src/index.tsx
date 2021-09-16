@@ -8,6 +8,13 @@ import packageName from './packageName';
 import figurlPlugins from './plugins/plugins';
 import reportWebVitals from './reportWebVitals';
 import { pythonProjectVersion, webAppProjectVersion } from './version';
+import winston from 'winston'
+
+winston.add(
+  new winston.transports.Console({
+      level: 'info'
+  })
+)
 
 ReactDOM.render(
   // disable strict mode to supress: "findDOMNode is deprecated in StrictMode" warnings

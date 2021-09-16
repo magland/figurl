@@ -1,6 +1,6 @@
 import { useChannel, useKacheryNode } from 'figurl/kachery-react'
-import { RegisteredTaskFunction } from 'kachery-js/types/kacheryHubTypes'
-import { TaskFunctionId } from 'kachery-js/types/kacheryTypes'
+import { RegisteredTaskFunction } from 'kacheryInterface/kacheryHubTypes'
+import { TaskFunctionId } from 'commonInterface/kacheryTypes'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
 import Hyperlink from '../components/Hyperlink/Hyperlink'
 

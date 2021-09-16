@@ -1,4 +1,4 @@
-import { isString, _validateObject } from "kachery-js/types/kacheryTypes";
+import { isString, _validateObject } from "commonInterface/kacheryTypes";
 import { ComponentType } from "react";
 
 // A figurl plugin implements a figurl figure of a given type

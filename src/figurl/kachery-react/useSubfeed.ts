@@ -1,6 +1,6 @@
-import Subfeed from "kachery-js/feeds/Subfeed";
-import { FeedId, messageCount, sha1OfString, SubfeedHash, SubfeedMessage, subfeedPosition, unscaledDurationMsec } from "kachery-js/types/kacheryTypes";
-import { sleepMsec } from "kachery-js/util";
+import Subfeed from "kacheryInterface/feeds/Subfeed";
+import { FeedId, messageCount, sha1OfString, SubfeedHash, SubfeedMessage, subfeedPosition, unscaledDurationMsec } from "commonInterface/kacheryTypes";
+import { sleepMsec } from "commonInterface/util";
 import { useEffect, useState } from "react";
 import useChannel from "./useChannel";
 import useKacheryNode from "./useKacheryNode";

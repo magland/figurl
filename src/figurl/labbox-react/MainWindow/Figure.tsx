@@ -5,7 +5,7 @@ import { RecentFiguresAction } from 'figurl/RecentFigures';
 import { FigureObject, isFigureObject } from 'figurl/types';
 import useFigurlPlugins from 'figurl/useFigurlPlugins';
 import useSyncHive from 'figurl/useSyncHive';
-import { JSONObject, Sha1Hash } from 'kachery-js/types/kacheryTypes';
+import { JSONObject, Sha1Hash } from 'commonInterface/kacheryTypes';
 import React, { FunctionComponent, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import useRoute from './useRoute';

@@ -1,5 +1,5 @@
 import { FigurlPlugin } from "figurl/types";
-import { isString, _validateObject } from "kachery-js/types/kacheryTypes";
+import { isString, _validateObject } from "commonInterface/kacheryTypes";
 import WorkspaceView from 'plugins/sortingview/gui/extensions/workspaceview/WorkspaceView';
 import { WorkspaceRoute } from 'plugins/sortingview/gui/pluginInterface';
 import { WorkspaceRouteAction, workspaceRouteReducer } from "plugins/sortingview/gui/pluginInterface/WorkspaceRoute";
@@ -84,6 +84,7 @@ const WorkspaceComponent: FunctionComponent<Props> = ({data, width, height}) => 
                     workspaceRouteDispatch={workspaceRouteDispatch}
                     width={width - horizontalPadding * 2}
                     height={height - workspaceNavigationHeight - paddingTop}
+                    workspaceUri={workspaceUri}
                 />
             </div>
         </MountainViewSetup>

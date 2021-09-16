@@ -1,8 +1,8 @@
 import axios from "axios"
-import { KacheryNode } from "kachery-js"
-import { ChannelName, errorMessage, ErrorMessage, isTaskFunctionId, isTaskKwargs, nowTimestamp, scaledDurationMsec, TaskFunctionId, TaskId, TaskKwargs, TaskStatus, Timestamp, UrlString } from "kachery-js/types/kacheryTypes"
-import { TaskFunctionType } from "kachery-js/types/kacheryTypes"
-import { cacheBust } from "kachery-js/util"
+import KacheryNode from "kacheryInterface/core/KacheryNode"
+import { ChannelName, errorMessage, ErrorMessage, isTaskFunctionId, isTaskKwargs, nowTimestamp, scaledDurationMsec, TaskFunctionId, TaskId, TaskKwargs, TaskStatus, Timestamp, UrlString } from "commonInterface/kacheryTypes"
+import { TaskFunctionType } from "commonInterface/kacheryTypes"
+import { cacheBust } from "commonInterface/util"
 import deserializeReturnValue from "./deserializeReturnValue"
 import TaskManager from "./TaskManager"
 
