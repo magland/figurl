@@ -1,4 +1,4 @@
-import { JSONObject, sha1OfObject, subfeedHash, SubfeedHash } from 'commonInterface/kacheryTypes';
+import { JSONObject, sha1OfObject, SubfeedHash } from 'commonInterface/kacheryTypes';
 import { initiateTask, useChannel, useKacheryNode } from 'figurl/kachery-react';
 import useSubfeedReducer from 'figurl/kachery-react/useSubfeedReducer';
 import { usePlugins } from 'figurl/labbox-react';

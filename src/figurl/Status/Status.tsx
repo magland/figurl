@@ -1,4 +1,5 @@
 import React, { FunctionComponent } from 'react';
+import KacheryhubApiStatus from './KacheryhubApiStatus';
 
 type Props = {
 
@@ -6,7 +7,11 @@ type Props = {
 
 const Status: FunctionComponent<Props> = () => {
     return (
-        <div>Status</div>
+        <div style={{margin: 20}}>
+            <KacheryhubApiStatus />
+            {/* <BitwooderApiStatus />
+            <FigurlApiStatus /> */}
+        </div>
     )
 }
 
