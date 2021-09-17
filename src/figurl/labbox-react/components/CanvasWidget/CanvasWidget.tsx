@@ -1,81 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { CanvasWidgetLayer, ClickEventType, formClickEventFromMouseEvent, KeyEventType, MousePresenceEventType } from './CanvasWidgetLayer'
-import { Vec2, Vec4 } from './Geometry'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { CanvasWidgetLayer, ClickEventType, KeyEventType, MousePresenceEventType } from './CanvasWidgetLayer'
 
 // This class serves three purposes:
 // 1. It collects & is a repository for the Layers that actually execute view and display output
-// 2. It maintains drag/interaction state & dispatches user interactions back to the Layers
 // 3. It creates and lays out the Canvas elements the Layers draw to.
 // Essentially it's an interface between the browser and the Layer logic.
-
-const COMPUTE_DRAG = 'COMPUTE_DRAG'
-const END_DRAG = 'END_DRAG'
-
-interface DragState {
-    dragging: boolean, // whether we are in an active dragging state
-    dragAnchor?: Vec2, // The position where dragging began (pixels)
-    dragPosition?: Vec2, // The current drag position (pixels)
-    dragRect?: Vec4, // The drag rect for convenience (pixels)
-    shift?: boolean // whether the shift keys is being pressed
-}
-
-interface DragAction {
-    type: 'COMPUTE_DRAG' | 'END_DRAG', // type of action
-    mouseButton?: boolean, // whether the mouse is down
-    point?: Vec2, // The position (pixels)
-    shift?: boolean // Whether shift key is being pressed
-}
-
-const dragReducer = (state: DragState, action: DragAction): DragState => {
-    let {dragging, dragAnchor } = state
-    const {type, mouseButton, point, shift} = action
-
-    switch (type) {
-        case END_DRAG:
-            // drag has ended (button released)
-            return { dragging: false }
-        case COMPUTE_DRAG:
-            if (!mouseButton) return { // no button held; unset any drag state & return.
-                dragging: false
-            }
-            if (!point) throw Error('Unexpected: no point')
-            // with button, 4 cases: dragging yes/no and dragAnchor yes/no.
-            // 0: dragging yes, dragAnchor no: this is invalid and throws an error.
-            if (dragging && !dragAnchor) throw Error('Invalid state in computing drag: cannot have drag set with no dragAnchor.')
-            // 1: dragging no, dragAnchor no: set dragAnchor to current position, and we're done.
-            if (!dragging && !dragAnchor) return {
-                dragging: false,
-                dragAnchor: point,
-                shift: shift || false
-            }
-            // 2: dragging no, dragAnchor yes: check if the mouse has moved past tolerance to see if we initiate dragging.
-            if (!dragging && dragAnchor) {
-                const tol = 4
-                dragging = ((Math.abs(point[0] - dragAnchor[0]) > tol) || (Math.abs(point[1] - dragAnchor[1]) > tol))
-                if (!dragging) return {
-                    dragging: false,
-                    dragAnchor: dragAnchor,
-                    shift: shift || false
-                }
-            }
-            // 3: dragging yes (or newly dragging), and dragAnchor yes. Compute point and rect, & return all.
-            if (dragging && dragAnchor) return {
-                dragging: true,
-                dragAnchor: dragAnchor,
-                dragPosition: point,
-                dragRect: [ Math.min(dragAnchor[0],  point[0]), // x: upper left corner of rect, NOT the anchor
-                            Math.min(dragAnchor[1],  point[1]), // y: upper left corner of rect, NOT the anchor
-                            Math.abs(dragAnchor[0] - point[0]), // width
-                            Math.abs(dragAnchor[1] - point[1]) ], //height
-                shift: shift || false
-            }
-        break;
-        default: {
-            throw Error('Invalid mode for drag reducer.')
-        }
-    }
-    throw Error('Unexpected: unreachable, but keeps ESLint happy')
-}
 
 interface Props {
     layers: (CanvasWidgetLayer<any, any> | null)[] // the layers to paint (each corresponds to a canvas html element)
@@ -121,36 +50,13 @@ const CanvasWidget = (props: Props) => {
                     canvasElement.addEventListener("wheel", stopScrollEvent)
                 }
                 L.resetCanvasElement(canvasElement)
-                L.scheduleRepaint()
+                L.scheduleRepaint() 
             }
             else {
                 console.warn('Unable to get canvas element for layer', i)
             }
         })
     }, [divElement, layers, preventDefaultWheel])
-
-    // The drag state
-    const [dragState, dispatchDrag] = useReducer(dragReducer, {
-        dragging: false
-    })
-
-    // This is very important so that we don't send out too many drag events
-    // Limits the fire rate for drag events
-    const scheduledDispatchDragAction = useRef<DragAction | null>(null)
-    const scheduleDispatchDrag = (a: DragAction) => {
-        if (scheduledDispatchDragAction.current) {
-            scheduledDispatchDragAction.current = a
-            return
-        }
-        else {
-            scheduledDispatchDragAction.current = a
-            setTimeout(() => {
-                const a2 = scheduledDispatchDragAction.current
-                scheduledDispatchDragAction.current = null
-                if (a2) dispatchDrag(a2)
-            }, 30)
-        }
-    }
 
     // schedule repaint when width or height change
     useEffect(() => {
@@ -161,47 +67,13 @@ const CanvasWidget = (props: Props) => {
         })
     }, [width, height, layers])
 
-    const [prevDragState, setPrevDragState] = useState<DragState | null>(null)
-
-    // handle drag when dragState changes
-    useEffect(() => {
-        let ds: DragState | null = null
-        if (dragState.dragging) {
-            ds = dragState
-        }
-        else if ((prevDragState) && (prevDragState.dragging)) {
-            ds = prevDragState
-        }
-        else {
-            ds = null
-        }
-        if (ds) {
-            const dragRect = ds.dragRect
-            if (dragRect) {
-                const pixelDragRect = {
-                    xmin: dragRect[0],
-                    xmax: dragRect[0] + dragRect[2],
-                    ymin: dragRect[1] + dragRect[3],
-                    ymax: dragRect[1]
-                }
-                for (let l of layers) {
-                    if (l) {
-                        l.handleDrag(pixelDragRect, !dragState.dragging, ds.shift, ds.dragAnchor, ds.dragPosition)
-                    }
-                }
-            }
-        }
-        setPrevDragState(dragState)
-    }, [dragState, prevDragState, setPrevDragState, layers])
-
     const _handleDiscreteMouseEvents = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>, type: ClickEventType) => {
-        if (dragState.dragging) return
         for (let l of layers) {
             if (l) {
                 l.handleDiscreteEvent(e, type)
             }
         }
-    }, [layers, dragState])
+    }, [layers])
 
     const _handleMousePresenceEvents = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>, type: MousePresenceEventType) => {
         if (!layers) return
@@ -211,25 +83,17 @@ const CanvasWidget = (props: Props) => {
     }, [layers])
 
     const _handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        const { point, mouseButton, modifiers } = formClickEventFromMouseEvent(e, ClickEventType.Move)
-        // limit the rate of drag events by scheduling the dispatch drag
-        scheduleDispatchDrag({type: COMPUTE_DRAG, mouseButton: mouseButton === 1, point: point, shift: modifiers.shift || false})
         _handleDiscreteMouseEvents(e, ClickEventType.Move)
     }, [_handleDiscreteMouseEvents])
 
     const _handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        const { point, modifiers } = formClickEventFromMouseEvent(e, ClickEventType.Press)
         _handleDiscreteMouseEvents(e, ClickEventType.Press)
-        dispatchDrag({ type: COMPUTE_DRAG, mouseButton: true, point: point, shift: modifiers.shift || false})
     }, [_handleDiscreteMouseEvents])
 
     const _handleMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         setHasFocus(true)
-        const { point, mouseButton, modifiers } = formClickEventFromMouseEvent(e, ClickEventType.Move)
         _handleDiscreteMouseEvents(e, ClickEventType.Release)
-        dispatchDrag({type: COMPUTE_DRAG, mouseButton: mouseButton === 1, point: point, shift: modifiers.shift || false})
-        dispatchDrag({ type: END_DRAG })
-    }, [_handleDiscreteMouseEvents, dispatchDrag])
+    }, [_handleDiscreteMouseEvents])
 
     const _handleMouseEnter = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         _handleMousePresenceEvents(e, MousePresenceEventType.Enter)

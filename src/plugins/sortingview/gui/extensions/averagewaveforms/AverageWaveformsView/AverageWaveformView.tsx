@@ -1,13 +1,13 @@
 // import { createCalculationPool } from 'labbox';
-import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView'
+// import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView'
 import useChannel from 'figurl/kachery-react/useChannel'
 import usePureCalculationTask from 'figurl/kachery-react/usePureCalculationTask'
 import { KeypressMap } from 'figurl/labbox-react/components/CanvasWidget'
 import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds'
-import React, { FunctionComponent, useMemo } from 'react'
+import React, { Fragment, FunctionComponent, useMemo } from 'react'
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelectionDispatch } from '../../../pluginInterface'
 import { ElectrodeOpts } from '../../common/sharedCanvasLayers/electrodesLayer'
-import WaveformWidget, { defaultWaveformOpts } from './WaveformWidget'
+// import WaveformWidget, { defaultWaveformOpts } from './WaveformWidget'
 
 export type PlotData = {
     average_waveform: number[][]
@@ -70,24 +70,40 @@ const AverageWaveformView: FunctionComponent<Props> = ({ sorting, curation, reco
             : definedPlotData.channel_locations
     }, [visibleElectrodeIds, definedPlotData.channel_ids, definedPlotData.channel_locations])
 
-    return plotData
-        ? <WaveformWidget
-            waveform={definedPlotData.average_waveform}
-            layoutMode={waveformsMode || 'geom'}
-            noiseLevel={noiseLevel}
-            electrodeIds={electrodeIds}
-            electrodeLocations={electrodeLocations}
-            samplingFrequency={definedPlotData.sampling_frequency}
+    // TEMPORARY TEST
+    return <Fragment>
+        <canvas 
+            style={{position: 'absolute', left: 0, top: 0}}
             width={width}
             height={height}
-            selectedElectrodeIds={selectedElectrodeIds || []}
-            ampScaleFactor={ampScaleFactor || 1}
-            keypressMap={keypressMap}
-            selectionDispatch={selectionDispatch}
-            electrodeOpts={electrodeOpts}
-            waveformOpts={defaultWaveformOpts}
+            onMouseDown={(e) => console.log(`First canvas got mousedown event: ${e.clientX, e.clientY} with shift? ${e.shiftKey}`)}
         />
-        : <TaskStatusView task={task} label="fetch avg waveform" />
+        <canvas
+            style={{position: 'absolute', left: 0, top: 0}}
+            width={width}
+            height={height}
+            onMouseDown={(e) => console.log(`Second canvas got mousedown event: ${e.clientX, e.clientY} with shift? ${e.shiftKey}`)}
+        />
+    </Fragment>
+
+    // return plotData
+    //     ? <WaveformWidget
+    //         waveform={definedPlotData.average_waveform}
+    //         layoutMode={waveformsMode || 'geom'}
+    //         noiseLevel={noiseLevel}
+    //         electrodeIds={electrodeIds}
+    //         electrodeLocations={electrodeLocations}
+    //         samplingFrequency={definedPlotData.sampling_frequency}
+    //         width={width}
+    //         height={height}
+    //         selectedElectrodeIds={selectedElectrodeIds || []}
+    //         ampScaleFactor={ampScaleFactor || 1}
+    //         keypressMap={keypressMap}
+    //         selectionDispatch={selectionDispatch}
+    //         electrodeOpts={electrodeOpts}
+    //         waveformOpts={defaultWaveformOpts}
+    //     />
+    //     : <TaskStatusView task={task} label="fetch avg waveform" />
 }
 
 export default AverageWaveformView
