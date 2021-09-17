@@ -1,4 +1,5 @@
 import { RecentFiguresAction } from 'figurl/RecentFigures'
+import Status from 'figurl/Status/Status'
 import React, { FunctionComponent } from 'react'
 import HomePage, { HomePageProps } from '../HomePage/HomePage'
 import Figure from './Figure'
@@ -26,6 +27,11 @@ const Routes: FunctionComponent<Props> = (props) => {
                 height={height}
                 recentFiguresDispatch={recentFiguresDispatch}
             />
+        )
+    }
+    else if (routePath === '/status') {
+        return (
+            <Status />
         )
     }
     else {

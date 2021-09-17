@@ -6,7 +6,7 @@ export const parseWorkspaceUri = (workspaceUri: string | undefined): {feedId: Fe
     if (!workspaceUri.startsWith('workspace://')) {
         return undefinedResult
     }
-    const a = workspaceUri.split('/')
+    const a = workspaceUri.split('?')[0].split('/')
     const feedId = a[2] || undefined
     const workspaceName = a[3] || undefined
     if (!feedId) return undefinedResult

@@ -20,7 +20,7 @@ const useChannel = () => {
     return useMemo(() => ({
         channelName: channel,
         selectChannel,
-        backendId: backendIdForChannel(channel.toString()),
+        backendId: channel ? backendIdForChannel(channel.toString()) : null,
         setBackendIdForChannel
     }), [channel, selectChannel, backendIdForChannel, setBackendIdForChannel])
 }
