@@ -56,5 +56,5 @@ def _replace_sync_objects(x: Any):
     else:
         return x
 
-default_base_url = os.getenv('FIGURL_BASE_URL', 'https://figurl.vercel.app')
+default_base_url = os.getenv('FIGURL_BASE_URL', 'https://figurl.org')
 default_channel = os.getenv('FIGURL_CHANNEL', None)
