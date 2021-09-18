@@ -59,6 +59,8 @@ export type NodeChannelAuthorization = {
         provideFeeds?: boolean
         provideTasks?: boolean
     }
+
+    // roles are deprecated
     roles?: { // obtained by cross-referencing with the node
         downloadFiles?: boolean
         downloadFeeds?: boolean
@@ -84,6 +86,8 @@ export const isNodeChannelAuthorization = (x: any): x is NodeChannelAuthorizatio
             provideFeeds: optional(isBoolean),
             provideTasks: optional(isBoolean)
         }, {allowAdditionalFields: true})),
+
+        // roles are deprecated
         roles: optional((a: any) => _validateObject(a, {
             downloadFiles: optional(isBoolean),
             downloadFeeds: optional(isBoolean),
@@ -184,6 +188,8 @@ export type NodeChannelMembership = {
     nodeId: NodeId
     channelName: ChannelName
     channelPasscodes?: Passcode[],
+
+    // roles are deprecated
     roles: {
         downloadFiles?: boolean
         downloadFeeds?: boolean
@@ -673,6 +679,20 @@ export const isNodeReportRequest = (x: any): x is NodeReportRequest => {
     })
 }
 
+export type GetBitwooderResourceInfoRequest = {
+    type: 'getBitwooderResourceInfo'
+    resourceKey: string
+    auth: Auth
+}
+
+export const isGetBitwooderResourceInfoRequest = (x: any): x is GetBitwooderResourceInfoRequest => {
+    return _validateObject(x, {
+        type: isEqualTo('getBitwooderResourceInfo'),
+        resourceKey: isString,
+        auth: isAuth
+    })
+}
+
 export type KacheryHubRequest =
     AddAuthorizedNodeRequest |
     AddAuthorizedPasscodeRequest |
@@ -694,7 +714,8 @@ export type KacheryHubRequest =
     UpdateChannelPropertyRequest |
     UpdateNodeChannelMembershipRequest |
     UpdateNodeChannelAuthorizationRequest |
-    UpdatePasscodeChannelAuthorizationRequest
+    UpdatePasscodeChannelAuthorizationRequest |
+    GetBitwooderResourceInfoRequest
 
 export const isKacheryHubRequest = (x: any): x is KacheryHubRequest => {
     return isOneOf([
@@ -718,7 +739,8 @@ export const isKacheryHubRequest = (x: any): x is KacheryHubRequest => {
         isUpdateChannelPropertyRequest,
         isUpdateNodeChannelMembershipRequest,
         isUpdateNodeChannelAuthorizationRequest,
-        isUpdatePasscodeChannelAuthorizationRequest
+        isUpdatePasscodeChannelAuthorizationRequest,
+        isGetBitwooderResourceInfoRequest
     ])(x)
 }
 

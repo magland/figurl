@@ -37,6 +37,7 @@ class KacheryNode {
         kacheryStorageManager: KacheryStorageManagerInterface,
         mutableManager: MutableManagerInterface,
         localFeedManager: LocalFeedManagerInterface,
+        additionalChannels: ChannelName[],
         opts: KacheryNodeOpts
     }) {
         this.#nodeId = p.nodeId
@@ -59,7 +60,8 @@ class KacheryNode {
             nodeLabel: p.label,
             kacheryHubUrl: p.opts.kacheryHubUrl,
             bitwooderUrl: p.opts.bitwooderUrl,
-            nodeStats: this.#stats
+            nodeStats: this.#stats,
+            additionalChannels: p.additionalChannels
         })
 
         this.#kacheryHubInterface.onIncomingFileRequest(({fileKey, channelName, fromNodeId}) => {

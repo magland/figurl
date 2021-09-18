@@ -1,6 +1,6 @@
 import axios from "axios"
 import { publicKeyToHex, signMessage } from "../../commonInterface/crypto/signatures"
-import { NodeConfig } from "../../kacheryInterface/kacheryHubTypes"
+import { NodeChannelMembership, NodeConfig } from "../../kacheryInterface/kacheryHubTypes"
 import { GetNodeConfigRequestBody, isGetNodeConfigResponse, KacheryNodeRequest } from '../../kacheryInterface/kacheryNodeRequestTypes'
 import { JSONValue, KeyPair, publicKeyHexToNodeId, UserId } from "../../commonInterface/kacheryTypes"
 
@@ -8,7 +8,7 @@ class KacheryHubNodeClient {
     #initialized = false
     #initializing = false
     #onInitializedCallbacks: (() => void)[] = []
-    #nodeConfig: NodeConfig | undefined = undefined
+    #channelMemberships: NodeChannelMembership[] | undefined = undefined
     constructor(private opts: {keyPair: KeyPair, ownerId: UserId, kacheryHubUrl?: string}) {
     }
     async initialize() {
@@ -42,20 +42,17 @@ class KacheryHubNodeClient {
         }
         const nodeConfig = resp.nodeConfig
         if (!nodeConfig) throw Error('Unexpected, no nodeConfig')
-        this.#nodeConfig = nodeConfig
+        this.#channelMemberships = nodeConfig.channelMemberships
 
         this.#initialized = true
         this.#initializing = false
-    }
-    public get nodeConfig() {
-        return this.#nodeConfig
     }
     public get nodeId() {
         return publicKeyHexToNodeId(publicKeyToHex(this.opts.keyPair.publicKey))
     }
     public get channelMemberships() {
-        if (!this.#nodeConfig) return undefined
-        return this.#nodeConfig.channelMemberships || []
+        if (!this.#initialized) return undefined
+        return this.#channelMemberships || []
     }
     onInitialized(callback: () => void) {
         this.#onInitializedCallbacks.push(callback)

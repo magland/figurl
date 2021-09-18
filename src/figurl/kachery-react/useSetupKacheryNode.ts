@@ -1,10 +1,11 @@
 import axios from "axios"
-import KacheryNode from "kacheryInterface/core/KacheryNode"
 import { BitwooderResourceRequest, BitwooderResourceResponse, isBitwooderResourceResponse } from "bitwooderInterface/BitwooderResourceRequest"
-import { KacheryNodeRequestBody } from "kacheryInterface/kacheryNodeRequestTypes"
 import { isJSONObject, isJSONValue, isNodeId, isSignature, NodeLabel, Signature, userId } from "commonInterface/kacheryTypes"
+import KacheryNode from "kacheryInterface/core/KacheryNode"
+import { KacheryNodeRequestBody } from "kacheryInterface/kacheryNodeRequestTypes"
 import { KacheryHubPubsubMessageBody } from "kacheryInterface/pubsubMessages"
 import { useMemo } from "react"
+import { useChannel } from "."
 import BrowserKacheryStorageManager from "./BrowserKacheryStorageManager"
 import BrowserLocalFeedManager from "./BrowserLocalFeedManager"
 import BrowserMutableManager from "./BrowserMutableManager"
@@ -17,6 +18,7 @@ const bitwooderUrl = 'https://bitwooder.net'
 // const bitwooderUrl = 'http://localhost:3001'
 
 const useSetupKacheryNode = (nodeLabel: NodeLabel): KacheryNode => {
+    const {channelName} = useChannel()
     const kacheryNode = useMemo(() => {
         const nodeId = process.env.REACT_APP_KACHERY_NODE_ID
         if (!isNodeId(nodeId)) {
@@ -71,6 +73,7 @@ const useSetupKacheryNode = (nodeLabel: NodeLabel): KacheryNode => {
             kacheryStorageManager,
             mutableManager,
             localFeedManager,
+            additionalChannels: [channelName],
             opts: {
                 kacheryHubUrl,
                 bitwooderUrl,
@@ -78,7 +81,7 @@ const useSetupKacheryNode = (nodeLabel: NodeLabel): KacheryNode => {
             }
         })
         return x
-    }, [nodeLabel])
+    }, [nodeLabel, channelName])
 
     return kacheryNode
 }

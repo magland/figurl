@@ -18,16 +18,16 @@ const KacheryhubApiStatus: FunctionComponent<Props> = () => {
         ;(async () => {
             setText('Getting node config')
             await sleepMsec(1000)
-            const nodeConfig = await kacheryNode.kacheryHubInterface().getNodeConfig()
-            if (!nodeConfig) {
+            const channelMemberships = await kacheryNode.kacheryHubInterface().getChannelMemberships()
+            if (!channelMemberships) {
                 setStatus('error')
-                setText('nodeConfig is undefined')
+                setText('channelMemberships is undefined')
                 return
             }
             setStatus('finished')
-            console.info('Node config:')
-            console.info(nodeConfig)
-            const channels = (nodeConfig.channelMemberships || []).map(cm => (cm.channelName))
+            console.info('Channel memberships:')
+            console.info(channelMemberships)
+            const channels = (channelMemberships || []).map(cm => (cm.channelName))
             setText(`This node belongs to channels: ${channels.join(', ')}`)
         })()
     }, [job.refreshCode, setStatus, setText, kacheryNode])

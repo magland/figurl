@@ -273,7 +273,7 @@ class KacheryHubClient {
     }
     createPubsubClientForChannel(channelName: ChannelName, subscribeToPubsubChannels: PubsubChannelName[]) {
         if (channelName.toString() in this.#pubsubClients) {
-            // todo: think about how to update the subscriptions of the auth has changed
+            // todo: think about how to update the subscriptions if the auth has changed
             return
         }
         const ablyAuthCallback: AblyAuthCallback = (tokenParams: Ably.Types.TokenParams, callback: AblyAuthCallbackCallback) => {

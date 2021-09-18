@@ -4,7 +4,7 @@ import logger from "winston";
 import KacheryHubClient, { IncomingKacheryHubPubsubMessage } from "../kacheryHubClient/KacheryHubClient";
 import IncomingTaskManager, { ProbeTaskFunctionsResult } from "../tasks/IncomingTaskManager";
 import OutgoingTaskManager from "../tasks/outgoingTaskManager";
-import { NodeConfig, RegisteredTaskFunction, RequestedTask } from "../kacheryHubTypes";
+import { ChannelConfig, NodeChannelMembership, NodeConfig, RegisteredTaskFunction, RequestedTask } from "../kacheryHubTypes";
 import { KacheryNodeRequestBody } from "../kacheryNodeRequestTypes";
 import { ByteCount, ChannelName, DurationMsec, durationMsecToNumber, elapsedSince, errorMessage, ErrorMessage, FeedId, FileKey, fileKeyHash, isMessageCount, isSignedSubfeedMessage, JSONValue, MessageCount, NodeId, NodeLabel, nowTimestamp, pathifyHash, pubsubChannelName, PubsubChannelName, scaledDurationMsec, Sha1Hash, Signature, SignedSubfeedMessage, SubfeedHash, SubfeedPosition, TaskFunctionId, TaskFunctionType, TaskId, TaskKwargs, TaskStatus, toTaskId, urlString, UrlString, UserId, _validateObject } from "../../commonInterface/kacheryTypes";
 import { KacheryHubPubsubMessageBody, KacheryHubPubsubMessageData, ProbeTaskFunctionsBody, RequestFileMessageBody, RequestSubfeedMessageBody, RequestTaskMessageBody, UpdateSubfeedMessageCountMessageBody, UpdateTaskStatusMessageBody, UploadFileStatusMessageBody } from "../pubsubMessages";
@@ -30,7 +30,7 @@ type WaitForTaskResult = {
 
 class KacheryHubInterface {
     #kacheryHubClient: KacheryHubClient
-    #nodeConfig: NodeConfig | null = null
+    #channelMemberships: NodeChannelMembership[] | undefined = undefined
     #initialized = false
     #initializing = false
     #onInitializedCallbacks: (() => void)[] = []
@@ -48,7 +48,8 @@ class KacheryHubInterface {
         nodeLabel?: NodeLabel,
         kacheryHubUrl: string,
         bitwooderUrl: string,
-        nodeStats: NodeStats
+        nodeStats: NodeStats,
+        additionalChannels: ChannelName[]
     }) {
         const {nodeId, sendKacheryNodeRequest, sendBitwooderResourceRequest, ownerId, nodeLabel, kacheryHubUrl, bitwooderUrl} = opts
         this.#kacheryHubClient = new KacheryHubClient({nodeId, sendKacheryNodeRequest, sendBitwooderResourceRequest, ownerId, nodeLabel, kacheryHubUrl, bitwooderUrl})
@@ -83,11 +84,10 @@ class KacheryHubInterface {
     async checkForFileInChannelBuckets(sha1: Sha1Hash): Promise<{downloadUrl: UrlString, channelName: ChannelName}[] | null> {
         logger.debug(`KacheryHubInterface: checkForFileInChannelBuckets ${sha1}`)
         await this.initialize()
-        const nodeConfig = this.#nodeConfig
-        if (!nodeConfig) return null
+        if (!this.#channelMemberships) return null
         const options: {downloadUrl: UrlString, channelName: ChannelName}[] = []
         // const checkedBucketUrls = new Set<string>()
-        for (let cm of (nodeConfig.channelMemberships || [])) {
+        for (let cm of (this.#channelMemberships || [])) {
             const channelName = cm.channelName
             // const bucketUri = cm.channelBucketUri
             // if (bucketUri) {
@@ -117,10 +117,9 @@ class KacheryHubInterface {
     async checkForSubfeedInChannelBucket(feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName): Promise<MessageCount | null> {
         logger.debug(`KacheryHubInterface: checkForSubfeedInChannelBucket ${channelName} ${feedId}/${subfeedHash}`)
         await this.initialize()
-        const nodeConfig = this.#nodeConfig
-        if (!nodeConfig) return null
+        if (!this.#channelMemberships) return null
         // const checkedBucketUrls = new Set<string>()
-        for (let cm of (nodeConfig.channelMemberships || [])) {
+        for (let cm of (this.#channelMemberships || [])) {
             if (channelName === cm.channelName) {
                 // const bucketUri = cm.channelBucketUri
                 // if (bucketUri) {
@@ -159,8 +158,7 @@ class KacheryHubInterface {
     async requestFileFromChannels(fileKey: FileKey): Promise<boolean> {
         logger.debug(`KacheryHubInterface: requestFileFromChannels ${fileKey.sha1}`)
         await this.initialize()
-        const nodeConfig = this.#nodeConfig
-        if (!nodeConfig) return false
+        if (!this.#channelMemberships) return false
         let status: '' | 'pending' | 'started' | 'finished' = ''
         let stageFromStatus: {[key: string]: number} = {
             '': 0,
@@ -188,7 +186,7 @@ class KacheryHubInterface {
                     }
                 }
             })
-            for (let cm of (nodeConfig.channelMemberships || [])) {
+            for (let cm of (this.#channelMemberships || [])) {
                 const au = cm.authorization
                 if ((au) && (au.permissions.requestFiles)) {
                     const msg: RequestFileMessageBody = {
@@ -252,9 +250,9 @@ class KacheryHubInterface {
         }
         this._publishMessageToPubsubChannel(channelName, pubsubChannelName(`${channelName}-provideFiles`), msg)
     }
-    async getNodeConfig() {
+    async getChannelMemberships() {
         await this.initialize()
-        return this.#nodeConfig
+        return this.#channelMemberships
     }
     async createSignedFileUploadUrl(a: {channelName: ChannelName, sha1: Sha1Hash, size: ByteCount}) {
         logger.debug(`KacheryHubInterface: createSignedFileUploadUrl`)
@@ -286,10 +284,9 @@ class KacheryHubInterface {
     async subscribeToRemoteSubfeed(feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName, position: SubfeedPosition) {
         logger.debug(`KacheryHubInterface: subscribeToRemoteSubfeed`)
         await this.initialize()
-        const nodeConfig = this.#nodeConfig
-        if (!nodeConfig) return
+        if (!this.#channelMemberships) return
         // const channelNames: ChannelName[] = []
-        // for (let channelMembership of (nodeConfig.channelMemberships || [])) {
+        // for (let channelMembership of (this.#channelMemberships || [])) {
         //     if (channelMembership.roles.requestFeeds) {
         //         if ((channelMembership.authorization) && (channelMembership.authorization.permissions.requestFeeds)) {
         //             channelNames.push(channelMembership.channelName)
@@ -309,15 +306,15 @@ class KacheryHubInterface {
     async _requestTaskFromChannel(args: {channelName: ChannelName, taskFunctionId: TaskFunctionId, kwargs: TaskKwargs, taskFunctionType: TaskFunctionType, taskId: TaskId, backendId: string | null}) {
         const {channelName, taskFunctionId, kwargs, taskFunctionType, taskId, backendId} = args
         await this.initialize()
-        const nodeConfig = this.#nodeConfig
-        if (!nodeConfig) {
+        if (!this.#channelMemberships) {
             throw Error('Problem initializing kacheryhub interface')
         }
-        const channelMembership = (nodeConfig.channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
+        const channelMembership = (this.#channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
         if (!channelMembership) {
             throw Error(`Not a member of channel: ${channelName}`)
         }
-        const roles = channelMembership.roles
+        // roles are deprecated
+        // const roles = channelMembership.roles
         const permissions = (channelMembership.authorization || {}).permissions
         if (!permissions) {
             throw Error(`No permissions on channel: ${channelName}`)
@@ -325,9 +322,9 @@ class KacheryHubInterface {
         if (!permissions.requestTasks) {
             throw Error(`This node does not have permission to request tasks on channel: ${channelName}`)
         }
-        if (!roles.requestTasks) {
-            throw Error(`This node does not have role to request tasks on channel: ${channelName}`)
-        }
+        // if (!roles.requestTasks) {
+        //     throw Error(`This node does not have role to request tasks on channel: ${channelName}`)
+        // }
         const msg: RequestTaskMessageBody = {
             type: 'requestTask',
             backendId,
@@ -342,15 +339,15 @@ class KacheryHubInterface {
         logger.debug(`KacheryHubInterface: probeTaskFunctionsFromChannel`)
         const {channelName, taskFunctionIds, backendId} = args
         await this.initialize()
-        const nodeConfig = this.#nodeConfig
-        if (!nodeConfig) {
+        if (!this.#channelMemberships) {
             throw Error('Problem initializing kacheryhub interface')
         }
-        const channelMembership = (nodeConfig.channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
+        const channelMembership = (this.#channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
         if (!channelMembership) {
             throw Error(`Not a member of channel: ${channelName}`)
         }
-        const roles = channelMembership.roles
+        // roles are deprecated
+        // const roles = channelMembership.roles
         const permissions = (channelMembership.authorization || {}).permissions
         if (!permissions) {
             throw Error(`No permissions on channel: ${channelName}`)
@@ -358,9 +355,9 @@ class KacheryHubInterface {
         if (!permissions.requestTasks) {
             throw Error(`This node does not have permission to request tasks (probe task functions) on channel: ${channelName}`)
         }
-        if (!roles.requestTasks) {
-            throw Error(`This node does not have role to request tasks (probe task functions) on channel: ${channelName}`)
-        }
+        // if (!roles.requestTasks) {
+        //     throw Error(`This node does not have role to request tasks (probe task functions) on channel: ${channelName}`)
+        // }
         const msg: ProbeTaskFunctionsBody = {
             type: 'probeTaskFunctions',
             taskFunctionIds,
@@ -380,11 +377,10 @@ class KacheryHubInterface {
     async downloadSignedSubfeedMessages(channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, start: MessageCount, end: MessageCount): Promise<SignedSubfeedMessage[]> {
         logger.debug(`KacheryHubInterface: downloadSignedSubfeedMessages`)
         await this.initialize()
-        const nodeConfig = this.#nodeConfig
-        if (!nodeConfig) {
+        if (!this.#channelMemberships) {
             throw Error('Problem initializing kacheryhub interface')
         }
-        const channelMembership = (nodeConfig.channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
+        const channelMembership = (this.#channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
         if (!channelMembership) {
             throw Error(`Not a member of channel: ${channelName}`)
         }
@@ -487,15 +483,15 @@ class KacheryHubInterface {
         logger.debug(`KacheryHubInterface: updateTaskStatus`)
         const { channelName, taskId, status, errorMessage } = args
         await this.initialize()
-        const nodeConfig = this.#nodeConfig
-        if (!nodeConfig) {
+        if (!this.#channelMemberships) {
             throw Error('Problem initializing kacheryhub interface')
         }
-        const channelMembership = (nodeConfig.channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
+        const channelMembership = (this.#channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
         if (!channelMembership) {
             throw Error(`Not a member of channel: ${channelName}`)
         }
-        const roles = channelMembership.roles
+        // roles are deprecated
+        // const roles = channelMembership.roles
         const permissions = (channelMembership.authorization || {}).permissions
         if (!permissions) {
             throw Error(`No permissions for updating task status for channel: ${channelName}`)
@@ -503,9 +499,9 @@ class KacheryHubInterface {
         if (!permissions.provideTasks) {
             throw Error(`This nodes does not have the provideTasks permissions for channel: ${channelName}`)
         }
-        if (!roles.provideTasks) {
-            throw Error(`This nodes does not have the provideTasks role for channel: ${channelName}`)
-        }
+        // if (!roles.provideTasks) {
+        //     throw Error(`This nodes does not have the provideTasks role for channel: ${channelName}`)
+        // }
         const pcn = pubsubChannelName(`${channelName}-provideTasks`)
         const msg: UpdateTaskStatusMessageBody = {
             type: 'updateTaskStatus',
@@ -676,8 +672,8 @@ class KacheryHubInterface {
         })
     }
     _getChannelMembership(channelName: ChannelName) {
-        if (!this.#nodeConfig) return
-        const x = (this.#nodeConfig.channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
+        if (!this.#channelMemberships) return
+        const x = (this.#channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
         if (!x) return undefined
         return x
     }
@@ -716,12 +712,13 @@ class KacheryHubInterface {
                 logger.warn(`Unexpected pubsub channel for requestSubfeed: ${x.pubsubChannelName}`)
                 return
             }
-            const nodeConfig = this.#nodeConfig
-            if (!nodeConfig) return
+            if (!this.#channelMemberships) return
             const {channelName} = x
-            const channelMembership = (nodeConfig.channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
+            const channelMembership = (this.#channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
             if (!channelMembership) return
-            if ((channelMembership.roles.provideFeeds) && (channelMembership.authorization) && (channelMembership.authorization.permissions.provideFeeds)) {
+            // roles are deprecated
+            // if ((channelMembership.roles.provideFeeds) && (channelMembership.authorization) && (channelMembership.authorization.permissions.provideFeeds)) {
+                if ((channelMembership.authorization) && (channelMembership.authorization.permissions.provideFeeds)) {
                 this.#requestSubfeedCallbacks.forEach(cb => {
                     cb(channelName, msg.feedId, msg.subfeedHash, msg.position)
                 })
@@ -786,27 +783,35 @@ class KacheryHubInterface {
             const au = cm.authorization
             if (au) {
                 const subscribeToPubsubChannels: PubsubChannelName[] = []
-                if ((au.permissions.requestFiles) && (cm.roles.requestFiles)) {
+                // roles are deprecated
+                // if ((au.permissions.requestFiles) && (cm.roles.requestFiles)) {
+                if (au.permissions.requestFiles) {
                     // if we are requesting files, then we need to listen to provideFiles channel
                     subscribeToPubsubChannels.push(pubsubChannelName(`${cm.channelName}-provideFiles`))
                 }
-                if ((au.permissions.provideFiles) && (cm.roles.provideFiles)) {
+                // roles are deprecated
+                // if ((au.permissions.provideFiles) && (cm.roles.provideFiles)) {
+                if (au.permissions.provideFiles) {
                     // if we are providing files, then we need to listen to requestFiles channel
                     subscribeToPubsubChannels.push(pubsubChannelName(`${cm.channelName}-requestFiles`))
                 }
-                if ((au.permissions.requestFeeds) && (cm.roles.requestFeeds)) {
+                // if ((au.permissions.requestFeeds) && (cm.roles.requestFeeds)) {
+                if (au.permissions.requestFeeds) {
                     // if we are requesting feeds, then we need to listen to provideFeeds channel
                     subscribeToPubsubChannels.push(pubsubChannelName(`${cm.channelName}-provideFeeds`))
                 }
-                if ((au.permissions.provideFeeds) && (cm.roles.provideFeeds)) {
+                // if ((au.permissions.provideFeeds) && (cm.roles.provideFeeds)) {
+                if (au.permissions.provideFeeds) {
                     // if we are providing feeds, then we need to listen to requestFeeds channel
                     subscribeToPubsubChannels.push(pubsubChannelName(`${cm.channelName}-requestFeeds`))
                 }
-                if ((au.permissions.requestTasks) && (cm.roles.requestTasks)) {
+                // if ((au.permissions.requestTasks) && (cm.roles.requestTasks)) {
+                if (au.permissions.requestTasks) {
                     // if we are requesting tasks, then we need to listen to provideTasks channel
                     subscribeToPubsubChannels.push(pubsubChannelName(`${cm.channelName}-provideTasks`))
                 }
-                if ((au.permissions.provideTasks) && (cm.roles.provideTasks)) {
+                // if ((au.permissions.provideTasks) && (cm.roles.provideTasks)) {
+                if (au.permissions.provideTasks) {
                     // if we are providing tasks, then we need to listen to requestTasks channel
                     subscribeToPubsubChannels.push(pubsubChannelName(`${cm.channelName}-requestTasks`))
                 }
@@ -815,7 +820,19 @@ class KacheryHubInterface {
                 this.#kacheryHubClient.createPubsubClientForChannel(cm.channelName, subscribeToPubsubChannels)
             }
         }
-        this.#nodeConfig = nodeConfig
+        this.#channelMemberships = [...(nodeConfig.channelMemberships || [])]
+        
+        for (let channelName of this.opts.additionalChannels) {
+            const channelConfig: ChannelConfig = await this.#kacheryHubClient.fetchChannelConfig(channelName)
+            const channelMembership: NodeChannelMembership = {
+                nodeId: this.opts.nodeId,
+                channelName,
+                roles: {}, // roles are deprecated
+                channelResourceId: channelConfig.bitwooderResourceId,
+                channelBucketBaseUrl: channelConfig.bucketBaseUrl
+            }
+            this.#channelMemberships.push(channelMembership)
+        }
     }
 }
 
