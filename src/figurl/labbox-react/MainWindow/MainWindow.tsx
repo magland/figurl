@@ -38,7 +38,7 @@ const MainWindow: React.FunctionComponent<Props> = ({packageName, logo, homePage
             />
             <div>
                 <Routes
-                    width={width}
+                    width={width - 5}
                     height={height - 50}
                     homePageProps={{...homePageProps, onOpenFigure: handleOpenFigure}}
                     recentFiguresDispatch={recentFiguresDispatch}
