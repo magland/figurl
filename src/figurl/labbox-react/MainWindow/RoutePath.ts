@@ -1,6 +1,6 @@
-type RoutePath = '/home' | '/about' | '/fig' | '/status'
+type RoutePath = '/home' | '/about' | '/fig' | '/status' | '/compose'
 export const isRoutePath = (x: string): x is RoutePath => {
-    if (['/home', '/about', '/fig', '/status'].includes(x)) return true
+    if (['/home', '/about', '/fig', '/status', '/compose'].includes(x)) return true
     return false
 }
 

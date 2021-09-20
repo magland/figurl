@@ -73,7 +73,7 @@ const useSetupKacheryNode = (nodeLabel: NodeLabel): KacheryNode => {
             kacheryStorageManager,
             mutableManager,
             localFeedManager,
-            additionalChannels: [channelName],
+            additionalChannels: channelName ? [channelName] : [],
             opts: {
                 kacheryHubUrl,
                 bitwooderUrl,
