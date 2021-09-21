@@ -15,12 +15,12 @@ type Props = {
 
 const columns = [
     {
-        key: 'documentId',
+        key: 'label',
         label: 'Document'
     },
     {
-        key: 'label',
-        label: 'Label'
+        key: 'documentId',
+        label: 'ID'
     }
 ]
 
@@ -36,11 +36,14 @@ const ComposeHome: FunctionComponent<Props> = () => {
     const rows = documents.map(doc => ({
         key: doc.documentId,
         columnValues: {
+            label: {
+                text: doc.label,
+                element: <Hyperlink onClick={() => handleDocumentClicked(doc.documentId)}>{doc.label}</Hyperlink>
+            },
             documentId: {
                 text: doc.documentId,
                 element: <Hyperlink onClick={() => handleDocumentClicked(doc.documentId)}>{doc.documentId}</Hyperlink>
-            },
-            label: doc.label
+            }
         }
     }))
     const [newDocumentLabel, setNewDocumentLabel] = useState<string>('')
@@ -65,7 +68,7 @@ const ComposeHome: FunctionComponent<Props> = () => {
     }, [setDocument, newDocumentLabel, channelName])
     return (
         <div style={{padding: 20}}>
-            <h2>Figurl compose</h2>
+            <h1>Figurl compose</h1>
             {
                 channelName ? (
                     <p>Kachery channel: <Hyperlink onClick={selectChannelVisibility.show}>{channelName}</Hyperlink></p>
@@ -73,6 +76,7 @@ const ComposeHome: FunctionComponent<Props> = () => {
                     <Hyperlink onClick={selectChannelVisibility.show}>Select a kachery channel</Hyperlink>
                 )
             }
+            {channelName && <h2>Documents on this device</h2>}
             {
                 channelName && (addVisibility.visible) ? (
                     <div>

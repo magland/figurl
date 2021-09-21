@@ -34,7 +34,10 @@ const ComposeDoc: FunctionComponent<Props> = ({documentId, width, height}) => {
     }, [internalDocument, setDocument])
     return (
         <div>
-            <Button disabled={!canSave} onClick={handleSave}>Save</Button>
+            <div style={{paddingLeft: 5}}>
+                <Button style={{marginTop: 3}} disabled={!canSave} onClick={handleSave}>Save to this device</Button>
+                {document && <span>&nbsp;{document.label} ({document.documentId})</span>}
+            </div>
             <Splitter
                 width={width}
                 height={height - 40}

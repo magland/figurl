@@ -44,7 +44,7 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
 
     const client = useGoogleSignInClient()
     const gapi = client?.gapi
-    const {setRoute, figureLabel, routePath} = useRoute()
+    const {setRoute, figureLabel, gist, routePath} = useRoute()
 
     const signedIn = useSignedIn()
     const handleLogin = useCallback(() => {
@@ -69,6 +69,11 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
                 {
                     ((routePath === '/fig') && (figureLabel)) && (
                         <span style={{paddingLeft: 20}}>{figureLabel}</span>
+                    )
+                }
+                {
+                    ((routePath === '/doc') && (gist)) && (
+                        <span style={{paddingLeft: 20}}>{fileNameFromGist(gist)}</span>
                     )
                 }
                 <span style={{marginLeft: 'auto'}} />
@@ -114,6 +119,11 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
             </ModalWindow>
         </span>
     )
+}
+
+const fileNameFromGist = (x: string) => {
+    const a = x.split('/')
+    return a[a.length - 1]
 }
 
 export default ApplicationBar

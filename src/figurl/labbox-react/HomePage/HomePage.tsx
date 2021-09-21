@@ -9,7 +9,7 @@ import './Home.css'
 import IntroSection from './IntroSection'
 import './localStyles.css'
 import RecentFiguresSection from './RecentFiguresSection'
-import ComposeSection from './ComposeSection'
+import DocumentSection from './DocumentSection'
 
 export type HomePageProps = {
     taskFunctionIds: TaskFunctionId[]
@@ -33,7 +33,7 @@ const HomePage: FunctionComponent<HomePageProps> = ({taskFunctionIds, introMd, p
             
             <IntroSection introMd={introMd} />
             <ChannelSection onSelectChannel={selectChannelVisibility.show} taskFunctionIds={taskFunctionIds} packageName={packageName} />
-            <ComposeSection />
+            <DocumentSection />
             <RecentFiguresSection recentFigures={recentFigures} plugins={plugins} onOpenFigure={onOpenFigure} />
             <span>
                 <hr />

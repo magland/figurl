@@ -33,9 +33,10 @@ const useRoute = () => {
     const p = location.pathname
     const figureLabel = p === '/fig' ? (query.label as any as string) || undefined : undefined
     const documentId = p === '/compose' ? (query.document as any as string) || undefined : undefined
+    const gist = p === '/doc' ? (query.gist as any as string) || undefined : undefined
     const routePath: RoutePath = isRoutePath(p) ? p : '/home'
 
-    const setRoute = useCallback((o: {routePath?: RoutePath, figureObjectOrHash?: FigureObject | Sha1Hash, channel?: ChannelName, figureLabel?: string, documentId?: string}) => {
+    const setRoute = useCallback((o: {routePath?: RoutePath, figureObjectOrHash?: FigureObject | Sha1Hash, channel?: ChannelName, figureLabel?: string, documentId?: string, gist?: string}) => {
         const query2 = {...query}
         let pathname2 = location.pathname
         if (o.routePath) pathname2 = o.routePath
@@ -54,6 +55,9 @@ const useRoute = () => {
         if (o.documentId) {
             query2.document = o.documentId
         }
+        if (o.gist) {
+            query2.gist = o.gist
+        }
         if (o.routePath !== '/fig') {
             delete query2['figureObject']
             delete query2['label']
@@ -62,12 +66,15 @@ const useRoute = () => {
         if (o.routePath !== '/compose') {
             delete query2['document']
         }
+        if (o.routePath !== '/doc') {
+            delete query2['gist']
+        }
         if (o.channel !== undefined) query2.channel = o.channel.toString()
         const search2 = queryString(query2)
         history.push({...location, pathname: pathname2, search: search2})
     }, [location, history, query])
     
-    return {routePath, figureObjectOrHash, channel, figureLabel, documentId, query, setRoute}
+    return {routePath, figureObjectOrHash, channel, figureLabel, documentId, gist, query, setRoute}
 }
 
 const queryString = (params: { [key: string]: string | string[] }) => {
