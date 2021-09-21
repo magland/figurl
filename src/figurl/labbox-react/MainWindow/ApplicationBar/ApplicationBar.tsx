@@ -44,7 +44,7 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
 
     const client = useGoogleSignInClient()
     const gapi = client?.gapi
-    const {setRoute, figureLabel, gist, routePath} = useRoute()
+    const {setRoute, figureLabel, wiki, routePath} = useRoute()
 
     const signedIn = useSignedIn()
     const handleLogin = useCallback(() => {
@@ -72,8 +72,8 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
                     )
                 }
                 {
-                    ((routePath === '/doc') && (gist)) && (
-                        <span style={{paddingLeft: 20}}>{fileNameFromGist(gist)}</span>
+                    ((routePath === '/doc') && (wiki)) && (
+                        <span style={{paddingLeft: 20}}>{fileNameFromWiki(wiki)}</span>
                     )
                 }
                 <span style={{marginLeft: 'auto'}} />
@@ -121,7 +121,7 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
     )
 }
 
-const fileNameFromGist = (x: string) => {
+const fileNameFromWiki = (x: string) => {
     const a = x.split('/')
     return a[a.length - 1]
 }

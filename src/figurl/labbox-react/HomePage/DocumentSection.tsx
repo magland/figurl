@@ -2,7 +2,7 @@ import Hyperlink from 'commonComponents/Hyperlink/Hyperlink';
 import useVisible from 'commonComponents/useVisible';
 import React, { FunctionComponent, useCallback } from 'react';
 import useRoute from '../MainWindow/useRoute';
-import ViewGistControl from './ViewGistControl';
+import ViewWikiPageControl from './ViewWikiPageControl';
 
 type Props = {
 
@@ -13,7 +13,7 @@ const DocumentSection: FunctionComponent<Props> = () => {
     const handleCompose = useCallback(() => {
         setRoute({routePath: '/compose'})
     }, [setRoute])
-    const gistControlVisibility = useVisible()
+    const wikiPageControlVisibility = useVisible()
     return (
         <div>
             <h3>Documents</h3>
@@ -21,11 +21,11 @@ const DocumentSection: FunctionComponent<Props> = () => {
                 <Hyperlink onClick={handleCompose}>Compose a document on this device</Hyperlink>
             </div>
             <div>
-                <Hyperlink onClick={gistControlVisibility.show}>View a gist document</Hyperlink>
+                <Hyperlink onClick={wikiPageControlVisibility.show}>View a GitHub wiki page document</Hyperlink>
             </div>
             {
-                gistControlVisibility.visible && (
-                    <ViewGistControl />
+                wikiPageControlVisibility.visible && (
+                    <ViewWikiPageControl />
                 )
             }
         </div>
