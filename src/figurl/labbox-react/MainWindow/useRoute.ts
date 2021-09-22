@@ -69,6 +69,7 @@ const useRoute = () => {
         if (o.routePath !== '/doc') {
             delete query2['wiki']
         }
+        delete query2['workspaceRoute'] // historical
         if (o.channel !== undefined) query2.channel = o.channel.toString()
         const search2 = queryString(query2)
         history.push({...location, pathname: pathname2, search: search2})
