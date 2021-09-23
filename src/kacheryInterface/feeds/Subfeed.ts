@@ -1,12 +1,16 @@
 import { Mutex } from 'async-mutex';
+import axios from 'axios';
+import logger from 'winston';
 import { hexToPublicKey, signMessage, verifySignature } from '../../commonInterface/crypto/signatures';
+import { byteCount, ChannelName, DurationMsec, durationMsecToNumber, FeedId, feedIdToPublicKeyHex, JSONObject, messageCount, MessageCount, messageCountToNumber, nowTimestamp, PrivateKey, PublicKey, SignedSubfeedMessage, SubfeedHash, SubfeedMessage, subfeedPosition, SubfeedPosition, subfeedPositionToNumber } from '../../commonInterface/kacheryTypes';
+import randomAlphaString from '../../commonInterface/util/randomAlphaString';
 import { LocalFeedManagerInterface } from '../core/ExternalInterface';
 import KacheryHubInterface from '../core/KacheryHubInterface';
-import { ChannelName, DurationMsec, durationMsecToNumber, FeedId, feedIdToPublicKeyHex, JSONObject, messageCount, MessageCount, messageCountToNumber, nowTimestamp, PrivateKey, PublicKey, SignedSubfeedMessage, SubfeedHash, SubfeedMessage, subfeedPosition, SubfeedPosition, subfeedPositionToNumber } from '../../commonInterface/kacheryTypes';
-import randomAlphaString from '../../commonInterface/util/randomAlphaString';
+import NodeStats from '../core/NodeStats';
+import IncomingSubfeedConnection from './IncomingSubfeedConnection';
 import LocalSubfeedSignedMessagesManager from './LocalSubfeedSignedMessagesManager';
+import OutgoingSubfeedConnection from './OutgoingSubfeedConnection';
 import RemoteSubfeedMessageDownloader from './RemoteSubfeedMessageDownloader';
-// import NewOutgoingSubfeedSubscriptionManager from './NewOutgoingSubfeedSubscriptionManager';
 
 class Subfeed {
     // Represents a subfeed, which may or may not be writeable on this node
@@ -14,7 +18,6 @@ class Subfeed {
     #privateKey: PrivateKey | null = null // The private key (or null if this is not writeable on the local node) -- set below
     #localSubfeedSignedMessagesManager: LocalSubfeedSignedMessagesManager // The signed messages loaded from the messages file (in-memory cache)
     #isWriteable: boolean | null = null
-    // #outgoingSubfeedSubscriptionManager: NewOutgoingSubfeedSubscriptionManager
     
     #initialized: boolean = false;
     #initializing: boolean = false;
@@ -23,19 +26,22 @@ class Subfeed {
     #onInitializeErrorCallbacks: ((err: Error) => void)[] = [];
     #newMessageListeners = new Map<ListenerId, () => void>();
 
-    #onMessagesAddedCallbacks: (() => void)[] = []
-
-    #subscribeToRemoteSubfeedCallbacks: ((feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName, position: SubfeedPosition) => void)[] = []
+    #onMessagesAddedCallbacks: ((messages: SignedSubfeedMessage[]) => void)[] = []
 
     #mutex = new Mutex()
     #remoteSubfeedMessageDownloader: RemoteSubfeedMessageDownloader
 
-    #triggerScheduled = false
+    #outgoingSubfeedConnection: OutgoingSubfeedConnection
+    #incomingSubfeedConnectionsByChannel: {[channelName: string]: IncomingSubfeedConnection} = {}
 
-    constructor(private kacheryHubInterface: KacheryHubInterface, private feedId: FeedId, private subfeedHash: SubfeedHash, private channelName: ChannelName | '*local*', private localFeedManager: LocalFeedManagerInterface) {
+    constructor(public kacheryHubInterface: KacheryHubInterface, public feedId: FeedId, public subfeedHash: SubfeedHash, public channelName: ChannelName | '*local*', private localFeedManager: LocalFeedManagerInterface, private nodeStats: NodeStats) {
         this.#publicKey = hexToPublicKey(feedIdToPublicKeyHex(feedId)); // The public key of the feed (which is determined by the feed ID)
         this.#localSubfeedSignedMessagesManager = new LocalSubfeedSignedMessagesManager(localFeedManager, feedId, subfeedHash, this.#publicKey)
         this.#remoteSubfeedMessageDownloader = new RemoteSubfeedMessageDownloader(this.kacheryHubInterface, this)
+
+        this.#outgoingSubfeedConnection = new OutgoingSubfeedConnection(
+            this
+        )
     }
     async acquireLock() {
         return await this.#mutex.acquire()
@@ -87,7 +93,7 @@ class Subfeed {
                     }
                     if (msgs) {
                         this.#localSubfeedSignedMessagesManager.addSignedMessages(msgs)
-                        this._scheduleTriggerNewMessageCallbacks()
+                        this._callNewMessagesCallbacks(msgs)
                     }
                 }
             }
@@ -144,12 +150,7 @@ class Subfeed {
         const messages = check()
         if (messages.length > 0) return messages
         if (durationMsecToNumber(waitMsec) > 0) {
-            this.#subscribeToRemoteSubfeedCallbacks.forEach(cb => {
-                if (this.channelName === '*local*') {
-                    throw Error('Unexpected channel=*local* in subscriptToRemoteSubfeedCallback')
-                }
-                cb(this.feedId, this.subfeedHash, this.channelName, subfeedPosition(Number(this.getNumLocalMessages())))
-            })
+            this.#outgoingSubfeedConnection.renew()
             return new Promise((resolve, reject) => {
                 const listenerId = createListenerId()
                 let completed = false
@@ -268,27 +269,82 @@ class Subfeed {
         }
         // CHAIN:append_messages:step(5)
         await this.#localSubfeedSignedMessagesManager.addSignedMessages(signedMessagesToAdd);
-        this._scheduleTriggerNewMessageCallbacks()
+        this._callNewMessagesCallbacks(signedMessagesToAdd)
     }
-    _scheduleTriggerNewMessageCallbacks() {
-        if (this.#triggerScheduled) return
-        this.#triggerScheduled = true
-        setTimeout(() => {
-            this.#triggerScheduled = false
-            this.#newMessageListeners.forEach((listener) => {
-                listener()
-            })
-            this.#onMessagesAddedCallbacks.forEach(cb => {
-                // CHAIN:append_messages:step(9)
-                cb()
-            })
-        }, 100)
+    async downloadMessages(numUploadedMessages: MessageCount) {
+        const i1 = this.getNumLocalMessages()
+        const i2 = numUploadedMessages
+        const channelName = this.channelName
+        if (channelName === '*local*') return
+        if (i1 >= i2) return
+        const messages = await this.kacheryHubInterface.downloadSignedSubfeedMessages(channelName, this.feedId, this.subfeedHash, i1, i2)
+        this.addSignedMessages(messages)
     }
-    onMessagesAdded(callback: () => void) {
+    handleIncomingSubscription(channelName: ChannelName, position: SubfeedPosition) {
+        let a = this.#incomingSubfeedConnectionsByChannel[channelName.toString()]
+        if ((!a) || (a.isExpired())) {
+            a = new IncomingSubfeedConnection(this, channelName)
+            this.#incomingSubfeedConnectionsByChannel[channelName.toString()] = a
+        }
+        a.handleIncomingSubscription(position)
+    }
+    reportReceivedUpdateFromRemote() {
+        this.#outgoingSubfeedConnection.reportReceivedUpdateFromRemote()
+    }
+    _callNewMessagesCallbacks(messages: SignedSubfeedMessage[]) {
+        if (messages.length === 0) return
+        for (let listener of this.#newMessageListeners.values()) {
+            listener()
+        }
+        for (let cb of this.#onMessagesAddedCallbacks) {
+            cb(messages)
+        }
+        const channelNames = Object.keys(this.#incomingSubfeedConnectionsByChannel).map(cn => (cn as any as ChannelName))
+        for (let channelName of channelNames) {
+            const x = this.#incomingSubfeedConnectionsByChannel[channelName.toString()]
+            if (!x.isExpired()) {
+                x.handleNewMessages(messages)
+            }
+            else {
+                delete this.#incomingSubfeedConnectionsByChannel[channelName.toString()]
+            }
+        }
+    }
+    async uploadSubfeedMessages(channelName: ChannelName): Promise<MessageCount> {
+        const subfeedJson = await this.kacheryHubInterface.loadSubfeedJson(channelName, this.feedId, this.subfeedHash)
+        const currentNumUploaded = subfeedJson?.messageCount || messageCount(0)
+        const numLocal = this.getNumLocalMessages()
+        if (currentNumUploaded < numLocal) {
+            const i1 = Number(currentNumUploaded)
+            const i2 = Number(numLocal)
+            logger.debug(`uploadSubfeedMessagesToChannel: Uploading subfeed messages ${i1}-${i2 - 1} to channel ${channelName}`)
+            const signedMessages = this.getLocalSignedMessages({position: subfeedPosition(i1), numMessages: messageCount(i2 - i1)})
+            const signedMessageContents = signedMessages.map((sm) => (
+                new TextEncoder().encode(JSON.stringify(sm))
+            ))
+            const messageSizes = signedMessageContents.map((smc) => byteCount(smc.length))
+            const uploadUrls = await this.kacheryHubInterface.createSignedSubfeedMessageUploadUrls({channelName, feedId: this.feedId, subfeedHash: this.subfeedHash, messageNumberRange: [i1, i2], messageSizes})
+            for (let i = i1; i < i2; i++) {
+                const uploadUrl = uploadUrls[i - i1]
+                const signedMessageContent = signedMessageContents[i - i1]
+                const resp = await axios.put(uploadUrl.toString(), signedMessageContent, {
+                    headers: {
+                        'Content-Type': 'application/octet-stream',
+                        'Content-Length': signedMessageContent.length
+                    },
+                    maxBodyLength: Infinity, // apparently this is important
+                    maxContentLength: Infinity // apparently this is important
+                })
+                if (resp.status !== 200) {
+                    throw Error(`Error in upload of subfeed message: ${resp.statusText}`)
+                }
+                this.nodeStats.reportBytesSent(byteCount(signedMessageContent.length), channelName)
+            }
+        }
+        return numLocal
+    }
+    onMessagesAdded(callback: (messages: SignedSubfeedMessage[]) => void) {
         this.#onMessagesAddedCallbacks.push(callback)
-    }
-    onSubscribeToRemoteSubfeed(callback: (feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName, position: SubfeedPosition) => void) {
-        this.#subscribeToRemoteSubfeedCallbacks.push(callback)
     }
     reportNumRemoteMessages(channelName: ChannelName, numRemoteMessages: MessageCount) {
         this.#remoteSubfeedMessageDownloader.reportNumRemoteMessages(channelName, numRemoteMessages)

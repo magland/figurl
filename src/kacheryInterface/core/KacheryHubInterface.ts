@@ -7,7 +7,7 @@ import OutgoingTaskManager from "../tasks/outgoingTaskManager";
 import { ChannelConfig, NodeChannelMembership, NodeConfig, RegisteredTaskFunction, RequestedTask } from "../kacheryHubTypes";
 import { KacheryNodeRequestBody } from "../kacheryNodeRequestTypes";
 import { ByteCount, ChannelName, DurationMsec, durationMsecToNumber, elapsedSince, errorMessage, ErrorMessage, FeedId, FileKey, fileKeyHash, isMessageCount, isSignedSubfeedMessage, JSONValue, MessageCount, NodeId, NodeLabel, nowTimestamp, pathifyHash, pubsubChannelName, PubsubChannelName, scaledDurationMsec, Sha1Hash, Signature, SignedSubfeedMessage, SubfeedHash, SubfeedPosition, TaskFunctionId, TaskFunctionType, TaskId, TaskKwargs, TaskStatus, toTaskId, urlString, UrlString, UserId, _validateObject } from "../../commonInterface/kacheryTypes";
-import { KacheryHubPubsubMessageBody, KacheryHubPubsubMessageData, ProbeTaskFunctionsBody, RequestFileMessageBody, RequestSubfeedMessageBody, RequestTaskMessageBody, UpdateSubfeedMessageCountMessageBody, UpdateTaskStatusMessageBody, UploadFileStatusMessageBody } from "../pubsubMessages";
+import { KacheryHubPubsubMessageBody, KacheryHubPubsubMessageData, NewSubfeedMessagesMessageBody, NumSubfeedMessagesUploadedMessageBody, ProbeTaskFunctionsBody, RequestFileMessageBody, RequestTaskMessageBody, SubscribeToSubfeedMessageBody, UpdateTaskStatusMessageBody, UploadFileStatusMessageBody } from "../pubsubMessages";
 import cacheBust from "../../commonInterface/util/cacheBust";
 import computeTaskHash from "../../commonInterface/util/computeTaskHash";
 import randomAlphaString from "../../commonInterface/util/randomAlphaString";
@@ -35,8 +35,9 @@ class KacheryHubInterface {
     #initializing = false
     #onInitializedCallbacks: (() => void)[] = []
     #incomingFileRequestCallbacks: IncomingFileRequestCallback[] = []
-    #requestSubfeedCallbacks: ((channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, position: SubfeedPosition) => void)[] = []
-    #updateSubfeedMessageCountCallbacks: ((channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, messageCount: MessageCount) => void)[] = []
+    #incomingSubfeedSubscriptionCallbacks: ((channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, position: SubfeedPosition) => void)[] = []
+    #newSubfeedMessagesCallbacks: ((channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, messages: SignedSubfeedMessage[]) => void)[] = []
+    #numSubfeedMessagesUploadedCallbacks: ((channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, numMessagesUploaded: MessageCount) => void)[] = []
     #incomingTaskManager: IncomingTaskManager
     #outgoingTaskManager: OutgoingTaskManager
     constructor(private opts: {
@@ -233,11 +234,14 @@ class KacheryHubInterface {
     onIncomingFileRequest(callback: IncomingFileRequestCallback) {
         this.#incomingFileRequestCallbacks.push(callback)
     }
-    onRequestSubfeed(cb: (channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, position: SubfeedPosition) => void) {
-        this.#requestSubfeedCallbacks.push(cb)
+    onIncomingSubfeedSubscription(cb: (channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, position: SubfeedPosition) => void) {
+        this.#incomingSubfeedSubscriptionCallbacks.push(cb)
     }
-    onUpdateSubfeedMessageCount(callback: (channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, messageCount: MessageCount) => void) {
-        this.#updateSubfeedMessageCountCallbacks.push(callback)
+    onNewSubfeedMessages(cb: (channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, messages: SignedSubfeedMessage[]) => void) {
+        this.#newSubfeedMessagesCallbacks.push(cb)
+    }
+    onNumSubfeedMessagesUploaded(cb: (channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, numMessagesUploaded: MessageCount) => void) {
+        this.#numSubfeedMessagesUploadedCallbacks.push(cb)
     }
     async sendUploadFileStatusMessage(args: {channelName: ChannelName, fileKey: FileKey, status: 'started' | 'finished'}) {
         logger.debug(`KacheryHubInterface: sendUploadFileStatusMessage ${args.channelName} ${args.status}`)
@@ -269,39 +273,6 @@ class KacheryHubInterface {
     async createSignedTaskResultUploadUrl(a: {channelName: ChannelName, taskId: TaskId, size: ByteCount}) {
         logger.debug(`KacheryHubInterface: createSignedTaskResultUploadUrl`)
         return this.#kacheryHubClient.createSignedTaskResultUploadUrl(a)
-    }
-    async reportToChannelSubfeedMessagesAdded(channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, numMessages: MessageCount) {
-        logger.debug(`KacheryHubInterface: reportToChannelSubfeedMessagesAdded`)
-        await this.initialize()
-        const msg: UpdateSubfeedMessageCountMessageBody = {
-            type: 'updateSubfeedMessageCount',
-            feedId,
-            subfeedHash,
-            messageCount: numMessages
-        }
-        this._publishMessageToPubsubChannel(channelName, pubsubChannelName(`${channelName}-provideFeeds`), msg)
-    }
-    async subscribeToRemoteSubfeed(feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName, position: SubfeedPosition) {
-        logger.debug(`KacheryHubInterface: subscribeToRemoteSubfeed`)
-        await this.initialize()
-        if (!this.#channelMemberships) return
-        // const channelNames: ChannelName[] = []
-        // for (let channelMembership of (this.#channelMemberships || [])) {
-        //     if (channelMembership.roles.requestFeeds) {
-        //         if ((channelMembership.authorization) && (channelMembership.authorization.permissions.requestFeeds)) {
-        //             channelNames.push(channelMembership.channelName)
-        //         }
-        //     }
-        // }
-        const msg: RequestSubfeedMessageBody = {
-            type: 'requestSubfeed',
-            feedId,
-            subfeedHash,
-            position
-        }
-        // for (let channelName of channelNames) {
-        this._publishMessageToPubsubChannel(channelName, pubsubChannelName(`${channelName}-requestFeeds`), msg)
-        // }
     }
     async _requestTaskFromChannel(args: {channelName: ChannelName, taskFunctionId: TaskFunctionId, kwargs: TaskKwargs, taskFunctionType: TaskFunctionType, taskId: TaskId, backendId: string | null}) {
         const {channelName, taskFunctionId, kwargs, taskFunctionType, taskId, backendId} = args
@@ -671,6 +642,33 @@ class KacheryHubInterface {
             }, durationMsecToNumber(timeoutMsec))
         })
     }
+    sendSubscribeToSubfeedMessage(channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, position: SubfeedPosition) {
+        const msg: SubscribeToSubfeedMessageBody = {
+            type: 'subscribeToSubfeed',
+            feedId,
+            subfeedHash,
+            position
+        }
+        this._publishMessageToPubsubChannel(channelName, pubsubChannelName(`${channelName}-requestFeeds`), msg)
+    }
+    sendNewSubfeedMessagesMessage(channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, messages: SignedSubfeedMessage[]) {
+        const msg: NewSubfeedMessagesMessageBody = {
+            type: 'newSubfeedMessages',
+            feedId,
+            subfeedHash,
+            messages
+        }
+        this._publishMessageToPubsubChannel(channelName, pubsubChannelName(`${channelName}-provideFeeds`), msg)
+    }
+    sendNumSubfeedMessagesUploadedMessage(channelName: ChannelName, feedId: FeedId, subfeedHash: SubfeedHash, numUploadedMessages: MessageCount) {
+        const msg: NumSubfeedMessagesUploadedMessageBody = {
+            type: 'numSubfeedMessagesUploaded',
+            feedId,
+            subfeedHash,
+            numMessages: numUploadedMessages
+        }
+        this._publishMessageToPubsubChannel(channelName, pubsubChannelName(`${channelName}-provideFeeds`), msg)
+    }
     _getChannelMembership(channelName: ChannelName) {
         if (!this.#channelMemberships) return
         const x = (this.#channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
@@ -691,6 +689,9 @@ class KacheryHubInterface {
             this.opts.nodeStats.reportMessagesSent(1, channelName)
             pubsubChannel.publish({data: m as any as JSONValue})    
         }
+        else {
+            console.warn('No pubsub client for channel', channelName, pubsubChannelName)
+        }
     }
     _handleKacheryHubPubsubMessage(x: IncomingKacheryHubPubsubMessage) {
         const msg = x.message
@@ -707,32 +708,32 @@ class KacheryHubInterface {
                 cb({fileKey: msg.fileKey, channelName: x.channelName, fromNodeId: x.fromNodeId})
             })
         }
-        else if (msg.type === 'requestSubfeed') {
-            if (x.pubsubChannelName !== pubsubChannelName(`${x.channelName}-requestFeeds`)) {
-                logger.warn(`Unexpected pubsub channel for requestSubfeed: ${x.pubsubChannelName}`)
-                return
-            }
-            if (!this.#channelMemberships) return
-            const {channelName} = x
-            const channelMembership = (this.#channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
-            if (!channelMembership) return
-            // roles are deprecated
-            // if ((channelMembership.roles.provideFeeds) && (channelMembership.authorization) && (channelMembership.authorization.permissions.provideFeeds)) {
-                if ((channelMembership.authorization) && (channelMembership.authorization.permissions.provideFeeds)) {
-                this.#requestSubfeedCallbacks.forEach(cb => {
-                    cb(channelName, msg.feedId, msg.subfeedHash, msg.position)
-                })
-            }
-        }
-        else if (msg.type === 'updateSubfeedMessageCount') {
-            if (x.pubsubChannelName !== pubsubChannelName(`${x.channelName}-provideFeeds`)) {
-                logger.warn(`Unexpected pubsub channel for updateSubfeedMessageCount: ${x.pubsubChannelName}`)
-                return
-            }
-            this.#updateSubfeedMessageCountCallbacks.forEach(cb => {
-                cb(x.channelName, msg.feedId, msg.subfeedHash, msg.messageCount)
-            })
-        }
+        // else if (msg.type === 'requestSubfeed') {
+        //     if (x.pubsubChannelName !== pubsubChannelName(`${x.channelName}-requestFeeds`)) {
+        //         logger.warn(`Unexpected pubsub channel for requestSubfeed: ${x.pubsubChannelName}`)
+        //         return
+        //     }
+        //     if (!this.#channelMemberships) return
+        //     const {channelName} = x
+        //     const channelMembership = (this.#channelMemberships || []).filter(cm => (cm.channelName === channelName))[0]
+        //     if (!channelMembership) return
+        //     // roles are deprecated
+        //     // if ((channelMembership.roles.provideFeeds) && (channelMembership.authorization) && (channelMembership.authorization.permissions.provideFeeds)) {
+        //         if ((channelMembership.authorization) && (channelMembership.authorization.permissions.provideFeeds)) {
+        //         this.#requestSubfeedCallbacks.forEach(cb => {
+        //             cb(channelName, msg.feedId, msg.subfeedHash, msg.position)
+        //         })
+        //     }
+        // }
+        // else if (msg.type === 'updateSubfeedMessageCount') {
+        //     if (x.pubsubChannelName !== pubsubChannelName(`${x.channelName}-provideFeeds`)) {
+        //         logger.warn(`Unexpected pubsub channel for updateSubfeedMessageCount: ${x.pubsubChannelName}`)
+        //         return
+        //     }
+        //     this.#updateSubfeedMessageCountCallbacks.forEach(cb => {
+        //         cb(x.channelName, msg.feedId, msg.subfeedHash, msg.messageCount)
+        //     })
+        // }
         else if (msg.type === 'updateTaskStatus') {
             if (x.pubsubChannelName !== pubsubChannelName(`${x.channelName}-provideTasks`)) {
                 logger.warn(`Unexpected pubsub channel for updateTaskStatus: ${x.pubsubChannelName}`)
@@ -768,6 +769,17 @@ class KacheryHubInterface {
             }
             this.#outgoingTaskManager.reportRegisteredTaskFunctions(x.channelName, msg.registeredTaskFunctions)
         }
+        else if (msg.type === 'newSubfeedMessages') {
+            this.#newSubfeedMessagesCallbacks.forEach(cb => cb(x.channelName, msg.feedId, msg.subfeedHash, msg.messages))
+        }
+        else if (msg.type === 'numSubfeedMessagesUploaded') {
+            this.#numSubfeedMessagesUploadedCallbacks.forEach(cb => cb(x.channelName, msg.feedId, msg.subfeedHash, msg.numMessages))
+        }
+        else if (msg.type === 'subscribeToSubfeed') {
+            this.#incomingSubfeedSubscriptionCallbacks.forEach(cb => {
+                cb(x.channelName, msg.feedId, msg.subfeedHash, msg.position)
+            })
+        }
     }
     async _doInitialize() {
         let nodeConfig: NodeConfig
@@ -778,8 +790,27 @@ class KacheryHubInterface {
             logger.warn('Problem fetching node config.', err.message)
             return
         }
+
+        this.#channelMemberships = [...(nodeConfig.channelMemberships || [])]
+        
+        for (let channelName of this.opts.additionalChannels) {
+            const channelConfig: ChannelConfig = await this.#kacheryHubClient.fetchChannelConfig(channelName)
+            const authorizedNode = (channelConfig.authorizedNodes || []).filter(an => (an.nodeId === this.opts.nodeId))[0]
+            if (authorizedNode) {
+                const channelMembership: NodeChannelMembership = {
+                    nodeId: this.opts.nodeId,
+                    channelName,
+                    roles: {}, // roles are deprecated
+                    channelResourceId: channelConfig.bitwooderResourceId,
+                    channelBucketBaseUrl: channelConfig.bucketBaseUrl,
+                    authorization: {channelName, nodeId: this.opts.nodeId, permissions: authorizedNode.permissions}
+                }
+                this.#channelMemberships.push(channelMembership)
+            }
+        }
+
         // initialize the pubsub clients so we can subscribe to the pubsub channels
-        for (let cm of (nodeConfig.channelMemberships || [])) {
+        for (let cm of this.#channelMemberships) {
             const au = cm.authorization
             if (au) {
                 const subscribeToPubsubChannels: PubsubChannelName[] = []
@@ -820,19 +851,7 @@ class KacheryHubInterface {
                 this.#kacheryHubClient.createPubsubClientForChannel(cm.channelName, subscribeToPubsubChannels)
             }
         }
-        this.#channelMemberships = [...(nodeConfig.channelMemberships || [])]
         
-        for (let channelName of this.opts.additionalChannels) {
-            const channelConfig: ChannelConfig = await this.#kacheryHubClient.fetchChannelConfig(channelName)
-            const channelMembership: NodeChannelMembership = {
-                nodeId: this.opts.nodeId,
-                channelName,
-                roles: {}, // roles are deprecated
-                channelResourceId: channelConfig.bitwooderResourceId,
-                channelBucketBaseUrl: channelConfig.bucketBaseUrl
-            }
-            this.#channelMemberships.push(channelMembership)
-        }
     }
 }
 

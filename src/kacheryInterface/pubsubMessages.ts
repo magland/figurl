@@ -1,5 +1,5 @@
 import { isRegisteredTaskFunction, RegisteredTaskFunction } from "./kacheryHubTypes";
-import { ErrorMessage, FeedId, FileKey, isArrayOf, isEqualTo, isErrorMessage, isFeedId, isFileKey, isMessageCount, isNodeId, isNull, isOneOf, isSignature, isString, isSubfeedHash, isSubfeedPosition, isTaskFunctionId, isTaskFunctionType, isTaskId, isTaskKwargs, isTaskStatus, MessageCount, NodeId, optional, Signature, SubfeedHash, SubfeedPosition, TaskFunctionId, TaskFunctionType, TaskId, TaskKwargs, TaskStatus, _validateObject } from "../commonInterface/kacheryTypes";
+import { ErrorMessage, FeedId, FileKey, isArrayOf, isEqualTo, isErrorMessage, isFeedId, isFileKey, isMessageCount, isNodeId, isNull, isOneOf, isSignature, isSignedSubfeedMessage, isString, isSubfeedHash, isSubfeedPosition, isTaskFunctionId, isTaskFunctionType, isTaskId, isTaskKwargs, isTaskStatus, MessageCount, NodeId, optional, Signature, SignedSubfeedMessage, SubfeedHash, SubfeedPosition, TaskFunctionId, TaskFunctionType, TaskId, TaskKwargs, TaskStatus, _validateObject } from "../commonInterface/kacheryTypes";
 
 export type RequestFileMessageBody = {
     type: 'requestFile',
@@ -27,32 +27,80 @@ export const isUploadFileStatusMessageBody = (x: any): x is UploadFileStatusMess
     })
 }
 
-export type UpdateSubfeedMessageCountMessageBody = {
-    type: 'updateSubfeedMessageCount',
-    feedId: FeedId,
-    subfeedHash: SubfeedHash,
-    messageCount: MessageCount
+// export type UpdateSubfeedMessageCountMessageBody = {
+//     type: 'updateSubfeedMessageCount',
+//     feedId: FeedId,
+//     subfeedHash: SubfeedHash,
+//     messageCount: MessageCount
+// }
+
+// export const isUpdateSubfeedMessageCountMessageBody = (x: any): x is UpdateSubfeedMessageCountMessageBody => {
+//     return _validateObject(x, {
+//         type: isEqualTo('updateSubfeedMessageCount'),
+//         feedId: isFeedId,
+//         subfeedHash: isSubfeedHash,
+//         messageCount: isMessageCount
+//     })
+// }
+
+// export type RequestSubfeedMessageBody = {
+//     type: 'requestSubfeed',
+//     feedId: FeedId,
+//     subfeedHash: SubfeedHash,
+//     position: SubfeedPosition
+// }
+
+// export const isRequestSubfeedMessageBody = (x: any): x is RequestSubfeedMessageBody => {
+//     return _validateObject(x, {
+//         type: isEqualTo('requestSubfeed'),
+//         feedId: isFeedId,
+//         subfeedHash: isSubfeedHash,
+//         position: isSubfeedPosition
+//     })
+// }
+
+export type NewSubfeedMessagesMessageBody = {
+    type: 'newSubfeedMessages'
+    feedId: FeedId
+    subfeedHash: SubfeedHash
+    messages: SignedSubfeedMessage[]
 }
 
-export const isUpdateSubfeedMessageCountMessageBody = (x: any): x is UpdateSubfeedMessageCountMessageBody => {
+export const isNewSubfeedMessagesMessageBody = (x: any): x is NewSubfeedMessagesMessageBody => {
     return _validateObject(x, {
-        type: isEqualTo('updateSubfeedMessageCount'),
+        type: isEqualTo('newSubfeedMessages'),
         feedId: isFeedId,
         subfeedHash: isSubfeedHash,
-        messageCount: isMessageCount
+        messages: isArrayOf(isSignedSubfeedMessage)
     })
 }
 
-export type RequestSubfeedMessageBody = {
-    type: 'requestSubfeed',
-    feedId: FeedId,
-    subfeedHash: SubfeedHash,
+export type NumSubfeedMessagesUploadedMessageBody = {
+    type: 'numSubfeedMessagesUploaded'
+    feedId: FeedId
+    subfeedHash: SubfeedHash
+    numMessages: MessageCount
+}
+
+export const isNumSubfeedMessagesUploadedMessageBody = (x: any): x is NumSubfeedMessagesUploadedMessageBody => {
+    return _validateObject(x, {
+        type: isEqualTo('numSubfeedMessagesUploaded'),
+        feedId: isFeedId,
+        subfeedHash: isSubfeedHash,
+        numMessages: isMessageCount
+    })
+}
+
+export type SubscribeToSubfeedMessageBody = {
+    type: 'subscribeToSubfeed'
+    feedId: FeedId
+    subfeedHash: SubfeedHash
     position: SubfeedPosition
 }
 
-export const isRequestSubfeedMessageBody = (x: any): x is RequestSubfeedMessageBody => {
+export const isSubscribeToSubfeedMessageBody = (x: any): x is SubscribeToSubfeedMessageBody => {
     return _validateObject(x, {
-        type: isEqualTo('requestSubfeed'),
+        type: isEqualTo('subscribeToSubfeed'),
         feedId: isFeedId,
         subfeedHash: isSubfeedHash,
         position: isSubfeedPosition
@@ -121,18 +169,32 @@ export const isReportRegisteredTaskFunctionsBody = (x: any): x is ReportRegister
     })
 }
 
-export type KacheryHubPubsubMessageBody = RequestFileMessageBody | UploadFileStatusMessageBody | UpdateSubfeedMessageCountMessageBody | RequestSubfeedMessageBody | UpdateTaskStatusMessageBody | RequestTaskMessageBody | ProbeTaskFunctionsBody | ReportRegisteredTaskFunctionsBody
+export type KacheryHubPubsubMessageBody = 
+    RequestFileMessageBody |
+    UploadFileStatusMessageBody |
+    // UpdateSubfeedMessageCountMessageBody |
+    // RequestSubfeedMessageBody |
+    UpdateTaskStatusMessageBody |
+    RequestTaskMessageBody |
+    ProbeTaskFunctionsBody |
+    ReportRegisteredTaskFunctionsBody |
+    SubscribeToSubfeedMessageBody |
+    NewSubfeedMessagesMessageBody |
+    NumSubfeedMessagesUploadedMessageBody
 
 export const isKacheryHubPubsubMessageBody = (x: any): x is KacheryHubPubsubMessageBody => {
     return isOneOf([
         isRequestFileMessageBody,
         isUploadFileStatusMessageBody,
-        isUpdateSubfeedMessageCountMessageBody,
-        isRequestSubfeedMessageBody,
+        // isUpdateSubfeedMessageCountMessageBody,
+        // isRequestSubfeedMessageBody,
         isUpdateTaskStatusMessageBody,
         isRequestTaskMessageBody,
         isProbeTaskFunctionsBody,
-        isReportRegisteredTaskFunctionsBody
+        isReportRegisteredTaskFunctionsBody,
+        isSubscribeToSubfeedMessageBody,
+        isNewSubfeedMessagesMessageBody,
+        isNumSubfeedMessagesUploadedMessageBody
     ])(x)
 }
 

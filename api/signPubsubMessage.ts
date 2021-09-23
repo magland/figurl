@@ -16,7 +16,7 @@ module.exports = (req: VercelRequest, res: VercelResponse) => {
     
     ;(async () => {
         let okay = false
-        if (messageBody.type === 'requestSubfeed') {
+        if (messageBody.type === 'subscribeToSubfeed') {
             okay = true
         }
         else if (messageBody.type === 'requestTask') {
