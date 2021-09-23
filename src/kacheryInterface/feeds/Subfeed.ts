@@ -312,7 +312,7 @@ class Subfeed {
     }
     async uploadSubfeedMessages(channelName: ChannelName): Promise<MessageCount> {
         const subfeedJson = await this.kacheryHubInterface.loadSubfeedJson(channelName, this.feedId, this.subfeedHash)
-        const currentNumUploaded = subfeedJson?.messageCount || messageCount(0)
+        const currentNumUploaded = subfeedJson ? subfeedJson.messageCount : messageCount(0)
         const numLocal = this.getNumLocalMessages()
         if (currentNumUploaded < numLocal) {
             const i1 = Number(currentNumUploaded)

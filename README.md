@@ -4,7 +4,7 @@ Shareable web links for figures generated using Python.
 
 ## Sharing static figures
 
-The first step in sharing static figures is to [setup and host a kachery node](https://github.com/kacheryhub/kachery-doc/blob/main/doc/kacheryhub-markdown/hostKacheryNode.md) on your computer. You can read more about the kachery system [here](https://github.com/kacheryhub/kachery-doc/blob/main/README.md).
+The first step in sharing static figures is to [setup and host a kachery node](https://github.com/kacheryhub/kachery-doc/blob/main/doc/hostKacheryNode.md) on your computer. You can read more about the kachery system [here](https://github.com/kacheryhub/kachery-doc/blob/main/README.md).
 
 Once you have a running node and have registered your node on kacheryhub, you will need to [create a kachery channel](). This is where your figure data will be stored in the cloud.
 
