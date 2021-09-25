@@ -14,7 +14,7 @@ const kacheryHubApiRequest = async (request: KacheryHubRequest, opts: {reCaptcha
     }
     catch(err: any) {
         if (err.response) {
-            console.log(err.response)
+            console.warn(err.response)
             throw Error(err.response.data)
         }
         else throw err

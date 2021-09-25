@@ -800,7 +800,7 @@ class KacheryHubInterface {
                 const channelMembership: NodeChannelMembership = {
                     nodeId: this.opts.nodeId,
                     channelName,
-                    roles: {}, // roles are deprecated
+                    // roles: {}, // roles are deprecated
                     channelResourceId: channelConfig.bitwooderResourceId,
                     channelBucketBaseUrl: channelConfig.bucketBaseUrl,
                     authorization: {channelName, nodeId: this.opts.nodeId, permissions: authorizedNode.permissions}

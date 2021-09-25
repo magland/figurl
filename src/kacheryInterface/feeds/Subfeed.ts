@@ -238,18 +238,23 @@ class Subfeed {
         }
         if (signedMessages.length === 0)
             return;
+        let localMessageCount = Number(this.#localSubfeedSignedMessagesManager.getNumMessages());
         // it's possible that we have already added some of these messages. Let's check
-        if (signedMessages[0].body.messageNumber < messageCountToNumber(this.#localSubfeedSignedMessagesManager.getNumMessages())) {
-            signedMessages = signedMessages.slice(messageCountToNumber(this.#localSubfeedSignedMessagesManager.getNumMessages()) - signedMessages[0].body.messageNumber)
+        if (signedMessages[0].body.messageNumber < localMessageCount) {
+            signedMessages = signedMessages.slice(localMessageCount - signedMessages[0].body.messageNumber)
+        }
+        // it also is possible that we haven't added the messages that come before the new messages. In that case just return.
+        if (signedMessages[0].body.messageNumber > localMessageCount) {
+            console.warn('Ignoring messages because message number is too high', signedMessages[0].body.messageNumber, localMessageCount)
+            return
         }
         if (signedMessages.length === 0)
             return;
         const signedMessagesToAdd: SignedSubfeedMessage[] = []
         let previousSignature;
         if (Number(this.#localSubfeedSignedMessagesManager.getNumMessages()) > 0) {
-            previousSignature = this.#localSubfeedSignedMessagesManager.getSignedMessage(Number(this.#localSubfeedSignedMessagesManager.getNumMessages()) - 1).signature;
+            previousSignature = this.#localSubfeedSignedMessagesManager.getSignedMessage(localMessageCount - 1).signature;
         }
-        let messageNumber = Number(this.#localSubfeedSignedMessagesManager.getNumMessages());
         for (let signedMessage of signedMessages) {
             const body = signedMessage.body;
             const signature = signedMessage.signature;
@@ -257,14 +262,14 @@ class Subfeed {
                 throw Error(`Error verifying signature when adding signed message for: ${this.feedId} ${this.subfeedHash} ${signature}`);
             }
             if ((body.previousSignature || null) !== (previousSignature || null)) {
-                throw Error(`Error in previousSignature when adding signed message for: ${this.feedId} ${this.subfeedHash} ${body.previousSignature} <> ${previousSignature}`);
+                throw Error(`Error in previousSignature when adding signed message for: ${this.feedId} ${this.subfeedHash} ${body.previousSignature} <> ${previousSignature} (localMessageCount=${localMessageCount})`);
             }
-            if (body.messageNumber !== messageNumber) {
+            if (body.messageNumber !== localMessageCount) {
                 // problem here
-                throw Error(`Error in messageNumber when adding signed message for: ${this.feedId} ${this.subfeedHash} ${body.messageNumber} <> ${messageNumber}`);
+                throw Error(`Error in messageNumber when adding signed message for: ${this.feedId} ${this.subfeedHash} ${body.messageNumber} <> ${localMessageCount}`);
             }
             previousSignature = signedMessage.signature;
-            messageNumber ++;
+            localMessageCount ++;
             signedMessagesToAdd.push(signedMessage)
         }
         // CHAIN:append_messages:step(5)
@@ -340,6 +345,23 @@ class Subfeed {
                 }
                 this.nodeStats.reportBytesSent(byteCount(signedMessageContent.length), channelName)
             }
+            const subfeedJson = {
+                messageCount: i2
+            }
+            const subfeedJsonContent = new TextEncoder().encode(JSON.stringify(subfeedJson))
+            const subfeedJsonUploadUrl = await this.kacheryHubInterface.createSignedSubfeedJsonUploadUrl({channelName, feedId: this.feedId, subfeedHash: this.subfeedHash, size: byteCount(subfeedJsonContent.length)})
+            const resp = await axios.put(subfeedJsonUploadUrl.toString(), subfeedJsonContent, {
+                headers: {
+                    'Content-Type': 'application/octet-stream',
+                    'Content-Length': subfeedJsonContent.length
+                },
+                maxBodyLength: Infinity, // apparently this is important
+                maxContentLength: Infinity // apparently this is important
+            })
+            if (resp.status !== 200) {
+                throw Error(`Error in upload of subfeed json: ${resp.statusText}`)
+            }
+            this.nodeStats.reportBytesSent(byteCount(subfeedJsonContent.length), channelName)
         }
         return numLocal
     }

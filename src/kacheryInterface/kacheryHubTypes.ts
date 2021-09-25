@@ -190,17 +190,18 @@ export type NodeChannelMembership = {
     channelPasscodes?: Passcode[],
 
     // roles are deprecated
-    roles: {
-        downloadFiles?: boolean
-        downloadFeeds?: boolean
-        downloadTaskResults?: boolean
-        requestFiles?: boolean
-        requestFeeds?: boolean
-        requestTasks?: boolean
-        provideFiles?: boolean
-        provideFeeds?: boolean
-        provideTasks?: boolean
-    }
+    // roles: {
+    //     downloadFiles?: boolean
+    //     downloadFeeds?: boolean
+    //     downloadTaskResults?: boolean
+    //     requestFiles?: boolean
+    //     requestFeeds?: boolean
+    //     requestTasks?: boolean
+    //     provideFiles?: boolean
+    //     provideFeeds?: boolean
+    //     provideTasks?: boolean
+    // }
+    
     validChannelPasscodes?: Passcode[], // obtained by cross-referencing the channels collection
 
     // old
@@ -217,6 +218,7 @@ const isNodeChannelMembership = (x: any): x is NodeChannelMembership => {
         nodeId: isNodeId,
         channelName: isChannelName,
         channelPasscodes: optional(isArrayOf(isPasscode)),
+        // roles are deprecated
         roles: (a: any) => (_validateObject(a, {
             downloadFiles: optional(isBoolean),
             downloadFeeds: optional(isBoolean),
@@ -229,8 +231,10 @@ const isNodeChannelMembership = (x: any): x is NodeChannelMembership => {
             provideTasks: optional(isBoolean),
         }, {allowAdditionalFields: true})),
         validChannelPasscodes: optional(isArrayOf(isPasscode)),
+        // old
         channelBucketUri: optional(isString),
         authorization: optional(isNodeChannelAuthorization),
+        // new
         channelResourceId: optional(isString),
         channelBucketBaseUrl: optional(isString)
     }, {allowAdditionalFields: true})
