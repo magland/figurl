@@ -1,8 +1,8 @@
-import { FormControlLabel, FormGroup, Typography } from '@material-ui/core';
-import Switch from '@material-ui/core/Switch';
-import React, { Fragment, FunctionComponent } from 'react';
-import { Sorting, SortingCuration, SortingSelection, SortingSelectionDispatch } from "../../pluginInterface";
-import SelectUnitsWidget from './SelectUnitsWidget';
+import { FormControlLabel, FormGroup, Typography } from '@material-ui/core'
+import Switch from '@material-ui/core/Switch'
+import React, { Fragment, FunctionComponent } from 'react'
+import { Sorting, SortingCuration, SortingSelection, SortingSelectionDispatch } from "../../pluginInterface"
+import SelectUnitsWidget from './SelectUnitsWidget'
 
 type Props = {
     sorting: Sorting

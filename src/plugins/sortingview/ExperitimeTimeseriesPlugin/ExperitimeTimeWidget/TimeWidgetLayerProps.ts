@@ -1,4 +1,5 @@
-import { TimeWidgetAction, TimeWidgetPanel } from "./ExperitimeTimeWidget";
+import { TimeWidgetAction } from "plugins/sortingview/gui/extensions/timeseries/TimeWidgetNew/TimeWidgetNew"
+import { TimeWidgetPanel } from "./ExperitimeTimeWidget"
 
 export interface TimeWidgetLayerProps {
     width: number,

@@ -1,8 +1,9 @@
 import { useVisible } from 'figurl/labbox-react'
 import { CanvasPainter, PainterPath } from 'figurl/labbox-react/components/CanvasWidget/CanvasPainter'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { FaArrowDown, FaArrowUp, FaEye, FaRegTimesCircle } from 'react-icons/fa'
+import React, { useEffect, useMemo, useState } from 'react'
+import { FaEye } from 'react-icons/fa'
 import { RecordingSelection, RecordingSelectionDispatch, recordingSelectionReducer, SortingSelection } from '../../../pluginInterface'
+import AmplitudeScaleToolbarEntries from '../../common/sharedToolbarSets/AmplitudeScaleToolbarEntries'
 import useBufferedDispatch from '../../common/useBufferedDispatch'
 import { colorForUnitId } from '../../spikeamplitudes/SpikeAmplitudesView/SpikeAmplitudesPanel'
 import { SpikeAmplitudesData } from '../../spikeamplitudes/SpikeAmplitudesView/useSpikeAmplitudesData'
@@ -171,17 +172,6 @@ const TimeseriesWidgetNew = (props: Props) => {
     const [panels, setPanels] = useState<Panel[]>([])
     const [recordingSelection, recordingSelectionDispatch] = useBufferedDispatch(recordingSelectionReducer, externalSelection, useMemo(() => ((state: RecordingSelection) => {externalSelectionDispatch({type: 'Set', state})}), [externalSelectionDispatch]), 400)
     
-    const _handleScaleAmplitudeUp = useCallback(() => {
-        recordingSelectionDispatch({type: 'ScaleAmpScaleFactor', direction: 'up'})
-    }, [recordingSelectionDispatch])
-    const _handleScaleAmplitudeDown = useCallback(() => {
-        recordingSelectionDispatch({type: 'ScaleAmpScaleFactor', direction: 'down'})
-    }, [recordingSelectionDispatch])
-    const _handleResetAmplitude = useCallback(() => {
-        recordingSelectionDispatch({type: 'SetAmpScaleFactor', ampScaleFactor: 1})
-    }, [recordingSelectionDispatch])
-
-
     const spikeMarkersVisibility = useVisible()
 
     useEffect(() => {
@@ -198,34 +188,22 @@ const TimeseriesWidgetNew = (props: Props) => {
         }
         setPanels(panels0)
     }, [channel_ids, setPanels, timeseriesData, y_scale_factor, visibleChannelIds, width, recordingSelection.ampScaleFactor, recordingSelection.timeRange])
+
+    
+    // NOTE: These actions are currently spread between here and the TimeWidget (which includes the time-scaling controls/features.)
+    // It would probably make more sense to have *all* the defaults--including amplitude scaling--be put together there; however, I'm not
+    // sure if the intention is that the TimeWidget be reusable in contexts where amplitude scaling wouldn't be relevant/make sense.
+    // I suspect the answer is no. We should return to this question.
+    const amplitudeScaleControls = useMemo(() => {
+        return AmplitudeScaleToolbarEntries({
+            ampScaleFactor: recordingSelection?.ampScaleFactor ?? 1,
+            selectionDispatch: recordingSelectionDispatch
+        })
+    }, [recordingSelection?.ampScaleFactor, recordingSelectionDispatch])
+
     const actions = useMemo(() => {
         const a: TimeWidgetAction[] = [
-            {
-                type: 'button',
-                callback: _handleScaleAmplitudeUp,
-                title: 'Scale amplitude up [up arrow]',
-                icon: <FaArrowUp />,
-                keyCode: 38
-            },
-            {
-                type: 'button',
-                callback: _handleResetAmplitude,
-                title: 'Reset scale amplitude',
-                icon: <FaRegTimesCircle />
-            },
-            {
-                type: 'button',
-                callback: _handleScaleAmplitudeDown,
-                title: 'Scale amplitude down [down arrow]',
-                icon: <FaArrowDown />,
-                keyCode: 40
-            },
-            {
-                type: 'text',
-                title: 'Zoom level',
-                content: recordingSelection?.ampScaleFactor || 1,
-                contentSigFigs: 2
-            },
+            ...amplitudeScaleControls,
             {
                 type: 'divider'
             }
@@ -243,7 +221,7 @@ const TimeseriesWidgetNew = (props: Props) => {
             })
         }
         return a
-    }, [_handleScaleAmplitudeDown, recordingSelection.ampScaleFactor, _handleResetAmplitude, _handleScaleAmplitudeUp, spikeAmplitudesData, spikeMarkersVisibility, sortingSelection])
+    }, [amplitudeScaleControls, spikeAmplitudesData, spikeMarkersVisibility, sortingSelection])
 
     const numTimepoints = useMemo(() => (timeseriesData ? timeseriesData.numTimepoints() : 0), [timeseriesData])
 

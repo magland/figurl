@@ -1,8 +1,11 @@
 import CanvasWidget from 'figurl/labbox-react/components/CanvasWidget'
 import { CanvasPainter } from 'figurl/labbox-react/components/CanvasWidget/CanvasPainter'
 import { useLayer, useLayers } from 'figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer'
-import { ActionItem, DividerItem, TextItem } from 'plugins/sortingview/gui/extensions/common/Toolbars'
-import React, { useCallback, useEffect, useState } from 'react'
+import TimeWidgetToolbarEntries from 'plugins/sortingview/gui/extensions/common/sharedToolbarSets/TimeWidgetToolbarEntries'
+import { Divider } from 'plugins/sortingview/gui/extensions/common/Toolbars'
+import ViewToolbar from 'plugins/sortingview/gui/extensions/common/ViewToolbar'
+import { TimeWidgetAction } from 'plugins/sortingview/gui/extensions/timeseries/TimeWidgetNew/TimeWidgetNew'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { TimeseriesSelection, TimeseriesSelectionDispatch } from '../interface/TimeseriesSelection'
 import { createCursorLayer } from './cursorLayer'
 import { createMainLayer } from './mainLayer'
@@ -10,9 +13,6 @@ import { createPanelLabelLayer } from './panelLabelLayer'
 import { createTimeAxisLayer } from './timeAxisLayer'
 import TimeSpanWidget, { SpanWidgetInfo } from './TimeSpanWidget'
 import TimeWidgetBottomBar from './TimeWidgetBottomBar'
-import TimeWidgetToolbarNew from './TimeWidgetToolbarNew'
-
-export type TimeWidgetAction = ActionItem | DividerItem | TextItem
 
 interface Props {
     panels: TimeWidgetPanel[]
@@ -308,22 +308,6 @@ const ExperitimeTimeWidget = (props: Props) => {
         })
     }, [allLayers])
 
-    const handleZoomTimeIn = useCallback(() => {
-        selectionDispatch({type: 'ZoomTimeRange', direction: 'in'})
-    }, [selectionDispatch])
-
-    const handleZoomTimeOut = useCallback(() => {
-        selectionDispatch({type: 'ZoomTimeRange', direction: 'out'})
-    }, [selectionDispatch])
-
-    const handleShiftTimeLeft = useCallback(() => {
-        selectionDispatch({type: 'TimeShiftFrac', frac: -0.2})
-    }, [selectionDispatch])
-
-    const handleShiftTimeRight = useCallback(() => {
-        selectionDispatch({type: 'TimeShiftFrac', frac: 0.2})
-    }, [selectionDispatch])
-
     const bottomBarInfo = {
         show: true,
         currentTime: selection.currentTimepoint,
@@ -333,6 +317,13 @@ const ExperitimeTimeWidget = (props: Props) => {
     }
     const showBottomBar = true
     const bottomBarHeight = showBottomBar ? 40 : 0;
+
+    const timeToolbar = useMemo(() => TimeWidgetToolbarEntries({selectionDispatch: selectionDispatch}), [selectionDispatch])
+    const actions = useMemo(() => ([
+        ...timeToolbar,
+        Divider,
+        ...customActions || []
+    ]), [customActions, timeToolbar])
 
     const layerProps = {
         customActions,
@@ -360,15 +351,11 @@ const ExperitimeTimeWidget = (props: Props) => {
             className="TimeWidget"
             style={{position: 'relative', left: 0, top: 0, width, height}}
         >
-            <TimeWidgetToolbarNew
+            <ViewToolbar
                 width={toolbarWidth}
                 height={height}
                 top={0}
-                onZoomIn={handleZoomTimeIn}
-                onZoomOut={handleZoomTimeOut}
-                onShiftTimeLeft={handleShiftTimeLeft}
-                onShiftTimeRight={handleShiftTimeRight}
-                customActions={customActions}
+                customActions={actions}
             />
             <div
                 style={{position: 'relative', left: toolbarWidth, top: 0, width: width - toolbarWidth, height: height}}
