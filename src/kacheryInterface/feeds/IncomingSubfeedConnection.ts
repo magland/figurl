@@ -57,8 +57,9 @@ class IncomingSubfeedConnection {
     async _start() {
         while (true) {
             if (this.isExpired()) return
-            await this._checkUpload()
+            // important to wait first before checking upload
             await sleepMsecNum(5 * 1000)
+            await this._checkUpload()
         }
     }
 }
