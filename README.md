@@ -1,6 +1,6 @@
 # figurl
 
-Shareable, interactive, data-backed figures generated using Python.
+Shareable, interactive, data-backed figures generated using Python
 
 ## How to
 
