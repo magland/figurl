@@ -1,42 +1,13 @@
-import Hyperlink from '../components/Hyperlink/Hyperlink';
-import Markdown from '../components/Markdown/Markdown';
-import RoutePath from '../MainWindow/RoutePath';
-import useRoute from '../MainWindow/useRoute';
-import React, { FunctionComponent, useCallback, useMemo } from 'react';
-import ReactMarkdown from 'react-markdown';
+import React, { FunctionComponent } from 'react';
 
 type Props = {
-    introMd: string
 }
 
-const IntroSection: FunctionComponent<Props> = ({introMd}) => {
-    const {setRoute} = useRoute()
-
-    const linkTargetResolver = useCallback((uri: string, text: string, title?: string) => {
-        return '_blank'
-    }, [])
-    
-    const routeRenderers: ReactMarkdown.Renderers = useMemo(() => ({
-        link: (props) => {
-            const value: string = props.children[0].props.value
-            const target: string = props.target
-            const href = props.href as any as RoutePath
-            if (href.startsWith('http')) {
-                return <a href={href} target={target}>{value}</a>
-            }
-            else {
-                return <Hyperlink onClick={() => {setRoute({routePath: href})}}>{value}</Hyperlink>
-            }
-        }
-    }), [setRoute])
-
+const IntroSection: FunctionComponent<Props> = () => {
     return (
         <div className="IntroSection HomeSection">
-            <Markdown
-                source={introMd}
-                linkTarget={linkTargetResolver}
-                renderers={{...routeRenderers}}
-            />
+            <h3>Shareable, interactive, data-backed figures created using Python</h3>
+            <p><a href="https://github.com/magland/figurl">Figurl overview</a></p>
         </div>
     )
 }

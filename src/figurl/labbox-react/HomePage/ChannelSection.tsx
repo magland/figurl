@@ -1,15 +1,10 @@
-import { IconButton } from '@material-ui/core'
-import { Help } from '@material-ui/icons'
+import { ChannelName, TaskFunctionId } from 'commonInterface/kacheryTypes'
 import { useChannel } from 'figurl/kachery-react'
 import RecentlyUsedBackends from 'figurl/kachery-react/components/SelectChannel/RecentlyUsedChannels'
-import { ChannelName, TaskFunctionId } from 'commonInterface/kacheryTypes'
 import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds'
 import React, { FunctionComponent, useCallback } from 'react'
-import { useVisible } from '..'
 import Hyperlink from '../components/Hyperlink/Hyperlink'
-import MarkdownDialog from '../components/Markdown/MarkdownDialog'
 import useRoute from '../MainWindow/useRoute'
-import aboutKacheryChannelsMd from './aboutKacheryChannels.md.gen'
 import CheckBackend from './CheckBackendPythonPackageVersion'
 import hyperlinkStyle from './hyperlinkStyle'
 
@@ -25,13 +20,12 @@ const ChannelSection: FunctionComponent<Props> = ({onSelectChannel, taskFunction
     // const channelInfo = useBackendInfo()
     // const backendPythonProjectVersion = backendInfo.backendPythonProjectVersion
     // const {visible: customBackendInstructionsVisible, show: showCustomBackendInstructions, hide: hideCustomBackendInstructions} = useVisible()
-    const aboutKacheryChannelsVisible = useVisible()
     const handleSetChannel = useCallback((channel: ChannelName) => {
         setRoute({channel})
     }, [setRoute])
     return (
         <div className="ChannelSection HomeSection">
-            <h3>Select a kachery channel <IconButton onClick={aboutKacheryChannelsVisible.show}><Help /></IconButton></h3>
+            <h3>Select a kachery channel</h3>
             {
                 channelName ? (
                     <span>
@@ -78,11 +72,11 @@ const ChannelSection: FunctionComponent<Props> = ({onSelectChannel, taskFunction
                     <p>No backend ID is specified (using default)</p>
                 )
             }
-            <MarkdownDialog
+            {/* <MarkdownDialog
                 visible={aboutKacheryChannelsVisible.visible}
                 onClose={aboutKacheryChannelsVisible.hide}
                 source={aboutKacheryChannelsMd}
-            />
+            /> */}
             {/* <MarkdownDialog
                 visible={customBackendInstructionsVisible}
                 onClose={hideCustomBackendInstructions}

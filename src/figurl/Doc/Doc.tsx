@@ -1,5 +1,5 @@
 import axios from 'axios';
-import ComposeDocPreview from 'figurl/Compose/ComposeDocPreview';
+import ComposeDocPreview from './DocView';
 import { useChannel } from 'figurl/kachery-react';
 import { useWindowDimensions } from 'figurl/labbox-react';
 import useRoute from 'figurl/labbox-react/MainWindow/useRoute';

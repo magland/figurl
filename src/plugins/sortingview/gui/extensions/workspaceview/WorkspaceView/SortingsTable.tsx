@@ -1,8 +1,9 @@
 import { Button, CircularProgress } from '@material-ui/core';
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import NiceTable from 'figurl/labbox-react/components/NiceTable/NiceTable';
-import { Recording, Sorting, WorkspaceRouteDispatch } from "../../../pluginInterface";
 import { useSortingInfos } from 'plugins/sortingview/gui/pluginInterface/useSortingInfo';
+import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import { Recording, Sorting, WorkspaceRouteDispatch } from "../../../pluginInterface";
+import SelectSortingControl from './SelectSortingControl';
 
 interface Props {
     recording: Recording
@@ -13,7 +14,7 @@ interface Props {
 
 const SortingsTable: FunctionComponent<Props> = ({ recording, sortings, onDeleteSortings, workspaceRouteDispatch }) => {
 
-    const [selectedSortingIds, setSelectedSortingIds] = useState<string[]>([])
+    // const [selectedSortingIds, setSelectedSortingIds] = useState<string[]>([])
 
     const handleViewSorting = useCallback((sorting: Sorting) => {
         workspaceRouteDispatch({
@@ -56,30 +57,40 @@ const SortingsTable: FunctionComponent<Props> = ({ recording, sortings, onDelete
         }
     ]
 
-    const compareEnabled = (selectedSortingIds.length === 2)
+    const [sortingA, setSortingA] = useState<Sorting | undefined>(undefined)
+    const [sortingB, setSortingB] = useState<Sorting | undefined>(undefined)
+
+    const compareEnabled = (sortingA !== undefined) && (sortingB !== undefined)
     const handleCompareSortings = useCallback(() => {
-        if (selectedSortingIds.length !== 2) throw Error('Unexpected')
-        const sortingId1 = selectedSortingIds[0]
-        const sortingId2 = selectedSortingIds[1]
+        if ((!sortingA) || (!sortingB)) throw Error('Unexpected')
+        const sortingId1 = sortingA.sortingId
+        const sortingId2 = sortingB.sortingId
         workspaceRouteDispatch({type: 'gotoSortingComparisonPage', sortingId1, sortingId2, recordingId: recording.recordingId})
-    }, [workspaceRouteDispatch, selectedSortingIds, recording])
+    }, [workspaceRouteDispatch, sortingA, sortingB, recording])
 
     return (
         <div>
-            {
-                sortings2.length > 1 ? (
-                    <Button disabled={!compareEnabled} onClick={handleCompareSortings}>Compare selected sortings</Button>
-                ) : <span />
-            }
             <NiceTable
                 rows={rows}
                 columns={columns}
                 deleteRowLabel={"Remove this sorting"}
                 onDeleteRow={onDeleteSortings ? handleDeleteRow : undefined}
-                selectionMode="multiple"
-                selectedRowKeys={selectedSortingIds}
-                onSelectedRowKeysChanged={setSelectedSortingIds}
+                // selectionMode="multiple"
+                // selectedRowKeys={selectedSortingIds}
+                // onSelectedRowKeysChanged={setSelectedSortingIds}
             />
+            {
+                sortings2.length > 1 && (
+                    <div>
+                        Compare sortings:&nbsp;&nbsp;
+                        <SelectSortingControl label="Select sorting A" sortings={sortings2} selectedSorting={sortingA} onSelect={setSortingA} />
+                        &nbsp;&nbsp;&nbsp;
+                        <SelectSortingControl label="Select sorting B" sortings={sortings2} selectedSorting={sortingB} onSelect={setSortingB} />
+                        &nbsp;&nbsp;&nbsp;
+                        <Button disabled={!compareEnabled} onClick={handleCompareSortings}>Compare selected sortings</Button>
+                    </div>
+                )
+            }
         </div>
     );
 }

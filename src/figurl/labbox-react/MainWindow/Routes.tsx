@@ -1,4 +1,3 @@
-import Compose from 'figurl/Compose/Compose'
 import Doc from 'figurl/Doc/Doc'
 import { RecentFiguresAction } from 'figurl/RecentFigures'
 import Status from 'figurl/Status/Status'
@@ -36,11 +35,11 @@ const Routes: FunctionComponent<Props> = (props) => {
             <Status />
         )
     }
-    else if (routePath === '/compose') {
-        return (
-            <Compose />
-        )
-    }
+    // else if (routePath === '/compose') {
+    //     return (
+    //         <Compose />
+    //     )
+    // }
     else if (routePath === '/doc') {
         return (
             <Doc />

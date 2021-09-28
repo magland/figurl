@@ -19,7 +19,6 @@ testSignatures()
 type Props = {
   taskFunctionIds: TaskFunctionId[]
   plugins: FigurlPlugin[]
-  introMd: string
   packageName: string
   pythonProjectVersion: string
   webAppProjectVersion: string
@@ -28,12 +27,12 @@ type Props = {
 }
 
 const FigurlApp: FunctionComponent<Props> = ({
-  plugins, taskFunctionIds, introMd, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, logo
+  plugins, taskFunctionIds, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, logo
 }) => {
   const [recentFigures, recentFiguresDispatch] = useReducer(recentFiguresReducer, initialRecentFigures)
   const homePageProps = useMemo(() => ({
-    taskFunctionIds, introMd, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, recentFigures, plugins
-  }), [taskFunctionIds, introMd, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, recentFigures, plugins])
+    taskFunctionIds, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, recentFigures, plugins
+  }), [taskFunctionIds, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, recentFigures, plugins])
   return (
     <div className="App">
       <MuiThemeProvider theme={theme}>
