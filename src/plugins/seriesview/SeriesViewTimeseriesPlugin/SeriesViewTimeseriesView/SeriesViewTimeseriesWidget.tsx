@@ -3,7 +3,7 @@ import useBufferedDispatch from 'plugins/sortingview/gui/extensions/common/useBu
 import { TimeWidgetAction } from 'plugins/sortingview/gui/extensions/timeseries/TimeWidgetNew/TimeWidgetNew'
 import React, { useCallback, useMemo } from 'react'
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa'
-import ExperitimeTimeWidget from '../ExperitimeTimeWidget/ExperitimeTimeWidget'
+import SeriesViewTimeWidget from '../SeriesViewTimeWidget/SeriesViewTimeWidget'
 import { TimeseriesSelection, TimeseriesSelectionDispatch, timeseriesSelectionReducer } from '../interface/TimeseriesSelection'
 import { TimeseriesData } from './useTimeseriesModel'
 // import TimeseriesModelNew from './TimeseriesModelNew'
@@ -167,7 +167,7 @@ class Panel {
     // }
 }
 
-const ExperitimeTimeseriesWidget = (props: Props) => {
+const SeriesViewTimeseriesWidget = (props: Props) => {
     const { timeseriesData, width, height, y_scale_factor, visibleChannelNames, timeseriesSelection: externalSelection, timeseriesSelectionDispatch: externalSelectionDispatch, timeseriesType } = props
     const [timeseriesSelection, timeseriesSelectionDispatch] = useBufferedDispatch(timeseriesSelectionReducer, externalSelection || {}, useMemo(() => ((state: TimeseriesSelection) => {externalSelectionDispatch && externalSelectionDispatch({type: 'Set', state})}), [externalSelectionDispatch]), 200)
     
@@ -219,7 +219,7 @@ const ExperitimeTimeseriesWidget = (props: Props) => {
     // const numTimepoints = useMemo(() => (timeseriesData ? timeseriesData.numTimepoints() : 0), [timeseriesData])
 
     return (
-        <ExperitimeTimeWidget
+        <SeriesViewTimeWidget
             panels={panels}
             customActions={actions}
             width={width}
@@ -235,4 +235,4 @@ const ExperitimeTimeseriesWidget = (props: Props) => {
     )
 }
 
-export default ExperitimeTimeseriesWidget
+export default SeriesViewTimeseriesWidget

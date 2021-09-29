@@ -1,4 +1,4 @@
-import { TimeWidgetAction, TimeWidgetPanel } from "./ExperitimeTimeWidget";
+import { TimeWidgetAction, TimeWidgetPanel } from "./SeriesViewTimeWidget";
 
 export interface TimeWidgetLayerProps {
     width: number,

@@ -1,10 +1,11 @@
+import { JSONObject } from "commonInterface/kacheryTypes";
+
 export interface ChannelPropertiesInterface {
     location: number[]
 }
 
 export type TimeseriesInfo = {
-    uri: string
-    object: any
+    object: JSONObject
     channelNames: string[]
     numSamples: number
     startTime: number

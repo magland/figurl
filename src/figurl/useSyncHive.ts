@@ -77,6 +77,7 @@ const useSyncHive = (): ReplaceSyncFunction => {
         
         // The replaceHelper is needed because we do a recursive replace
         const replaceHelper = (a: any): any => {
+            if (!a) return a
             if ((typeof(a) === 'object') && (a['_syncId'])) {
                 // here's where we replace {_syncId: "..."} by {value: ..., setValue: ...}
                 const syncId = a['_syncId']

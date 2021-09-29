@@ -1,7 +1,7 @@
 import CanvasWidget from "figurl/labbox-react/components/CanvasWidget"
 import { useLayer, useLayers } from "figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer"
-import { TimeseriesSelection, TimeseriesSelectionDispatch } from "plugins/sortingview/ExperitimeTimeseriesPlugin/interface/TimeseriesSelection"
 import React, { useMemo } from "react"
+import { TimeseriesSelection, TimeseriesSelectionDispatch } from "../../interface/TimeseriesSelection"
 import { ChannelGeometryLayerProps, createChannelGeometryLayer } from "./channelGeometryLayer"
 
 // Okay, so after some hoop-jumping, we've learned the RecordingInfo has:

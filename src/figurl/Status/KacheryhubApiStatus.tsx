@@ -1,5 +1,5 @@
+import { sleepMsecNum } from 'commonInterface/util/util';
 import { useKacheryNode } from 'figurl/kachery-react';
-import { sleepMsec } from 'plugins/sortingview/ExperitimeTimeseriesPlugin/interface/TimeseriesSelection';
 import React, { FunctionComponent, useEffect } from 'react';
 import TestJobView from './TestJobView';
 import useTestJob from './useTestJob';
@@ -17,7 +17,7 @@ const KacheryhubApiStatus: FunctionComponent<Props> = () => {
         setText('')
         ;(async () => {
             setText('Getting node config')
-            await sleepMsec(1000)
+            await sleepMsecNum(1000)
             const channelMemberships = await kacheryNode.kacheryHubInterface().getChannelMemberships()
             if (!channelMemberships) {
                 setStatus('error')

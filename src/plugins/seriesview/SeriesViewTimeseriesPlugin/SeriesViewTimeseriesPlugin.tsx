@@ -1,43 +1,42 @@
+import { isJSONObject, _validateObject } from "commonInterface/kacheryTypes";
+import { JSONObject } from "commonInterface/util/misc";
 import { useChannel, usePureCalculationTask } from "figurl/kachery-react";
 import TaskStatusView from "figurl/kachery-react/components/TaskMonitor/TaskStatusView";
 import { FigurlPlugin } from "figurl/types";
-import { isString, _validateObject } from "commonInterface/kacheryTypes";
-import { useEffect } from "react";
-import { useReducer } from "react";
-import { FunctionComponent } from "react";
-import sortingviewTaskFunctionIds from "../sortingviewTaskFunctionIds";
-import ExperitimeTimeseriesView from "./ExperitimeTimeseriesView/ExperitimeTimeseriesView";
+import { FunctionComponent, useEffect, useReducer } from "react";
+import sortingviewTaskFunctionIds from "../seriesviewTaskFunctionIds";
 import { TimeseriesInfo } from "./interface/TimeseriesInfo";
 import { timeseriesSelectionReducer } from "./interface/TimeseriesSelection";
+import SeriesViewTimeseriesView from "./SeriesViewTimeseriesView/SeriesViewTimeseriesView";
 
-type ExperitimeTimeseriesData = {
-    timeseriesUri: string
+type SeriesViewTimeseriesData = {
+    timeseriesObject: JSONObject
 }
-const isExperitimeTimeseriesData = (x: any): x is ExperitimeTimeseriesData => {
+const isSeriesViewTimeseriesData = (x: any): x is SeriesViewTimeseriesData => {
     return _validateObject(x, {
-        timeseriesUri: isString
+        timeseriesObject: isJSONObject
     })
 }
 
 type Props = {
-    data: ExperitimeTimeseriesData
+    data: SeriesViewTimeseriesData
     width: number
     height: number
 }
 
-const useTimeseriesInfo = (timeseriesUri: string) => {
+const useTimeseriesInfo = (timeseriesObject: JSONObject) => {
     const {channelName} = useChannel()
     const {returnValue: timeseriesInfo, task} = usePureCalculationTask<TimeseriesInfo>(
-        timeseriesUri ? sortingviewTaskFunctionIds.experitimeGetTimeseriesInfo : undefined,
-        {timeseries_uri: timeseriesUri},
+        timeseriesObject ? sortingviewTaskFunctionIds.seriesViewGetTimeseriesInfo : undefined,
+        {timeseries_object: timeseriesObject},
         {channelName}
     )
     return {timeseriesInfo, task}
 }
 
-const ExperitimeTimeseriesComponent: FunctionComponent<Props> = ({data, width, height}) => {
-    const {timeseriesUri} = data
-    const {timeseriesInfo, task} = useTimeseriesInfo(timeseriesUri)
+const SeriesViewTimeseriesComponent: FunctionComponent<Props> = ({data, width, height}) => {
+    const {timeseriesObject} = data
+    const {timeseriesInfo, task} = useTimeseriesInfo(timeseriesObject)
     const [timeseriesSelection, timeseriesSelectionDispatch] = useReducer(timeseriesSelectionReducer, {})
     useEffect(() => {
         if (!timeseriesInfo) return
@@ -50,7 +49,7 @@ const ExperitimeTimeseriesComponent: FunctionComponent<Props> = ({data, width, h
         <TaskStatusView task={task} label="Loading timeseries info" />
     )
     return (
-        <ExperitimeTimeseriesView
+        <SeriesViewTimeseriesView
             timeseriesInfo={timeseriesInfo}
             width={width}
             height={height}
@@ -61,10 +60,10 @@ const ExperitimeTimeseriesComponent: FunctionComponent<Props> = ({data, width, h
     )
 }
 
-const ExperitimeTimeseriesPlugin: FigurlPlugin = {
-    type: 'experitime.timeseries.1',
-    validateData: isExperitimeTimeseriesData,
-    component: ExperitimeTimeseriesComponent
+const SeriesViewTimeseriesPlugin: FigurlPlugin = {
+    type: 'seriesview.timeseries.2',
+    validateData: isSeriesViewTimeseriesData,
+    component: SeriesViewTimeseriesComponent
 }
 
-export default ExperitimeTimeseriesPlugin
+export default SeriesViewTimeseriesPlugin

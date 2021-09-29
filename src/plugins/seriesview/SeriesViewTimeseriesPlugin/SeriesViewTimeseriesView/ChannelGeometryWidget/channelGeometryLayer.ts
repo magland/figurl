@@ -1,8 +1,8 @@
 import { CanvasPainter } from 'figurl/labbox-react/components/CanvasWidget/CanvasPainter';
 import { CanvasDragEvent, CanvasWidgetLayer, ClickEvent, ClickEventType, DiscreteMouseEventHandler, DragHandler } from 'figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer';
 import { pointIsInEllipse, RectangularRegion, rectangularRegionsIntersect } from 'figurl/labbox-react/components/CanvasWidget/Geometry';
-import { TimeseriesSelection, TimeseriesSelectionDispatch } from 'plugins/sortingview/ExperitimeTimeseriesPlugin/interface/TimeseriesSelection';
 import { ActionItem, DividerItem } from 'plugins/sortingview/gui/extensions/common/Toolbars';
+import { TimeseriesSelection, TimeseriesSelectionDispatch } from '../../interface/TimeseriesSelection';
 import setupChannelBoxes, { ChannelBox } from './setupChannelBoxes';
 
 export type ChannelGeometryLayerProps = {

@@ -1,8 +1,8 @@
 import { initiateTask, useChannel, useFetchCache, useKacheryNode } from "figurl/kachery-react"
 import KacheryNode from "kacheryInterface/core/KacheryNode"
-import { ChannelName } from "commonInterface/kacheryTypes"
+import { ChannelName, JSONObject } from "commonInterface/kacheryTypes"
 import { useMemo } from "react"
-import sortingviewTaskFunctionIds from "../../sortingviewTaskFunctionIds"
+import seriesviewTaskFunctionIds from "../../seriesviewTaskFunctionIds"
 import { TimeseriesInfo } from "../interface/TimeseriesInfo"
 
 // it may be important to limit this when using a filter
@@ -17,8 +17,8 @@ export type TimeseriesData = {
   samplingFrequency: number
 }
 
-const getTimeseriesDataSegment = async (args: {kacheryNode: KacheryNode, channelName: ChannelName, backendId: string | null, timeseriesUri: string, channel_name: string, ds_factor: number, segment_num: number, segment_duration_sec: number}): Promise<{timestamps: number[], values: number[]}> => {
-  const { kacheryNode, channelName, backendId, timeseriesUri, channel_name, ds_factor, segment_num, segment_duration_sec } = args
+const getTimeseriesDataSegment = async (args: {kacheryNode: KacheryNode, channelName: ChannelName, backendId: string | null, timeseriesObject: JSONObject, channel_name: string, ds_factor: number, segment_num: number, segment_duration_sec: number}): Promise<{timestamps: number[], values: number[]}> => {
+  const { kacheryNode, channelName, backendId, timeseriesObject, channel_name, ds_factor, segment_num, segment_duration_sec } = args
   return new Promise((resolve, reject) => {
     const check = () => {
       if (!task) return
@@ -40,9 +40,9 @@ const getTimeseriesDataSegment = async (args: {kacheryNode: KacheryNode, channel
       kacheryNode,
       channelName,
       backendId,
-      functionId: sortingviewTaskFunctionIds.experitimeGetTimeseriesSamples,
+      functionId: seriesviewTaskFunctionIds.seriesViewGetTimeseriesSamples,
       kwargs: {
-        timeseries_uri: timeseriesUri,
+        timeseries_object: timeseriesObject,
         channel_name,
         ds_factor,
         segment_num,
@@ -75,10 +75,10 @@ const useTimeseriesData = (timeseriesInfo: TimeseriesInfo): TimeseriesData | nul
   const fetch = useMemo(() => (async (query: TimeseriesDataQuery) => {
     switch(query.type) {
       case 'dataSegment': {
-        return await getTimeseriesDataSegment({kacheryNode, channelName, backendId, timeseriesUri: timeseriesInfo.uri, ds_factor: query.ds_factor, channel_name: query.channel_name, segment_num: query.segment_num, segment_duration_sec: query.segment_duration_sec})
+        return await getTimeseriesDataSegment({kacheryNode, channelName, backendId, timeseriesObject: timeseriesInfo.object, ds_factor: query.ds_factor, channel_name: query.channel_name, segment_num: query.segment_num, segment_duration_sec: query.segment_duration_sec})
       }
     }
-  }), [timeseriesInfo.uri, channelName, backendId, kacheryNode])
+  }), [timeseriesInfo.object, channelName, backendId, kacheryNode])
   const data = useFetchCache<TimeseriesDataQuery>(fetch)
 
   // const segment_size_times_num_channels = 100000

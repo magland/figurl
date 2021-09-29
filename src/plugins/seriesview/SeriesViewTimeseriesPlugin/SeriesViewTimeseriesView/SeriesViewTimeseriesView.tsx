@@ -3,7 +3,7 @@ import React, { FunctionComponent, useMemo } from 'react';
 import { TimeseriesInfo } from '../interface/TimeseriesInfo';
 import { TimeseriesSelection, TimeseriesSelectionDispatch } from '../interface/TimeseriesSelection';
 import ChannelGeometryView from './ChannelGeometryView';
-import ExperitimeTimeseriesWidget from './ExperitimeTimeseriesWidget';
+import SeriesViewTimeseriesWidget from './SeriesViewTimeseriesWidget';
 import useTimeseriesData from './useTimeseriesModel';
 
 interface Props {
@@ -29,7 +29,7 @@ interface Props {
 //     initial_y_scale_factor: number
 // }
 
-const ExperitimeTimeseriesView: FunctionComponent<Props> = ({timeseriesInfo, opts, timeseriesSelection, timeseriesSelectionDispatch, width, height}) => {
+const SeriesViewTimeseriesView: FunctionComponent<Props> = ({timeseriesInfo, opts, timeseriesSelection, timeseriesSelectionDispatch, width, height}) => {
     const selectedChannelNames = useMemo(() => (timeseriesSelection?.selectedChannelNames || []), [timeseriesSelection?.selectedChannelNames])
     const visibleChannelNames = useMemo(() => (timeseriesSelection?.visibleChannelNames || timeseriesInfo.channelNames), [timeseriesSelection?.visibleChannelNames, timeseriesInfo.channelNames])
 
@@ -59,7 +59,7 @@ const ExperitimeTimeseriesView: FunctionComponent<Props> = ({timeseriesInfo, opt
                     }
                     {
                         ((!opts.channelSelectPanel) || (selectedChannelNames.length > 0) || (visibleChannelNames.length <= 12)) ? (
-                            <ExperitimeTimeseriesWidget
+                            <SeriesViewTimeseriesWidget
                                 timeseriesData={timeseriesData}
                                 channel_names={timeseriesInfo.channelNames}
                                 // y_offsets={timeseriesInfo.y_offsets}
@@ -108,4 +108,4 @@ const ExperitimeTimeseriesView: FunctionComponent<Props> = ({timeseriesInfo, opt
 //     return info
 // }
 
-export default ExperitimeTimeseriesView
+export default SeriesViewTimeseriesView
