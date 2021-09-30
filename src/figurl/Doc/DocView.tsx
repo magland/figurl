@@ -33,6 +33,10 @@ const DocView: FunctionComponent<Props> = ({source, width, height}) => {
         link: (props: any) => {
             const href: string = props.href
             const {figureObject, channel: hrefChannel, height} = parseFigurl(href)
+            // detect whether it is just a normal link
+            if (props.children[0].props.children !== href) {
+                return <a href={props.href} target={props.target}>{props.children}</a>
+            }
             if ((figureObject) && (hrefChannel !== channelName)) {
                 return <div>Channel mismatch: {hrefChannel} is not {channelName}</div>
             }

@@ -31,7 +31,7 @@ const ComposeDocPreview: FunctionComponent<Props> = ({source, width, height}) =>
     const customRenderers: ReactMarkdown.Renderers = useMemo(() => ({
         link: (props: any) => {
             const href: string = props.href
-            const {figureObject, channel: hrefChannel} = parseFigurl(href)
+            const {figureObject, channel: hrefChannel} = parseFigurl(href)            
             if ((figureObject) && (hrefChannel !== channelName)) {
                 return <div>Channel mismatch: {hrefChannel} is not {channelName}</div>
             }
