@@ -6,19 +6,23 @@ import { FaArrowDown, FaArrowUp } from 'react-icons/fa'
 import SeriesViewTimeWidget from '../SeriesViewTimeWidget/SeriesViewTimeWidget'
 import { TimeseriesSelection, TimeseriesSelectionDispatch, timeseriesSelectionReducer } from '../interface/TimeseriesSelection'
 import { TimeseriesData } from './useTimeseriesModel'
+import { Vec2 } from 'figurl/labbox-react/components/CanvasWidget/Geometry'
 // import TimeseriesModelNew from './TimeseriesModelNew'
 
 interface Props {
     timeseriesData: TimeseriesData
     channel_names: string[]
     // y_offsets: number[]
-    y_scale_factor: number
+    y_range: [number, number]
     width: number
     height: number
     visibleChannelNames?: string[] | null
     timeseriesSelection?: TimeseriesSelection
     timeseriesSelectionDispatch?: TimeseriesSelectionDispatch
-    timeseriesType: 'continuous' | 'discrete'
+    timeseriesType: 'continuous' | 'discrete' | 'event'
+    hideTimeSpan?: boolean
+    hideToolbar?: boolean
+    hideBottomBar?: boolean
 }
 
 const channelColors = [
@@ -34,7 +38,7 @@ class Panel {
     _timeRange: {min: number, max: number} | null = null
     _yScale: number = 1
     _pixelWidth: number | null = null // for determining the downsampling factor
-    constructor(private channelName: string, private channelColor: string, private timeseriesData: TimeseriesData, private y_offset: number, private y_scale_factor: number, private timeseriesType: 'continuous' | 'discrete') {
+    constructor(private channelName: string, private channelColor: string, private timeseriesData: TimeseriesData, private y_range: [number, number], private timeseriesType: 'continuous' | 'discrete' | 'event') {
         // timeseriesData.onDataSegmentSet((ds_factor, t1, t2) => {
         //     const timeRange = this._timeRange
         //     if (!timeRange) return
@@ -81,60 +85,102 @@ class Panel {
             downsample_factor *= 3
         }
 
-        const pp = new PainterPath()
-        if (downsample_factor === 1) {
-            let penDown = false;
-            for (let ii = 0; ii < data.timestamps.length; ii ++) {
-                const tt = data.timestamps[ii]
-                let val = data.values[ii];
-                if (!isNaN(val)) {
-                    let val2 = ((val + this.y_offset) * this.y_scale_factor * this._yScale) / 2 + 0.5
-                    if (this.timeseriesType === 'continuous') {
+        if ((this.timeseriesType === 'continuous') || (this.timeseriesType === 'event')) {
+            const pp = new PainterPath()
+            if (downsample_factor === 1) {
+                let penDown = false;
+                for (let ii = 0; ii < data.timestamps.length; ii ++) {
+                    const tt = data.timestamps[ii]
+                    let val = data.values[ii];
+                    if (!isNaN(val)) {
+                        let val2 = (val - this.y_range[0]) / (this.y_range[1] - this.y_range[0]) * this._yScale
+                        if (this.timeseriesType === 'continuous') {
+                            if (penDown) {
+                                pp.lineTo(tt, val2);    
+                            }
+                            else {
+                                pp.moveTo(tt, val2);
+                                penDown = true;
+                            }
+                        }
+                        else if (this.timeseriesType === 'event') {
+                            pp.moveTo(tt, 0)
+                            pp.lineTo(tt, val2)
+                        }
+                    }
+                    else {
+                        penDown = false;
+                    }
+                }
+            }
+            else {
+                let penDown = false;
+                for (let ii = 0; ii < data.timestamps.length; ii ++) {
+                    const tt = data.timestamps[ii]
+                    let val_min = data.values[ii * 2]
+                    let val_max = data.values[ii * 2 + 1]
+                    if ((!isNaN(val_min)) && (!isNaN(val_max))) {
+                        let val2_min = (val_min - this.y_range[0]) / (this.y_range[1] - this.y_range[0]) * this._yScale
+                        let val2_max = (val_max - this.y_range[0]) / (this.y_range[1] - this.y_range[0]) * this._yScale
                         if (penDown) {
-                            pp.lineTo(tt, val2);    
+                            pp.lineTo(tt - deltaT / 3, val2_min);
+                            pp.lineTo(tt + deltaT / 3, val2_max);
                         }
                         else {
-                            pp.moveTo(tt, val2);
+                            pp.moveTo(tt, val2_min);
+                            pp.lineTo(tt, val2_max);
                             penDown = true;
                         }
                     }
                     else {
-                        pp.moveTo(tt, 0)
-                        pp.lineTo(tt, val2)
+                        penDown = false;
                     }
                 }
-                else {
-                    penDown = false;
-                }
             }
+
+            const pen = {color: this.channelColor, width: 1}
+            painter.drawPath(pp, pen)
         }
-        else {
-            let penDown = false;
+        else if (this.timeseriesType === 'discrete') {
+            const radius = 4
+            const markers: {
+                x: number,
+                y: number,
+                p: Vec2,
+                density: number
+            }[] = []
             for (let ii = 0; ii < data.timestamps.length; ii ++) {
                 const tt = data.timestamps[ii]
-                let val_min = data.values[ii * 2]
-                let val_max = data.values[ii * 2 + 1]
-                if ((!isNaN(val_min)) && (!isNaN(val_max))) {
-                    let val2_min = ((val_min + this.y_offset) * this.y_scale_factor * this._yScale) / 2 + 0.5
-                    let val2_max = ((val_max + this.y_offset) * this.y_scale_factor * this._yScale) / 2 + 0.5
-                    if (penDown) {
-                        pp.lineTo(tt - deltaT / 3, val2_min);
-                        pp.lineTo(tt + deltaT / 3, val2_max);
-                    }
-                    else {
-                        pp.moveTo(tt, val2_min);
-                        pp.lineTo(tt, val2_max);
-                        penDown = true;
-                    }
-                }
-                else {
-                    penDown = false;
+                let val = data.values[ii]
+                if (!isNaN(val)) {
+                    let val2 = (val - this.y_range[0]) / (this.y_range[1] - this.y_range[0]) * this._yScale
+                    markers.push({x: tt, y: val2, p: painter.transformPointToPixels([tt, val2]), density: 0})
                 }
             }
+            for (let ii = 0; ii < markers.length; ii ++) {
+                let jj = ii + 1
+                while (jj < markers.length) {
+                    const dx = Math.abs(markers[jj].p[0] - markers[ii].p[0])
+                    const dy = Math.abs(markers[jj].p[1] - markers[ii].p[1])
+                    if (dx < 4) {
+                        if (dy < 4) {
+                            markers[ii].density ++
+                            markers[jj].density ++
+                        }
+                    }
+                    else break
+                    jj ++
+                }
+            }
+            const maxDensity = Math.max(...markers.map(m => (m.density)))
+            for (let marker of markers) {
+                const v = marker.density / maxDensity * 255
+                const color = `rgb(${v}, ${v}, 0)`
+                const pen = {color, width: 1}
+                const brush = {color}
+                painter.drawMarker([marker.x, marker.y], {radius, pen, brush})
+            }
         }
-
-        const pen = {color: this.channelColor, width: 1}
-        painter.drawPath(pp, pen)
     }
     _determineDownsampleFactor(completenessFactor: number) {
         completenessFactor = 1
@@ -168,7 +214,7 @@ class Panel {
 }
 
 const SeriesViewTimeseriesWidget = (props: Props) => {
-    const { timeseriesData, width, height, y_scale_factor, visibleChannelNames, timeseriesSelection: externalSelection, timeseriesSelectionDispatch: externalSelectionDispatch, timeseriesType } = props
+    const { timeseriesData, width, height, y_range, visibleChannelNames, timeseriesSelection: externalSelection, timeseriesSelectionDispatch: externalSelectionDispatch, timeseriesType, hideTimeSpan, hideToolbar, hideBottomBar } = props
     const [timeseriesSelection, timeseriesSelectionDispatch] = useBufferedDispatch(timeseriesSelectionReducer, externalSelection || {}, useMemo(() => ((state: TimeseriesSelection) => {externalSelectionDispatch && externalSelectionDispatch({type: 'Set', state})}), [externalSelectionDispatch]), 200)
     
     const _handleScaleAmplitudeUp = useCallback(() => {
@@ -185,14 +231,14 @@ const SeriesViewTimeseriesWidget = (props: Props) => {
             const channel_name = timeseriesData.channelNames[channelInd]
             if ((!visibleChannelNames) || (visibleChannelNames.includes(channel_name))) {
                 const color = channelColors[channelInd % channelColors.length]
-                const p = new Panel(channel_name, color, timeseriesData, 0, y_scale_factor, timeseriesType) // y_offsets[ch] replaced with 0
+                const p = new Panel(channel_name, color, timeseriesData, y_range, timeseriesType) // y_offsets[ch] replaced with 0
                 p.setPixelWidth(width)
                 p.setYScale(timeseriesSelection.ampScaleFactor || 1)
                 panels0.push(p)
             }
         }
         return panels0
-    }, [timeseriesData, timeseriesSelection.ampScaleFactor, timeseriesType, visibleChannelNames, width, y_scale_factor])
+    }, [timeseriesData, timeseriesSelection.ampScaleFactor, timeseriesType, visibleChannelNames, width, y_range])
     const actions = useMemo(() => {
         const a: TimeWidgetAction[] = [
             {
@@ -231,6 +277,9 @@ const SeriesViewTimeseriesWidget = (props: Props) => {
             timeseriesEndTime={timeseriesData.endTime}
             selection={timeseriesSelection}
             selectionDispatch={timeseriesSelectionDispatch}
+            hideTimeSpan={hideTimeSpan}
+            hideToolbar={hideToolbar}
+            hideBottomBar={hideBottomBar}
         />
     )
 }

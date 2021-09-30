@@ -1,6 +1,6 @@
+import { ChannelName } from "commonInterface/kacheryTypes"
 import { initiateTask, useChannel, useFetchCache, useKacheryNode } from "figurl/kachery-react"
 import KacheryNode from "kacheryInterface/core/KacheryNode"
-import { ChannelName, JSONObject } from "commonInterface/kacheryTypes"
 import { useMemo } from "react"
 import seriesviewTaskFunctionIds from "../../seriesviewTaskFunctionIds"
 import { TimeseriesInfo } from "../interface/TimeseriesInfo"
@@ -17,8 +17,8 @@ export type TimeseriesData = {
   samplingFrequency: number
 }
 
-const getTimeseriesDataSegment = async (args: {kacheryNode: KacheryNode, channelName: ChannelName, backendId: string | null, timeseriesObject: JSONObject, channel_name: string, ds_factor: number, segment_num: number, segment_duration_sec: number}): Promise<{timestamps: number[], values: number[]}> => {
-  const { kacheryNode, channelName, backendId, timeseriesObject, channel_name, ds_factor, segment_num, segment_duration_sec } = args
+const getTimeseriesDataSegment = async (args: {kacheryNode: KacheryNode, channelName: ChannelName, backendId: string | null, timeseriesUri?: string, channel_name: string, ds_factor: number, segment_num: number, segment_duration_sec: number}): Promise<{timestamps: number[], values: number[]}> => {
+  const { kacheryNode, channelName, backendId, timeseriesUri, channel_name, ds_factor, segment_num, segment_duration_sec } = args
   return new Promise((resolve, reject) => {
     const check = () => {
       if (!task) return
@@ -42,7 +42,7 @@ const getTimeseriesDataSegment = async (args: {kacheryNode: KacheryNode, channel
       backendId,
       functionId: seriesviewTaskFunctionIds.seriesViewGetTimeseriesSamples,
       kwargs: {
-        timeseries_object: timeseriesObject,
+        timeseries_uri: timeseriesUri,
         channel_name,
         ds_factor,
         segment_num,
@@ -69,25 +69,27 @@ type TimeseriesDataSegmentQuery = {
 
 type TimeseriesDataQuery = TimeseriesDataSegmentQuery
 
-const useTimeseriesData = (timeseriesInfo: TimeseriesInfo): TimeseriesData | null => {
+const useTimeseriesData = (timeseriesInfo: TimeseriesInfo | undefined): TimeseriesData | null => {
   const kacheryNode = useKacheryNode()
   const {channelName, backendId} = useChannel()
   const fetch = useMemo(() => (async (query: TimeseriesDataQuery) => {
     switch(query.type) {
       case 'dataSegment': {
-        return await getTimeseriesDataSegment({kacheryNode, channelName, backendId, timeseriesObject: timeseriesInfo.object, ds_factor: query.ds_factor, channel_name: query.channel_name, segment_num: query.segment_num, segment_duration_sec: query.segment_duration_sec})
+        return await getTimeseriesDataSegment({kacheryNode, channelName, backendId, timeseriesUri: timeseriesInfo?.uri, ds_factor: query.ds_factor, channel_name: query.channel_name, segment_num: query.segment_num, segment_duration_sec: query.segment_duration_sec})
       }
     }
-  }), [timeseriesInfo.object, channelName, backendId, kacheryNode])
+  }), [timeseriesInfo?.uri, channelName, backendId, kacheryNode])
   const data = useFetchCache<TimeseriesDataQuery>(fetch)
 
   // const segment_size_times_num_channels = 100000
   // const num_channels = timeseriesInfo.channelNames.length
   const est_segment_size_timepoints = 1e6
-  const segment_duration_sec = Math.ceil(est_segment_size_timepoints / timeseriesInfo.samplingFrequency) // round up to integer so that we don't get any rounding issues
 
   const getChannelData = useMemo(() => ((channel_name: string, t1: number, t2: number, ds_factor: number): {timestamps: number[], values: number[]} => {
     // Here we are retrieving the channel data, between for timepoints [t1, t2), with downsampling factor ds_factor
+    if (!timeseriesInfo) return {timestamps: [], values: []}
+
+    const segment_duration_sec = Math.ceil(est_segment_size_timepoints / timeseriesInfo.samplingFrequency) // round up to integer so that we don't get any rounding issues
 
     // first we accumulate the information about which segments we need to retrieve
     const i1 = Math.floor(Math.max(t1, timeseriesInfo.startTime) / segment_duration_sec) // index of start segment
@@ -130,15 +132,15 @@ const useTimeseriesData = (timeseriesInfo: TimeseriesInfo): TimeseriesData | nul
         values.filter((v, i) => ((t1 <= timestamps[i]) && (timestamps[i] < t2)))
       )
     }
-  }), [data, segment_duration_sec, timeseriesInfo])
+  }), [data, timeseriesInfo])
 
   return useMemo(() => ({
     getChannelData,
     requestChannelData: getChannelData,
-    channelNames: timeseriesInfo.channelNames,
-    startTime: timeseriesInfo.startTime,
-    endTime: timeseriesInfo.endTime,
-    samplingFrequency: timeseriesInfo.samplingFrequency
+    channelNames: timeseriesInfo ? timeseriesInfo.channelNames : [],
+    startTime: timeseriesInfo ? timeseriesInfo.startTime : 0,
+    endTime: timeseriesInfo ? timeseriesInfo.endTime : 0,
+    samplingFrequency: timeseriesInfo ? timeseriesInfo.samplingFrequency : 0
   }), [getChannelData, timeseriesInfo])
 }
 

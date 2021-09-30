@@ -142,6 +142,9 @@ export class CanvasPainter {
             return this
         }
     }
+    transformPointToPixels(p: Vec2) {
+        return transformPoint(this._transformMatrix, p)
+    }
     useOffscreenCanvas(W: number, H: number) {
         try {
             const c = new OffscreenCanvas(Math.max(W, 10), Math.max(H, 10))

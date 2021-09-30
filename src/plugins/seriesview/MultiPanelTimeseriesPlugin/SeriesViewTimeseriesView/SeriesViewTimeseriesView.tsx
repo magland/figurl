@@ -2,12 +2,13 @@ import Splitter from 'figurl/labbox-react/components/Splitter/Splitter';
 import React, { FunctionComponent, useMemo } from 'react';
 import { TimeseriesInfo } from '../interface/TimeseriesInfo';
 import { TimeseriesSelection, TimeseriesSelectionDispatch } from '../interface/TimeseriesSelection';
+import useTimeseriesInfo from '../useTimeseriesInfo';
 import ChannelGeometryView from './ChannelGeometryView';
 import SeriesViewTimeseriesWidget from './SeriesViewTimeseriesWidget';
-import useTimeseriesData from './useTimeseriesModel';
+import useTimeseriesData, { TimeseriesData } from './useTimeseriesModel';
 
 interface Props {
-    timeseriesInfo: TimeseriesInfo
+    timeseriesUri: string
     width: number
     height: number
     opts: {
@@ -15,6 +16,9 @@ interface Props {
     }
     timeseriesSelection?: TimeseriesSelection
     timeseriesSelectionDispatch?: TimeseriesSelectionDispatch
+    hideTimeSpan?: boolean
+    hideToolbar?: boolean
+    hideBottomBar?: boolean
 }
 
 // interface TimeseriesInfo {
@@ -29,13 +33,37 @@ interface Props {
 //     initial_y_scale_factor: number
 // }
 
-const SeriesViewTimeseriesView: FunctionComponent<Props> = ({timeseriesInfo, opts, timeseriesSelection, timeseriesSelectionDispatch, width, height}) => {
+const useValueRangeEstimate = (timeseriesInfo: TimeseriesInfo | undefined, timeseriesData: TimeseriesData | null) => {
+    return useMemo(() => {
+        if ((!timeseriesData) || (!timeseriesInfo)) return [0, 1]
+        const valueRange : [number, number] = [0, 1]
+        const channelNames = timeseriesInfo.channelNames
+        let first = true
+        for (let channelName of channelNames) {
+            const a = timeseriesData.getChannelData(channelName, timeseriesInfo.startTime, timeseriesInfo.endTime, 1)
+            if (a) {
+                const minval = Math.min(...a.values)
+                const maxval = Math.max(...a.values)
+                if ((first) || (minval < valueRange[0]))
+                    valueRange[0] = minval
+                if ((first) || (maxval > valueRange[1]))
+                    valueRange[1] = maxval
+                first = false
+            }
+        }
+        return valueRange
+    }, [timeseriesInfo, timeseriesData]) as [number, number]
+}
+
+const SeriesViewTimeseriesView: FunctionComponent<Props> = ({timeseriesUri, opts, timeseriesSelection, timeseriesSelectionDispatch, width, height, hideTimeSpan, hideToolbar, hideBottomBar}) => {
+    const {timeseriesInfo} = useTimeseriesInfo(timeseriesUri)
     const selectedChannelNames = useMemo(() => (timeseriesSelection?.selectedChannelNames || []), [timeseriesSelection?.selectedChannelNames])
-    const visibleChannelNames = useMemo(() => (timeseriesSelection?.visibleChannelNames || timeseriesInfo.channelNames), [timeseriesSelection?.visibleChannelNames, timeseriesInfo.channelNames])
+    const visibleChannelNames = useMemo(() => (timeseriesSelection?.visibleChannelNames || timeseriesInfo?.channelNames || []), [timeseriesSelection?.visibleChannelNames, timeseriesInfo?.channelNames])
 
-    const y_scale_factor = 1 / (timeseriesInfo.noiseLevel || 1) * 1/10
-
+    const channelNames = useMemo(() => (timeseriesInfo?.channelNames || []), [timeseriesInfo])
     const timeseriesData = useTimeseriesData(timeseriesInfo)
+
+    const y_range = useValueRangeEstimate(timeseriesInfo, timeseriesData)
 
     if (timeseriesData) {
         return (
@@ -46,7 +74,7 @@ const SeriesViewTimeseriesView: FunctionComponent<Props> = ({timeseriesInfo, opt
                     initialPosition={200}
                 >
                     {
-                        opts.channelSelectPanel && (
+                        ((opts.channelSelectPanel) && (timeseriesInfo)) ? (
                             <ChannelGeometryView
                                 timeseriesInfo={timeseriesInfo}
                                 width={0} // filled in above
@@ -55,22 +83,26 @@ const SeriesViewTimeseriesView: FunctionComponent<Props> = ({timeseriesInfo, opt
                                 selection={timeseriesSelection}
                                 selectionDispatch={timeseriesSelectionDispatch}
                             />
-                        )
+                        ) : undefined
                     }
                     {
                         ((!opts.channelSelectPanel) || (selectedChannelNames.length > 0) || (visibleChannelNames.length <= 12)) ? (
                             <SeriesViewTimeseriesWidget
                                 timeseriesData={timeseriesData}
-                                channel_names={timeseriesInfo.channelNames}
+                                channel_names={channelNames}
                                 // y_offsets={timeseriesInfo.y_offsets}
                                 // y_scale_factor={timeseriesInfo.y_scale_factor * (timeseriesInfo.initial_y_scale_factor || 1)}
-                                y_scale_factor={y_scale_factor}
+                                // y_scale_factor={y_scale_factor}
+                                y_range={y_range}
                                 width={width} // filled in above
                                 height={height} // filled in above
                                 visibleChannelNames={opts.channelSelectPanel ? (selectedChannelNames.length > 0 ? selectedChannelNames : visibleChannelNames) : null}
                                 timeseriesSelection={timeseriesSelection}
                                 timeseriesSelectionDispatch={timeseriesSelectionDispatch}
-                                timeseriesType={timeseriesInfo.type}
+                                timeseriesType={timeseriesInfo?.type || 'discrete'}
+                                hideTimeSpan={hideTimeSpan}
+                                hideToolbar={hideToolbar}
+                                hideBottomBar={hideBottomBar}
                             />
                         ) : (
                             <div>Select one or more electrodes</div>

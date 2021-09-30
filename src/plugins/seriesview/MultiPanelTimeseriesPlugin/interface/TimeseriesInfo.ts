@@ -5,13 +5,13 @@ export interface ChannelPropertiesInterface {
 }
 
 export type TimeseriesInfo = {
+    uri: string
     object: JSONObject
     channelNames: string[]
     numSamples: number
     startTime: number
     endTime: number
-    type: 'continuous' | 'discrete'
+    type: 'continuous' | 'discrete' | 'event'
     samplingFrequency: number
-    noiseLevel?: number
     channelProperties?: {[key: string]: ChannelPropertiesInterface}
 }

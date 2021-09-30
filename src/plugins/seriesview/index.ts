@@ -1,8 +1,8 @@
 import { FigurlPlugin } from "figurl/types"
-import SeriesViewTimeseriesPlugin from "./SeriesViewTimeseriesPlugin/SeriesViewTimeseriesPlugin"
+import MultiPanelTimeseriesPlugin from "./MultiPanelTimeseriesPlugin/MultiPanelTimeseriesPlugin"
 
 const plugins: FigurlPlugin[] = [
-    SeriesViewTimeseriesPlugin
+    MultiPanelTimeseriesPlugin
 ]
 
 export default plugins

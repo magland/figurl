@@ -31,7 +31,7 @@ const onPaint = (painter: CanvasPainter, layerProps: TimeWidgetLayerProps, state
         let alignment: TextAlignment = {Horizontal: 'AlignRight', Vertical: "AlignCenter"}
         const font: Font = {pixelSize: 12, family: 'Arial'}
         painter2.drawText({
-            rect, alignment, font, pen: {color: 'black'}, brush: {color: 'black'}, text: label
+            rect, alignment, font, orientation: 'Vertical', pen: {color: 'black'}, brush: {color: 'black'}, text: label
         })
     }
 }

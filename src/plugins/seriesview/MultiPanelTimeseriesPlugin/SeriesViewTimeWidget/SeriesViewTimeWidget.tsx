@@ -26,6 +26,9 @@ interface Props {
     timeseriesEndTime: number
     selection: TimeseriesSelection
     selectionDispatch: TimeseriesSelectionDispatch
+    hideToolbar?: boolean
+    hideTimeSpan?: boolean
+    hideBottomBar?: boolean
 }
 
 export interface TimeWidgetPanel {
@@ -34,9 +37,6 @@ export interface TimeWidgetPanel {
     paintYAxis?: (painter: CanvasPainter, width: number, height: number) => void
     label: () => string
 }
-
-const toolbarWidth = 36 // hard-coded for now
-const spanWidgetHeight = 40
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface TimeState {
@@ -227,9 +227,12 @@ const plotMargins = {
 //     return {timeState: newTimeState, timeDispatch: newTimeDispatch}
 // }\
 
-const ExperitimeTimeWidget = (props: Props) => {
+const SeriesViewTimeWidget = (props: Props) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const {panels, width, height, customActions, timeseriesStartTime, timeseriesEndTime, maxTimeSpan, startTimeSpan, samplerate, selection, selectionDispatch} = props
+    const {panels, width, height, customActions, timeseriesStartTime, timeseriesEndTime, maxTimeSpan, startTimeSpan, samplerate, selection, selectionDispatch, hideToolbar, hideTimeSpan, hideBottomBar} = props
+
+    const toolbarWidth = hideToolbar ? 0 : 36 // hard-coded for now
+    const spanWidgetHeight = hideTimeSpan ? 0 : 40
 
     const [spanWidgetInfo, setSpanWidgetInfo] = useState<SpanWidgetInfo>({timeseriesStartTime, timeseriesEndTime})
 
@@ -331,8 +334,7 @@ const ExperitimeTimeWidget = (props: Props) => {
         samplerate,
         statusText: ''
     }
-    const showBottomBar = true
-    const bottomBarHeight = showBottomBar ? 40 : 0;
+    const bottomBarHeight = !hideBottomBar ? 40 : 0;
 
     const layerProps = {
         customActions,
@@ -360,41 +362,53 @@ const ExperitimeTimeWidget = (props: Props) => {
             className="TimeWidget"
             style={{position: 'relative', left: 0, top: 0, width, height}}
         >
-            <TimeWidgetToolbarNew
-                width={toolbarWidth}
-                height={height}
-                top={0}
-                onZoomIn={handleZoomTimeIn}
-                onZoomOut={handleZoomTimeOut}
-                onShiftTimeLeft={handleShiftTimeLeft}
-                onShiftTimeRight={handleShiftTimeRight}
-                customActions={customActions}
-            />
+            {
+                !hideToolbar && (
+                    <TimeWidgetToolbarNew
+                        width={toolbarWidth}
+                        height={height}
+                        top={0}
+                        onZoomIn={handleZoomTimeIn}
+                        onZoomOut={handleZoomTimeOut}
+                        onShiftTimeLeft={handleShiftTimeLeft}
+                        onShiftTimeRight={handleShiftTimeRight}
+                        customActions={customActions}
+                    />
+                )
+            }
             <div
                 style={{position: 'relative', left: toolbarWidth, top: 0, width: width - toolbarWidth, height: height}}
             >
-                <TimeSpanWidget
-                    key='timespan'
-                    width={width - toolbarWidth}
-                    height={spanWidgetHeight}
-                    info={spanWidgetInfo}
-                    onCurrentTimeChanged={handleCurrentTimeChanged}
-                    onTimeRangeChanged={handleTimeRangeChanged}
-                />
+                {
+                    !hideTimeSpan && (
+                        <TimeSpanWidget
+                            key='timespan'
+                            width={width - toolbarWidth}
+                            height={spanWidgetHeight}
+                            info={spanWidgetInfo}
+                            onCurrentTimeChanged={handleCurrentTimeChanged}
+                            onTimeRangeChanged={handleTimeRangeChanged}
+                        />
+                    )
+                }
                 <CanvasWidget
                     key='canvas'
                     layers={allLayers}
                     preventDefaultWheel={true}
                     {...{width: width - toolbarWidth, height: layerProps.height}}
                 />
-                <TimeWidgetBottomBar
-                    key='bottom'
-                    width={width - toolbarWidth}
-                    height={bottomBarHeight}
-                    info={bottomBarInfo}
-                    onCurrentTimeChanged={handleCurrentTimeChanged}
-                    onTimeRangeChanged={handleTimeRangeChanged}
-                />
+                {
+                    !hideBottomBar && (
+                        <TimeWidgetBottomBar
+                            key='bottom'
+                            width={width - toolbarWidth}
+                            height={bottomBarHeight}
+                            info={bottomBarInfo}
+                            onCurrentTimeChanged={handleCurrentTimeChanged}
+                            onTimeRangeChanged={handleTimeRangeChanged}
+                        />
+                    )
+                }
             </div>
         </div>
     );
@@ -408,4 +422,4 @@ const shiftTimeRange = (timeRange: {min: number, max: number}, shift: number): {
     }
 }
 
-export default ExperitimeTimeWidget
+export default SeriesViewTimeWidget
