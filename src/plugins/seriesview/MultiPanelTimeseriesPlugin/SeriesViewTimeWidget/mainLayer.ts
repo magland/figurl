@@ -28,7 +28,6 @@ const onPaint = async (painter: CanvasPainter, layerProps: TimeWidgetLayerProps,
     if (panels.length === 0) return
 
     state.paintStatus.paintCode ++
-    console.log('---- incremented paint code', state.paintStatus.paintCode, panels.length)
     const paintCode = state.paintStatus.paintCode
 
     // painter.useOffscreenCanvas(layerProps.width, layerProps.height)
@@ -43,7 +42,6 @@ const onPaint = async (painter: CanvasPainter, layerProps: TimeWidgetLayerProps,
         const painter2 = painter.transform(state.transformations[i])
         const painter3 = painter.transform(state.yAxisTransformations[i])
         panel.setTimeRange(timeRange)
-        console.log('---- painting panel', state.paintStatus.paintCode)
         panel.paint(painter2, valid)
         panel.paintYAxis && panel.paintYAxis(painter3, state.yAxisWidths[i], state.yAxisHeights[i])
     }

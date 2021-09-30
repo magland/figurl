@@ -91,7 +91,6 @@ class Panel {
         this._pixelWidth = w
     }
     async paint(painter: CanvasPainter, valid: () => boolean) {
-        console.log('------------::::::::::: paint', this.seriesInfo.numSamples)
         const timeRange = this._timeRange
         if (!timeRange) return
 
@@ -99,9 +98,7 @@ class Panel {
             (timeRange.min < s.end_time) && (timeRange.max > s.start_time)
         ))
         while (true) { // loop until we have gotten all the data
-            console.log('--- a1', this.seriesInfo.numSamples, valid())
             if (!valid()) return
-            console.log('--- a2', this.seriesInfo.numSamples)
             let gotAllData = true
             const markers: {
                 x: number,
@@ -109,7 +106,6 @@ class Panel {
                 p: Vec2,
                 density: number
             }[] = []
-            console.log('--- a3', this.seriesInfo.numSamples)
             for (let s of segments) {
                 const R = {xmin: s.start_time, xmax: s.end_time, ymin: 0, ymax: 1}
                 painter.drawRect(R, {color: 'rgb(200,200,200)'})
@@ -159,16 +155,12 @@ class Panel {
                     if (!valid()) return
                 }
             }
-            console.log('--- a5', this.seriesInfo.numSamples)
             if (gotAllData) {
-                console.log('--- got all the data', markers.length, this.seriesInfo.numSamples)
                 break
             }
             else {
-                console.log('--- did not get all the data', this.seriesInfo.numSamples)
                 await sleepMsecNum(100)
             }
-            console.log('--- b', this.seriesInfo.numSamples)
         }
     }
     label() {
