@@ -1,6 +1,6 @@
 projectName: figurl
 pythonProjectVersion: 0.1.3
-webAppProjectVersion: 0.1.3d
+webAppProjectVersion: 0.1.3e
 projectAuthor: Jeremy Magland and Jeff Soules
 projectAuthorEmail: jmagland@flatironinstitute.org
 projectDescription: Web views of figures generated from Python
