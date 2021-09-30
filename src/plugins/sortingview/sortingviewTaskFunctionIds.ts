@@ -1,6 +1,4 @@
 const sortingviewTaskFunctionIds = {
-    experitimeGetTimeseriesInfo: 'experitime.get_timeseries_info.2',
-    experitimeGetTimeseriesSamples: 'experitime.get_timeseries_samples.2',
     fetchAverageWaveform: 'fetch_average_waveform.2',
     individualClusterFeatures: 'individual_cluster_features.1',
     fetchCorrelogramPlotData: 'fetch_correlogram_plot_data.6',

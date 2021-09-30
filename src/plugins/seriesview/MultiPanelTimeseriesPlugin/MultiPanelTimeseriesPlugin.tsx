@@ -4,20 +4,20 @@ import { FigurlPlugin } from "figurl/types";
 import { FunctionComponent, useEffect, useReducer } from "react";
 import { timeseriesSelectionReducer } from "./interface/TimeseriesSelection";
 import MultiPanelTimeseriesView from "./MultiPanelTimeseriesView";
-import useTimeseriesInfo from "./useTimeseriesInfo";
+import useSeriesInfo from "./useSeriesInfo";
 
 type EventAmplitudesPanelData = {
     type: 'EventAmplitudes',
     label: string,
     data: {
-        timeseriesUri: string
+        seriesUri: string
     }
 }
 
 const isEventAmplitudesPanelData = (x: any): x is EventAmplitudesPanelData => {
     const isData = (y: any) => {
         return _validateObject(y, {
-            timeseriesUri: isString
+            seriesUri: isString
         })
     }
     return _validateObject(x, {
@@ -54,16 +54,20 @@ type Props = {
 
 const MultiPanelTimeseriesComponent: FunctionComponent<Props> = ({data, width, height}) => {
     const {panels} = data
-    const {timeseriesInfo, task} = useTimeseriesInfo(panels[0].data.timeseriesUri)
+    const {seriesInfo, task} = useSeriesInfo(panels[0].data.seriesUri)
     const [timeseriesSelection, timeseriesSelectionDispatch] = useReducer(timeseriesSelectionReducer, {})
     useEffect(() => {
-        if (!timeseriesInfo) return
+        if (!seriesInfo) return
+        timeseriesSelectionDispatch({type: 'SetStartEndTime', startTime: seriesInfo.startTime, endTime: seriesInfo.endTime})
+    }, [seriesInfo])
+    useEffect(() => {
+        if (!seriesInfo) return
         timeseriesSelectionDispatch({
             type: 'SetTimeRange',
-            timeRange: {min: timeseriesInfo.startTime, max: timeseriesInfo.endTime}
+            timeRange: {min: seriesInfo.startTime, max: seriesInfo.endTime}
         })
-    }, [timeseriesInfo])
-    if (!timeseriesInfo) return (
+    }, [seriesInfo])
+    if (!seriesInfo) return (
         <TaskStatusView task={task} label="Loading timeseries info" />
     )
     return (
@@ -78,7 +82,7 @@ const MultiPanelTimeseriesComponent: FunctionComponent<Props> = ({data, width, h
 }
 
 const MultiPanelTimeseriesPlugin: FigurlPlugin = {
-    type: 'seriesview.multipanel-timeseries.1',
+    type: 'seriesview.multipanel-timeseries.2',
     validateData: isMultiPanelTimeseriesData,
     component: MultiPanelTimeseriesComponent
 }

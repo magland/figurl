@@ -23,22 +23,6 @@ interface LayerState {
     }
 }
 
-const initialLayerState = {
-    timeRange: null,
-    transformations: [],
-    inverseTransformations: [],
-    yAxisTransformations: [],
-    yAxisWidths: [],
-    yAxisHeights: [],
-    anchorTimepoint: null,
-    dragging: false,
-    captureWheel: false,
-    paintStatus: {
-        paintCode: 0,
-        completenessFactor: 0.2
-    }
-}
-
 const onPaint = async (painter: CanvasPainter, layerProps: TimeWidgetLayerProps, state: LayerState): Promise<void> => {
     const { panels, timeRange } = layerProps
     if (!timeRange) return
@@ -214,6 +198,21 @@ export const handleKeyboardEvent: KeyboardEventHandler = (e: KeyboardEvent, laye
 }
 
 export const createMainLayer = () => {
+    const initialLayerState = {
+        timeRange: null,
+        transformations: [],
+        inverseTransformations: [],
+        yAxisTransformations: [],
+        yAxisWidths: [],
+        yAxisHeights: [],
+        anchorTimepoint: null,
+        dragging: false,
+        captureWheel: false,
+        paintStatus: {
+            paintCode: 0,
+            completenessFactor: 0.2
+        }
+    }
     return new CanvasWidgetLayer<TimeWidgetLayerProps, LayerState>(
         onPaint,
         onPropsChange,

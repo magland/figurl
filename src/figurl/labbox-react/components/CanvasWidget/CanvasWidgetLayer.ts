@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CanvasPainter, Context2D } from './CanvasPainter'
 import { getInverseTransformationMatrix, RectangularRegion, TransformationMatrix, transformPoint, transformRect, transformXY, Vec2 } from './Geometry'
 
@@ -304,15 +304,21 @@ export class CanvasWidgetLayer<LayerProps extends BaseLayerProps, State extends 
 }
 
 export const useLayer = <LayerProps extends BaseLayerProps, LayerState extends Object>(createLayer: () => CanvasWidgetLayer<LayerProps, LayerState>, layerProps?: LayerProps): CanvasWidgetLayer<LayerProps, LayerState> | null => {
-    const [layer, setLayer] = useState<CanvasWidgetLayer<LayerProps, LayerState> | null>(null)
+    const layer = useMemo(() => {
+        return createLayer()
+    }, [createLayer])
+    // const [layer, setLayer] = useState<CanvasWidgetLayer<LayerProps, LayerState> | null>(null)
+    // useEffect(() => {
+    //     if (layer === null) {
+    //         setLayer(createLayer())
+    //     }
+    // }, [layer, setLayer, createLayer])
+    // if ((layer) && (layerProps)) {
+    //     layer.setProps(layerProps)
+    // }
     useEffect(() => {
-        if (layer === null) {
-            setLayer(createLayer())
-        }
-    }, [layer, setLayer, createLayer])
-    if ((layer) && (layerProps)) {
-        layer.setProps(layerProps)
-    }
+        if (layerProps) layer.setProps(layerProps)
+    }, [layer, layerProps])
     return layer
 }
 

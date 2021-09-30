@@ -45,14 +45,6 @@ type LayerState = {
     draggedElectrodeIds: number[]
     hoveredElectrodeId: number | null
 }
-const initialLayerState = {
-    electrodeBoxes: [],
-    radius: 0,
-    pixelRadius: 0,
-    dragRegion: null,
-    draggedElectrodeIds: [],
-    hoveredElectrodeId: null
-}
 
 export type ElectrodeColors = {
     border: string,
@@ -196,6 +188,14 @@ export const createElectrodesLayer = () => {
         layer.setTransformMatrix(transform)
         layer.setState({...state, electrodeBoxes, radius, pixelRadius})
         layer.scheduleRepaint()
+    }
+    const initialLayerState = {
+        electrodeBoxes: [],
+        radius: 0,
+        pixelRadius: 0,
+        dragRegion: null,
+        draggedElectrodeIds: [],
+        hoveredElectrodeId: null
     }
     return new CanvasWidgetLayer<ElectrodeLayerProps, LayerState>(
         onPaint,

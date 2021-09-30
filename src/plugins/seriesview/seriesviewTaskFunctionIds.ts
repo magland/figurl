@@ -1,6 +1,6 @@
 const seriesviewTaskFunctionIds = {
-    seriesViewGetTimeseriesInfo: 'seriesview.get_timeseries_info.4',
-    seriesViewGetTimeseriesSamples: 'seriesview.get_timeseries_samples.4'
+    seriesViewGetSeriesManifest: 'seriesview.get_series_manifest.1',
+    seriesViewGetArray: 'seriesview.get_array.2'
 }
 
 export default seriesviewTaskFunctionIds

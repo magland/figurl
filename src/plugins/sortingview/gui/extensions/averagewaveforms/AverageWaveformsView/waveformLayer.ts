@@ -13,9 +13,6 @@ const defaultWaveformColors: WaveformColors = {
 type LayerState = {
     electrodeBoxes: ElectrodeBox[]
 }
-const initialLayerState = {
-    electrodeBoxes: []
-}
 
 // If any custom actions have been set (that is, something a user of this component wants to happen in response to a key press)
 // expect them to have been passed in with the key 'customActions' & call them here.
@@ -61,6 +58,9 @@ export const createWaveformLayer = () => {
         layer.setTransformMatrix(transform)
         layer.setState({electrodeBoxes})
         layer.scheduleRepaint()
+    }
+    const initialLayerState = {
+        electrodeBoxes: []
     }
     return new CanvasWidgetLayer<WaveformLayerProps, LayerState>(
         onPaint,

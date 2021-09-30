@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { FunctionComponent } from 'react';
 import { TimeseriesSelection, TimeseriesSelectionDispatch } from './interface/TimeseriesSelection';
 import { PanelData } from './MultiPanelTimeseriesPlugin';
 import SeriesViewTimeseriesView from './SeriesViewTimeseriesView/SeriesViewTimeseriesView';
@@ -13,18 +13,16 @@ type Props = {
 
 const MultiPanelTimeseriesView: FunctionComponent<Props> = ({panels, width, height, timeseriesSelection, timeseriesSelectionDispatch}) => {
     const panelHeight = (height - panels.length * 3) / panels.length
-    const opts = useMemo(() => ({channelSelectPanel: false}), [])
     return (
         <div>
             {
-                panels.map(panel => (
-                    <div style={{height: panelHeight}}>
+                panels.map((panel, ii) => (
+                    <div key={ii} style={{height: panelHeight}}>
                         <div>{panel.label}</div>
                         <SeriesViewTimeseriesView
-                            timeseriesUri={panel.data.timeseriesUri}
+                            seriesUri={panel.data.seriesUri}
                             width={width}
                             height={panelHeight - 40}
-                            opts={opts}
                             timeseriesSelection={timeseriesSelection}
                             timeseriesSelectionDispatch={timeseriesSelectionDispatch}
                             hideTimeSpan={true}

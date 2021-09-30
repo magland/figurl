@@ -2,7 +2,6 @@ import { funcToTransform } from "figurl/labbox-react/components/CanvasWidget"
 import { CanvasPainter } from "figurl/labbox-react/components/CanvasWidget/CanvasPainter"
 import { CanvasDragEvent, CanvasWidgetLayer, ClickEvent, ClickEventType, DiscreteMouseEventHandler, DragHandler, KeyboardEvent, KeyboardEventHandler, MousePresenceEvent, MousePresenceEventHandler, MousePresenceEventType, WheelEvent, WheelEventHandler } from "figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer"
 import { getInverseTransformationMatrix, TransformationMatrix, transformPoint, Vec2 } from "figurl/labbox-react/components/CanvasWidget/Geometry"
-import { sleepMsec } from "plugins/sortingview/gui/pluginInterface/RecordingSelection"
 import { TimeWidgetLayerProps } from "./TimeWidgetLayerProps"
 
 type Layer = CanvasWidgetLayer<TimeWidgetLayerProps, LayerState>
@@ -23,64 +22,68 @@ interface LayerState {
     }
 }
 
-const initialLayerState = {
-    timeRange: null,
-    transformations: [],
-    inverseTransformations: [],
-    yAxisTransformations: [],
-    yAxisWidths: [],
-    yAxisHeights: [],
-    anchorTimepoint: null,
-    dragging: false,
-    captureWheel: false,
-    paintStatus: {
-        paintCode: 0,
-        completenessFactor: 0.2
-    }
-}
-
 const onPaint = async (painter: CanvasPainter, layerProps: TimeWidgetLayerProps, state: LayerState): Promise<void> => {
     const { panels, timeRange } = layerProps
     if (!timeRange) return
     if (panels.length === 0) return
+
     state.paintStatus.paintCode ++
+    console.log('---- incremented paint code', state.paintStatus.paintCode, panels.length)
     const paintCode = state.paintStatus.paintCode
 
-    for (let level = 1 ; level <= 2; level++) {
-        let completenessFactor = state.paintStatus.completenessFactor
-        painter.useOffscreenCanvas(layerProps.width, layerProps.height)
-        if (level === 1) {
-            painter.wipe()
-        }
-        else if (level === 2) {
-            completenessFactor = 1
-        }
-        const timer = Number(new Date())
-        for (let i = 0; i < panels.length; i++) {
-            const panel = panels[i]
-            const painter2 = painter.transform(state.transformations[i])
-            const painter3 = painter.transform(state.yAxisTransformations[i])
-            panel.setTimeRange(timeRange)
-            panel.paint(painter2, completenessFactor)
-            panel.paintYAxis && panel.paintYAxis(painter3, state.yAxisWidths[i], state.yAxisHeights[i])
-            if (level === 2) {
-                await sleepMsec(0)
-                if (paintCode !== state.paintStatus.paintCode) {
-                    return
-                }
-            }
-        }
-        const elapsed = Number(new Date()) - timer
-        if ((level === 1) && (elapsed)) {
-            layerProps.onRepaintTimeEstimate(elapsed)
-            // let's adjust the completeness factor based on a target elapsed time
-            const targetElapsed = 40
-            state.paintStatus.completenessFactor = state.paintStatus.completenessFactor * targetElapsed / elapsed
-            state.paintStatus.completenessFactor = Math.min(1, Math.max(0.15, state.paintStatus.completenessFactor))
-        }
-        painter.transferOffscreenToPrimary()
-        if (completenessFactor === 1) break
+    // painter.useOffscreenCanvas(layerProps.width, layerProps.height)
+
+    const valid = () => {
+        return (state.paintStatus.paintCode === paintCode)
     }
+
+    painter.wipe()
+    for (let i = 0; i < panels.length; i++) {
+        const panel = panels[i]
+        const painter2 = painter.transform(state.transformations[i])
+        const painter3 = painter.transform(state.yAxisTransformations[i])
+        panel.setTimeRange(timeRange)
+        console.log('---- painting panel', state.paintStatus.paintCode)
+        panel.paint(painter2, valid)
+        panel.paintYAxis && panel.paintYAxis(painter3, state.yAxisWidths[i], state.yAxisHeights[i])
+    }
+    
+
+    // for (let level = 1 ; level <= 2; level++) {
+    //     let completenessFactor = state.paintStatus.completenessFactor
+    //     painter.useOffscreenCanvas(layerProps.width, layerProps.height)
+    //     if (level === 1) {
+    //         painter.wipe()
+    //     }
+    //     else if (level === 2) {
+    //         completenessFactor = 1
+    //     }
+    //     const timer = Number(new Date())
+    //     for (let i = 0; i < panels.length; i++) {
+    //         const panel = panels[i]
+    //         const painter2 = painter.transform(state.transformations[i])
+    //         const painter3 = painter.transform(state.yAxisTransformations[i])
+    //         panel.setTimeRange(timeRange)
+    //         panel.paint(painter2, completenessFactor)
+    //         panel.paintYAxis && panel.paintYAxis(painter3, state.yAxisWidths[i], state.yAxisHeights[i])
+    //         if (level === 2) {
+    //             await sleepMsec(0)
+    //             if (paintCode !== state.paintStatus.paintCode) {
+    //                 return
+    //             }
+    //         }
+    //     }
+    //     const elapsed = Number(new Date()) - timer
+    //     if ((level === 1) && (elapsed)) {
+    //         layerProps.onRepaintTimeEstimate(elapsed)
+    //         // let's adjust the completeness factor based on a target elapsed time
+    //         const targetElapsed = 40
+    //         state.paintStatus.completenessFactor = state.paintStatus.completenessFactor * targetElapsed / elapsed
+    //         state.paintStatus.completenessFactor = Math.min(1, Math.max(0.15, state.paintStatus.completenessFactor))
+    //     }
+    //     painter.transferOffscreenToPrimary()
+    //     if (completenessFactor === 1) break
+    // }
 }
 
 const onPropsChange = (layer: Layer, layerProps: TimeWidgetLayerProps) => {
@@ -214,6 +217,21 @@ export const handleKeyboardEvent: KeyboardEventHandler = (e: KeyboardEvent, laye
 }
 
 export const createMainLayer = () => {
+    const initialLayerState = {
+        timeRange: null,
+        transformations: [],
+        inverseTransformations: [],
+        yAxisTransformations: [],
+        yAxisWidths: [],
+        yAxisHeights: [],
+        anchorTimepoint: null,
+        dragging: false,
+        captureWheel: false,
+        paintStatus: {
+            paintCode: 0,
+            completenessFactor: 0.2
+        }
+    }
     return new CanvasWidgetLayer<TimeWidgetLayerProps, LayerState>(
         onPaint,
         onPropsChange,
