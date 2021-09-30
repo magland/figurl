@@ -23,7 +23,8 @@ const parseFigurl = (url: string) => {
     const query = QueryString.parse(b)
     const channel = query['channel'] as any as ChannelName
     const figureObject = query['figureObject']
-    return {figureObject, channel}
+    const height = query['height']
+    return {figureObject, channel, height: height ? Number(height) : undefined}
 }
 
 const DocView: FunctionComponent<Props> = ({source, width, height}) => {
@@ -31,7 +32,7 @@ const DocView: FunctionComponent<Props> = ({source, width, height}) => {
     const customRenderers: ReactMarkdown.Renderers = useMemo(() => ({
         link: (props: any) => {
             const href: string = props.href
-            const {figureObject, channel: hrefChannel} = parseFigurl(href)
+            const {figureObject, channel: hrefChannel, height} = parseFigurl(href)
             if ((figureObject) && (hrefChannel !== channelName)) {
                 return <div>Channel mismatch: {hrefChannel} is not {channelName}</div>
             }
@@ -39,7 +40,7 @@ const DocView: FunctionComponent<Props> = ({source, width, height}) => {
                 return (
                     <Figure
                         width={width}
-                        height={500}
+                        height={height || 800}
                         figureObjectOrHash={figureObject}
                     />
                 )
