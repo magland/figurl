@@ -187,6 +187,7 @@ const setupElectrodes = (args: {width: number, height: number, electrodeLocation
         return { label: electrodeIds[i] + '', id: electrodeIds[i], x: x, y: y, rect, transform: transform0}}
     )
     const pixelRadius = transformDistance(transform, [radius, 0])[0]
+    console.log(`Calculated pixel radius as ${pixelRadius} (traditional way)`)
     return {electrodeBoxes, transform, radius, pixelRadius}
 }
 

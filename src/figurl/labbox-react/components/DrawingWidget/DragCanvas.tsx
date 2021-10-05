@@ -1,16 +1,21 @@
-import React, { useCallback, useReducer, useRef } from "react"
+import React, { useCallback, useEffect, useMemo, useReducer, useRef } from "react"
 import { Vec2, Vec4 } from "./Geometry"
 
-// NOTE: This is written to track drag state in *pixelspace*.
-// Consuming 
+// NOTE: Tracks drag state in *pixelspace*.
 
 type DragActionType = 'COMPUTE_DRAG' | 'END_DRAG' | 'RESET_DRAG' | 'PARTIAL'
 
-interface DragState {
-    isFinal: boolean, // whether we are in an active dragging state
+interface DragCanvasProps {
+    width: number
+    height: number
+    onDragStateChanged: (newState: DragState) => void
+}
+
+export interface DragState {
+    isFinal: boolean,  // whether we are in an active dragging state
     dragAnchor?: Vec2, // The position where dragging began (pixels)
-    dragRect?: Vec4, // The drag rect for convenience (pixels)
-    shift?: boolean // whether the shift keys is being pressed
+    dragRect?: Vec4,   // The drag rect for convenience (pixels)
+    shift?: boolean    // whether the shift keys is being pressed
 }
 
 interface DragAction {
@@ -50,7 +55,7 @@ const dragReducer = (state: DragState, action: DragAction): DragState => {
     const {dragAnchor, dragRect } = state
     const {type, mouseButtonIsDown, point, shift} = action
     const DRAG_START_TOLERANCE = 4
-
+    
     switch (type) {
         case RESET_DRAG:    // should happen on mousedown
             return { isFinal: true }
@@ -93,30 +98,60 @@ const dragReducer = (state: DragState, action: DragAction): DragState => {
     }
 }
 
-const useDragRect = () => {
-    const [state, dispatchDrag] = useReducer(dragReducer, {isFinal: true})
-    const nextDragStateUpdate = useRef<DragAction | null>(null)
+const dragStyle = 'rgba(196, 196, 196, 0.5)'
 
-    const applyPendingDragUpdate = useCallback(() => {
-        const updateToApply = nextDragStateUpdate.current
+const paintCanvas = (canvasRef: React.ForwardedRef<HTMLCanvasElement>, dragState: DragState | undefined) => {
+    if (!dragState || !canvasRef) return
+    if (typeof canvasRef === 'function') return
+    const canvas = canvasRef.current
+    const ctxt = canvas && canvas.getContext('2d')
+    if (!ctxt) {
+        console.log("Unable to get 2d context.")
+        return
+    }
+
+    ctxt.clearRect(0, 0, ctxt.canvas.width, ctxt.canvas.height)
+    if (!dragState.isFinal) {
+        const rect = dragState.dragRect || [0, 0, 0, 0]
+        ctxt.fillStyle = dragStyle
+        ctxt.fillRect(rect[0], rect[1], rect[2], rect[3])
+    }
+}
+
+const DragCanvas = React.forwardRef<HTMLCanvasElement, DragCanvasProps>((props: DragCanvasProps, ref) => {
+    const { width, height, onDragStateChanged } = props
+    const [state, dispatchDrag] = useReducer(dragReducer, {isFinal: true})
+
+    const nextDragStateUpdate = useRef<DragAction | null>(null)
+    const nextFrame = useRef<number>(0)
+
+    useEffect(() => {
+        paintCanvas(ref, state)
+        onDragStateChanged(state)
+    }, [ref, state, onDragStateChanged])
+
+    const updateState = useCallback(() => {
+        if (nextDragStateUpdate.current === null) {
+            window.cancelAnimationFrame(nextFrame.current)
+            nextFrame.current = 0
+        } else {
+            dispatchDrag(nextDragStateUpdate.current)
+            nextFrame.current = requestAnimationFrame(updateState)
+        }
         nextDragStateUpdate.current = null
-        updateToApply && dispatchDrag(updateToApply)
-    }, [nextDragStateUpdate, dispatchDrag])
-    const debouncedUpdateDrag = useCallback((a: DragAction) => {
-        const needToScheduleUpdateExecution = nextDragStateUpdate.current === null
-        nextDragStateUpdate.current = a
-        if (needToScheduleUpdateExecution) {
-            setTimeout(() => applyPendingDragUpdate, 30)
-        } 
-    }, [nextDragStateUpdate, applyPendingDragUpdate])
+    }, [nextDragStateUpdate, nextFrame, dispatchDrag])
 
     const handleMouseMove = useCallback((e: React.MouseEvent) => {
         const action: DragAction = {
             ...getActionFromEvent(e),
             type: COMPUTE_DRAG
         }
-        debouncedUpdateDrag(action)
-    }, [debouncedUpdateDrag])
+        if (!action.mouseButtonIsDown) return
+        nextDragStateUpdate.current = action
+        if (nextFrame.current === 0) {
+            updateState()
+        }
+    }, [nextDragStateUpdate, nextFrame, updateState])
 
     const handleMouseUp = useCallback((e: React.MouseEvent) => {
         nextDragStateUpdate.current = null
@@ -128,12 +163,19 @@ const useDragRect = () => {
         dispatchDrag({ type: RESET_DRAG })
     }, [])
 
-    return {
-        moveHandler: handleMouseMove,
-        upHandler: handleMouseUp,
-        downHandler: handleMouseDown,
-        state: state
-    }
-}
+    const canvas = useMemo(() => {
+        return <canvas
+            ref={ref}
+            width={width}
+            height={height}
+            style={{position: 'absolute', left: 0, top: 0}}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseDown={handleMouseDown}
+        />
+    }, [ref, width, height, handleMouseMove, handleMouseUp, handleMouseDown])
 
-export default useDragRect
+    return canvas
+})
+
+export default DragCanvas

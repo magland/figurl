@@ -3,6 +3,7 @@ import React, { useMemo } from "react"
 import { RecordingSelectionDispatch } from "../../../pluginInterface"
 import { createElectrodesLayer, Electrode, ElectrodeLayerProps } from "../../common/sharedCanvasLayers/electrodesLayer"
 import setupElectrodes from '../../common/sharedCanvasLayers/setupElectrodes'
+import ElectrodeGeometry from '../../common/sharedDrawnComponents/ElectrodeGeometry'
 
 // Okay, so after some hoop-jumping, we've learned the RecordingInfo has:
 // - sampling frequency (number), - channel_ids (list of number),
@@ -21,6 +22,8 @@ const defaultElectrodeLayerElectrodeOpts = {
     showLabels: true,
     maxElectrodePixelRadius: 25
 }
+
+const useNewStyle = true
 
 const ElectrodeGeometryWidget = (props: WidgetProps) => {
     const layoutMode = 'geom'
@@ -56,7 +59,20 @@ const ElectrodeGeometryWidget = (props: WidgetProps) => {
 
     const layer = useLayer(createElectrodesLayer, electrodeLayerProps)
     const layers = useLayers([layer])
-    return (
+    return useNewStyle ?
+    (
+        <ElectrodeGeometry
+            electrodes={props.electrodes}
+            selectedElectrodeIds={props.selectedElectrodeIds}
+            selectionDispatch={props.selectionDispatch}
+            width={props.width}
+            height={props.height}
+            layoutMode={'geom'}
+            showLabels={true}
+            maxElectrodePixelRadius={25}
+        />
+    )
+    : (
         <CanvasWidget
             key='electrodeGeometryCanvas'
             layers={layers}
@@ -64,5 +80,6 @@ const ElectrodeGeometryWidget = (props: WidgetProps) => {
         />
     )
 }
+
 
 export default ElectrodeGeometryWidget

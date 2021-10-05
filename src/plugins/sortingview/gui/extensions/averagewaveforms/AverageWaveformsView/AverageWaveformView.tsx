@@ -1,10 +1,11 @@
-// import { createCalculationPool } from 'labbox';
 // import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView'
 import useChannel from 'figurl/kachery-react/useChannel'
 import usePureCalculationTask from 'figurl/kachery-react/usePureCalculationTask'
 import { KeypressMap } from 'figurl/labbox-react/components/CanvasWidget'
+// import DragLayerTest from 'figurl/labbox-react/components/DrawingWidget/DragLayerTest'
+import DragLayer from 'figurl/labbox-react/components/DrawingWidget/DragLayer'
 import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds'
-import React, { Fragment, FunctionComponent, useMemo } from 'react'
+import React, { FunctionComponent, useMemo } from 'react'
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelectionDispatch } from '../../../pluginInterface'
 import { ElectrodeOpts } from '../../common/sharedCanvasLayers/electrodesLayer'
 // import WaveformWidget, { defaultWaveformOpts } from './WaveformWidget'
@@ -70,21 +71,10 @@ const AverageWaveformView: FunctionComponent<Props> = ({ sorting, curation, reco
             : definedPlotData.channel_locations
     }, [visibleElectrodeIds, definedPlotData.channel_ids, definedPlotData.channel_locations])
 
-    // TEMPORARY TEST
-    return <Fragment>
-        <canvas 
-            style={{position: 'absolute', left: 0, top: 0}}
-            width={width}
-            height={height}
-            onMouseDown={(e) => console.log(`First canvas got mousedown event: ${e.clientX, e.clientY} with shift? ${e.shiftKey}`)}
-        />
-        <canvas
-            style={{position: 'absolute', left: 0, top: 0}}
-            width={width}
-            height={height}
-            onMouseDown={(e) => console.log(`Second canvas got mousedown event: ${e.clientX, e.clientY} with shift? ${e.shiftKey}`)}
-        />
-    </Fragment>
+    return <DragLayer
+        width={width}
+        height={height}
+    />
 
     // return plotData
     //     ? <WaveformWidget
