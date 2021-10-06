@@ -314,17 +314,17 @@ export class CanvasPainter {
     drawMarker(center: Vec2, opts: {radius: number, pen?: Pen, brush?: Brush}) {
         const p = transformPoint(this._transformMatrix, center)
         this._context2D.save()
-        if (opts.pen) {
-            applyPen(this._context2D, opts.pen)
-            this._context2D.beginPath()
-            this._context2D.ellipse(p[0], p[1], opts.radius, opts.radius, 0, 0, 2 * Math.PI)
-            this._context2D.stroke()
-        }
         if (opts.brush) {
             applyBrush(this._context2D, opts.brush)
             this._context2D.beginPath()
             this._context2D.ellipse(p[0], p[1], opts.radius, opts.radius, 0, 0, 2 * Math.PI)
             this._context2D.fill()
+        }
+        if (opts.pen) {
+            applyPen(this._context2D, opts.pen)
+            this._context2D.beginPath()
+            this._context2D.ellipse(p[0], p[1], opts.radius, opts.radius, 0, 0, 2 * Math.PI)
+            this._context2D.stroke()
         }
         
         this._context2D.restore()

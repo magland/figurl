@@ -29,7 +29,8 @@ export const recentFiguresReducer = (s: RecentFigures, a: RecentFiguresAction) =
         let newF = [...s.figures.filter(x => (!sameRecentFigure(x, a.recentFigure))), a.recentFigure]
         if (newF.length > 15) newF = newF.slice(3)
         const newS = {...s, figures: newF}
-        localStorage.setItem('recent-figures-2', JSON.stringify(newS))
+        // disable this for now
+        // localStorage.setItem('recent-figures-2', JSON.stringify(newS))
         return newS
     }
     else return s

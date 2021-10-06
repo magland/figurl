@@ -35,7 +35,6 @@ const SpikeClusterView: FunctionComponent<Props> = ({features, xIndex, yIndex, x
         width: 400,
         height: 400
     }), [xFeatures, yFeatures, xRange, yRange])
-    console.log('----', xFeatures, yFeatures, xRange, yRange)
     const mainLayer = useLayer(createClusterViewMainLayer, layerProps)
     const layers = useLayers([mainLayer])
     return (
