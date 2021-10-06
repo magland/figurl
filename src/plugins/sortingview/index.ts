@@ -3,12 +3,14 @@ import AverageWaveformsPlugin from "./AverageWaveformsPlugin/AverageWaveformsPlu
 import AverageWaveformsNumpyPlugin from "./AverageWaveformsNumpyPlugin/AverageWaveformsNumpyPlugin"
 import MountainViewPlugin from "./MountainViewPlugin/MountainViewPlugin"
 import WorkspacePlugin from "./WorkspacePlugin/WorkspacePlugin"
+import SpikeExplorerPlugin from "./SpikeExplorerPlugin/SpikeExplorerPlugin"
 
 const plugins: FigurlPlugin[] = [
     MountainViewPlugin,
     AverageWaveformsPlugin,
     WorkspacePlugin,
-    AverageWaveformsNumpyPlugin
+    AverageWaveformsNumpyPlugin,
+    SpikeExplorerPlugin
 ]
 
 export default plugins
