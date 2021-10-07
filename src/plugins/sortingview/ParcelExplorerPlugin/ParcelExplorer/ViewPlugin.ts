@@ -14,6 +14,21 @@ export const parcelRefFromString = (x: string): ParcelRef => {
     return {segmentIndex: Number(v[0]), parcelIndex: Number(v[1])}
 }
 
+export type SpikeEventRef = {
+    segmentIndex: number
+    parcelIndex: number
+    spikeEventIndex: number
+}
+
+export const spikeEventRefToString = (r: SpikeEventRef): string => {
+    return `${r.segmentIndex}:${r.parcelIndex}:${r.spikeEventIndex}`
+}
+
+export const spikeEventRefFromString = (x: string): SpikeEventRef => {
+    const v = x.split(':')
+    return {segmentIndex: Number(v[0]), parcelIndex: Number(v[1]), spikeEventIndex: Number(v[2])}
+}
+
 export type ParcelSortingSelection = {
     selectedSegmentIndex: number
     selectedParcelRefs: ParcelRef[]
@@ -57,6 +72,7 @@ export type ViewProps = {
     parcelSortingSelection: ParcelSortingSelection,
     parcelSortingSelectionDispatch: ParcelSortingSelectionDispatch,
     featureRanges: {range: [number, number]}[]
+    maxAmplitude: number
     width: number
     height: number
 }

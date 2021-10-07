@@ -87,7 +87,7 @@ const ViewContainerTab: FunctionComponent<{view: View, onClose: (v: View) => voi
             </IconButton>
         </div>
     )
-    const style: React.CSSProperties = useMemo(() => (opts.selected ? {color: 'white', fontWeight: 'bold'} : {color: 'lightgray'}), [opts.selected])
+    const style: React.CSSProperties = useMemo(() => (opts.selected ? {color: 'black', fontWeight: 'bold'} : {color: 'gray'}), [opts.selected])
     return (
         <Tab key={view.viewId} label={label} className="Tab" style={style} />
     )

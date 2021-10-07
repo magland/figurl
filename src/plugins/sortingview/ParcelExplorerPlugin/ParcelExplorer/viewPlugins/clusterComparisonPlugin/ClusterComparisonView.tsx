@@ -1,13 +1,17 @@
+import { Grid } from '@material-ui/core';
 import { ParcelSorting } from 'plugins/sortingview/ParcelExplorerPlugin/ParcelExplorerPlugin';
-import React, { FunctionComponent, useMemo } from 'react';
-import { ParcelRef, parcelRefToString, ParcelSortingSelection, ParcelSortingSelectionDispatch } from '../../ViewPlugin';
+import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import colorForParcelIndex from '../../colorForParcelIndex';
+import { ParcelRef, parcelRefFromString, parcelRefToString, ParcelSortingSelection, ParcelSortingSelectionDispatch, SpikeEventRef } from '../../ViewPlugin';
 import ClusterWidget, { PointGroup } from '../overviewClusterPlugin/ClusterWidget';
+import SpikeWaveformWidget from './SpikeWaveformWidget/SpikeWaveformWidget';
 
 type Props = {
     parcelSorting: ParcelSorting
     parcelSortingSelection: ParcelSortingSelection,
     parcelSortingSelectionDispatch: ParcelSortingSelectionDispatch,
     featureRanges: {range: [number, number]}[]
+    maxAmplitude: number
     width: number
     height: number
 }
@@ -85,13 +89,14 @@ const prepareFeatureTransform = (a: {parcelSorting: ParcelSorting, p1?: ParcelRe
     return transform
 }
 
-const ClusterComparisonView: FunctionComponent<Props> = ({parcelSorting, parcelSortingSelection, parcelSortingSelectionDispatch, featureRanges, width, height}) => {
+const ClusterComparisonView: FunctionComponent<Props> = ({parcelSorting, parcelSortingSelection, parcelSortingSelectionDispatch, featureRanges, maxAmplitude, width, height}) => {
     const p1: ParcelRef | undefined = useMemo(() => (parcelSortingSelection.selectedParcelRefs[0]), [parcelSortingSelection.selectedParcelRefs])
     const p2: ParcelRef | undefined = useMemo(() => (parcelSortingSelection.selectedParcelRefs[1]), [parcelSortingSelection.selectedParcelRefs])
 
-    const {pointGroups, selectedPointGroups, xRange, yRange} = useMemo(() => {
+    const [currentSpikeEvent, setCurrentSpikeEvent] = useState<SpikeEventRef | undefined>(undefined)
+
+    const {pointGroups, xRange, yRange} = useMemo(() => {
         const pointGroups: PointGroup[] = []
-        const selectedPointGroups: string[] = []
         const transform = prepareFeatureTransform({parcelSorting, p1, p2})
         for (let p of [p1, p2]) {
             if (p) {
@@ -99,7 +104,8 @@ const ClusterComparisonView: FunctionComponent<Props> = ({parcelSorting, parcelS
                 const parcel = segment.parcels[p.parcelIndex]
                 const G: PointGroup = {
                     key: parcelRefToString(p),
-                    locations: []
+                    locations: [],
+                    color: colorForParcelIndex(p.parcelIndex)
                 }
                 for (let i = 0; i < parcel.features.length; i++) {
                     const a = transform(parcel.features[i])
@@ -110,28 +116,52 @@ const ClusterComparisonView: FunctionComponent<Props> = ({parcelSorting, parcelS
         }
         const xRange = undefined
         const yRange = undefined
-        return {pointGroups, selectedPointGroups, xRange, yRange}
+        return {pointGroups, xRange, yRange}
     }, [p1, p2, parcelSorting])
-    const W = Math.min(width, height)
-    const H = W
+
+    const handleClickPoint = useCallback((p: {pointGroupKey: string, pointIndex: number}) => {
+        const parcelRef = parcelRefFromString(p.pointGroupKey)
+        const e: SpikeEventRef = {
+            segmentIndex: parcelRef.segmentIndex,
+            parcelIndex: parcelRef.parcelIndex,
+            spikeEventIndex: p.pointIndex
+        }
+        setCurrentSpikeEvent(e)
+    }, [])
+
+    const W2 = Math.min(150, width / 2)
+    const W1 = Math.min(width - W2 - 20, height)
+    const H = W1
 
     if (parcelSortingSelection.selectedParcelRefs.length !== 2) {
         return <div>You must select exactly two parcels for comparison</div>
     }
     return (
-        <div>
+        <Grid container>
             <ClusterWidget
                 pointGroups={pointGroups}
-                selectedPointGroups={selectedPointGroups}
                 xRange={xRange}
                 yRange={yRange}
                 xLabel={"X"}
                 yLabel={"Y"}
-                width={W}
+                width={W1}
                 height={H}
                 pointRadius={3}
+                useDensityColor={false}
+                onClickPoint={handleClickPoint}
             />
-        </div>
+            {
+                currentSpikeEvent && (
+                    <SpikeWaveformWidget
+                        parcelSorting={parcelSorting}
+                        spikeEvent={currentSpikeEvent}
+                        maxAmplitude={maxAmplitude}
+                        width={W2}
+                        height={H}
+                    />
+                )
+            }
+        </Grid>
     )
 }
 

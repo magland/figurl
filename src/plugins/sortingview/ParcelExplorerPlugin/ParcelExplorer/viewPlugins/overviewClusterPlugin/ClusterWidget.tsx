@@ -6,24 +6,28 @@ import { createClusterViewMainLayer, LayerProps } from './clusterViewMainLayer';
 export type PointGroup = {
     key: string
     locations: {x: number, y: number}[]
+    color: string
 }
 
 type Props = {
     xRange?: [number, number]
     yRange?: [number, number]
     pointGroups: PointGroup[]
-    selectedPointGroups: string[]
+    selectedPointGroups?: string[]
     setSelectedPointGroups?: (x: string[]) => void
+    onClickPoint?: (p: {pointGroupKey: string, pointIndex: number}) => void
     xLabel: string
     yLabel: string
     width: number
     height: number
     pointRadius: number
+    useDensityColor: boolean
 }
 
-const ClusterWidget: FunctionComponent<Props> = ({pointGroups, selectedPointGroups, setSelectedPointGroups, xRange, yRange, xLabel, yLabel, width, height, pointRadius}) => {
+const ClusterWidget: FunctionComponent<Props> = ({pointGroups, selectedPointGroups, setSelectedPointGroups, onClickPoint, xRange, yRange, xLabel, yLabel, width, height, pointRadius, useDensityColor}) => {
     const [hoveredPointGroup, setHoveredPointGroup] = useState<string>('')
     const handleClickPointGroup = useCallback((key: string, modifiers: ClickEventModifiers) => {
+        if (!selectedPointGroups) return
         if (!setSelectedPointGroups) return
         if (key) {
             if (modifiers.ctrl) {
@@ -52,8 +56,8 @@ const ClusterWidget: FunctionComponent<Props> = ({pointGroups, selectedPointGrou
                 ymaxs.push(Math.max(...G.locations.map(a => (a.y))))
             }
             return {
-                xRange2: [Math.min(...xmins), Math.max(...xmaxs)] as [number, number],
-                yRange2: [Math.min(...ymins), Math.max(...ymaxs)] as [number, number]
+                xRange2: dilateRange([Math.min(...xmins), Math.max(...xmaxs)] as [number, number], 0.05),
+                yRange2: dilateRange([Math.min(...ymins), Math.max(...ymaxs)] as [number, number], 0.05)
             }
         }
     }, [xRange, yRange, pointGroups])
@@ -61,14 +65,16 @@ const ClusterWidget: FunctionComponent<Props> = ({pointGroups, selectedPointGrou
         pointGroups,
         selectedPointGroups,
         hoveredPointGroup,
-        onHoverPointGroup: setHoveredPointGroup,
-        onClickPointGroup: handleClickPointGroup,
+        onHoverPointGroup: setSelectedPointGroups ? setHoveredPointGroup : undefined,
+        onClickPointGroup: setSelectedPointGroups ? handleClickPointGroup : undefined,
+        onClickPoint: onClickPoint,
         xRange: xRange2,
         yRange: yRange2,
         width,
         height,
-        pointRadius
-    }), [pointGroups, hoveredPointGroup, setHoveredPointGroup, handleClickPointGroup, selectedPointGroups, xRange2, yRange2, width, height, pointRadius])
+        pointRadius,
+        useDensityColor
+    }), [pointGroups, hoveredPointGroup, setSelectedPointGroups, setHoveredPointGroup, handleClickPointGroup, selectedPointGroups, onClickPoint, xRange2, yRange2, width, height, pointRadius, useDensityColor])
     const mainLayer = useLayer(createClusterViewMainLayer, layerProps)
     const layers = useLayers([mainLayer])
     return (
@@ -77,6 +83,11 @@ const ClusterWidget: FunctionComponent<Props> = ({pointGroups, selectedPointGrou
             {...{width: layerProps.width, height: layerProps.height}}
         />
     )
+}
+
+const dilateRange = (r: [number, number], p: number): [number, number] => {
+    const d = r[1] - r[0]
+    return [r[0] - d * p / 2, r[1] + d * p / 2]
 }
 
 export default ClusterWidget

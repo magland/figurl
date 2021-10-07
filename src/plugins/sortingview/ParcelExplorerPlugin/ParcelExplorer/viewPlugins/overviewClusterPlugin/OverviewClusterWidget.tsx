@@ -1,6 +1,9 @@
+import { Grid } from '@material-ui/core';
 import { ParcelSorting } from 'plugins/sortingview/ParcelExplorerPlugin/ParcelExplorerPlugin';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
+import colorForParcelIndex from '../../colorForParcelIndex';
 import { ParcelSortingSelection, ParcelSortingSelectionDispatch } from '../../ViewPlugin';
+import AverageWaveformWidget from './AverageWaveformWidget/AverageWaveformWidget';
 import ClusterWidget, { PointGroup } from './ClusterWidget';
 
 type Props = {
@@ -8,11 +11,12 @@ type Props = {
     parcelSortingSelection: ParcelSortingSelection
     parcelSortingSelectionDispatch: ParcelSortingSelectionDispatch
     featureRanges: {range: [number, number]}[]
+    maxAmplitude: number
     width: number
     height: number
 }
 
-const OverviewClusterWidget: FunctionComponent<Props> = ({parcelSorting, parcelSortingSelection, parcelSortingSelectionDispatch, featureRanges, width, height}) => {
+const OverviewClusterWidget: FunctionComponent<Props> = ({parcelSorting, parcelSortingSelection, parcelSortingSelectionDispatch, featureRanges, maxAmplitude, width, height}) => {
     const segment = useMemo(() => (parcelSorting.segments[parcelSortingSelection.selectedSegmentIndex]), [parcelSorting, parcelSortingSelection.selectedSegmentIndex])
     const selectedParcelIndices = useMemo(() => (
         parcelSortingSelection.selectedParcelRefs.filter(r => (r.segmentIndex === parcelSortingSelection.selectedSegmentIndex)).map(r => (r.parcelIndex))
@@ -24,7 +28,8 @@ const OverviewClusterWidget: FunctionComponent<Props> = ({parcelSorting, parcelS
             const parcel = segment.parcels[j]
             const G: PointGroup = {
                 key: `${j}`,
-                locations: []
+                locations: [],
+                color: (selectedParcelIndices.length === 0) || selectedParcelIndices.includes(j) ? colorForParcelIndex(j) : 'black'
             }
             if (selectedParcelIndices.includes(j)) {
                 selectedPointGroups.push(G.key)
@@ -46,10 +51,13 @@ const OverviewClusterWidget: FunctionComponent<Props> = ({parcelSorting, parcelS
             ))
         })
     }, [parcelSortingSelection.selectedSegmentIndex, parcelSortingSelectionDispatch])
-    const W = Math.min(width, height)
-    const H = W
+    
+    const W2 = Math.min(150, width / 2)
+    const W1 = Math.min(width - W2 - 20, height)
+    const H = W1
+
     return (
-        <div>
+        <Grid container>
             <ClusterWidget
                 pointGroups={pointGroups}
                 selectedPointGroups={selectedPointGroups}
@@ -58,11 +66,23 @@ const OverviewClusterWidget: FunctionComponent<Props> = ({parcelSorting, parcelS
                 yRange={yRange}
                 xLabel={"X"}
                 yLabel={"Y"}
-                width={W}
+                width={W1}
                 height={H}
                 pointRadius={1}
+                useDensityColor={false}
             />
-        </div>
+            {
+                parcelSortingSelection.selectedParcelRefs.length === 1 && (
+                    <AverageWaveformWidget
+                        parcelSorting={parcelSorting}
+                        parcel={parcelSortingSelection.selectedParcelRefs[0]}
+                        maxAmplitude={maxAmplitude}
+                        width={W2}
+                        height={H}
+                    />
+                )
+            }
+        </Grid>
     )
 }
 

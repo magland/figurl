@@ -10,11 +10,12 @@ type Props = {
     parcelSortingSelection: ParcelSortingSelection,
     parcelSortingSelectionDispatch: ParcelSortingSelectionDispatch,
     featureRanges: {range: [number, number]}[]
+    maxAmplitude: number
     width: number
     height: number
 }
 
-const OverviewClusterView: FunctionComponent<Props> = ({parcelSorting, parcelSortingSelection, parcelSortingSelectionDispatch, featureRanges, width, height}) => {
+const OverviewClusterView: FunctionComponent<Props> = ({parcelSorting, parcelSortingSelection, parcelSortingSelectionDispatch, featureRanges, maxAmplitude, width, height}) => {
     return (
         <div>
             <Splitter
@@ -32,6 +33,7 @@ const OverviewClusterView: FunctionComponent<Props> = ({parcelSorting, parcelSor
                     parcelSortingSelection={parcelSortingSelection}
                     parcelSortingSelectionDispatch={parcelSortingSelectionDispatch}    
                     featureRanges={featureRanges}
+                    maxAmplitude={maxAmplitude}
                     width={0} // filled in by splitter
                     height={0} // filled in by splitter
                 />

@@ -12,17 +12,19 @@ type Props = {
 const ParcelSortingSelectionWidget: FunctionComponent<Props> = ({parcelSorting, parcelSortingSelection, parcelSortingSelectionDispatch}) => {
     return (
         <div>
+            <h4>Selected parcels:</h4>
+            {
+                parcelSortingSelection.selectedParcelRefs.map(r => (
+                    <span key={parcelRefToString(r)}>{parcelRefToString(r)}&nbsp;&nbsp;</span>
+                ))
+            }
+            <h4>Selected segment:</h4>
             <SegmentsTable
                 parcelSorting={parcelSorting}
                 parcelSortingSelection={parcelSortingSelection}
                 parcelSortingSelectionDispatch={parcelSortingSelectionDispatch}
             />
-            <h3>Selected parcels:</h3>
-            {
-                parcelSortingSelection.selectedParcelRefs.map(r => (
-                    <span>{parcelRefToString(r)}&nbsp;&nbsp;</span>
-                ))
-            }
+            
         </div>
     )
 }
