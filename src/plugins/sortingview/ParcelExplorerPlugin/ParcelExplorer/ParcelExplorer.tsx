@@ -1,7 +1,14 @@
-import React, { FunctionComponent, useMemo, useState } from 'react';
+import OpenInBrowserIcon from '@material-ui/icons/OpenInBrowser';
+import Expandable from 'figurl/labbox-react/components/Expandable/Expandable';
+import Splitter from 'figurl/labbox-react/components/Splitter/Splitter';
+import React, { FunctionComponent, useCallback, useMemo, useReducer } from 'react';
 import { ParcelSorting } from '../ParcelExplorerPlugin';
-import SegmentView from './SegmentView';
-import SelectSegmentControl from './SelectSegmentControl';
+import openViewsReducer from './openViewsReducer';
+import ViewContainer from './ViewContainer';
+import ViewLauncher from './ViewLauncher';
+import { initialParcelSortingSelection, parcelSortingSelectionReducer, View, ViewPlugin, ViewProps } from './ViewPlugin';
+import overviewClusterPlugin from './viewPlugins/overviewClusterPlugin/overviewClusterPlugin';
+import ViewWidget from './ViewWidget';
 
 type Props = {
     parcelSorting: ParcelSorting
@@ -9,25 +16,86 @@ type Props = {
     height: number
 }
 
-const ParcelExplorer: FunctionComponent<Props> = ({parcelSorting}) => {
-    const [currentSegmentIndex, setCurrentSegmentIndex] = useState<number>(0)
+const initialLeftPanelWidth = 320
+
+const ParcelExplorer: FunctionComponent<Props> = ({parcelSorting, width, height}) => {
+    const [parcelSortingSelection, parcelSortingSelectionDispatch] = useReducer(parcelSortingSelectionReducer, initialParcelSortingSelection)
     const featureRanges = useMemo(() => (computeFeatureRanges(parcelSorting)), [parcelSorting])
 
+    const viewProps: ViewProps = useMemo(() => ({
+        parcelSorting,
+        parcelSortingSelection,
+        parcelSortingSelectionDispatch,
+        featureRanges,
+        width: 0,
+        height: 0
+    }), [parcelSorting, parcelSortingSelection, parcelSortingSelectionDispatch, featureRanges])
+
+    const [openViews, openViewsDispatch] = useReducer(openViewsReducer, [])
+
+    const launchIcon = <span style={{color: 'gray'}}><OpenInBrowserIcon /></span>
+
+    const plugins: ViewPlugin[] = useMemo(() => ([
+        overviewClusterPlugin
+    ]), [])
+    
+    const handleLaunchView = useCallback((plugin: ViewPlugin) => {
+        openViewsDispatch({
+            type: 'AddView',
+            plugin,
+            label: plugin.label,
+            area: ''
+        })
+    }, [openViewsDispatch])
+
+    const handleViewClosed = useCallback((v: View) => {
+        openViewsDispatch({
+            type: 'CloseView',
+            view: v
+        })
+    }, [openViewsDispatch])
+
+    const handleSetViewArea = useCallback((view: View, area: 'north' | 'south') => {
+        openViewsDispatch({
+            type: 'SetViewArea',
+            viewId: view.viewId,
+            area
+        })
+    }, [openViewsDispatch])
+
     return (
-        <div>
-            <SelectSegmentControl
-                parcelSorting={parcelSorting}
-                currentSegmentIndex={currentSegmentIndex}
-                setCurrentSegmentIndex={setCurrentSegmentIndex}
-            />
-            {
-                <SegmentView
-                    parcelSorting={parcelSorting}
-                    featureRanges={featureRanges}
-                    segmentIndex={currentSegmentIndex}
-                />
-            }
-        </div>
+        <Splitter
+            width={width}
+            height={height}
+            initialPosition={initialLeftPanelWidth}
+        >
+            <div>
+                {/* Launch */}
+                <Expandable icon={launchIcon} label="Open views" defaultExpanded={true} unmountOnExit={false}>
+                    <ViewLauncher
+                        onLaunchView={handleLaunchView}
+                        plugins={plugins}
+                    />
+                </Expandable>
+            </div>
+            <ViewContainer
+                onViewClosed={handleViewClosed}
+                onSetViewArea={handleSetViewArea}
+                views={openViews}
+                width={0} // will be replaced by splitter
+                height={0} // will be replaced by splitter
+            >
+                {
+                    openViews.map(v => (
+                        <ViewWidget
+                            key={v.viewId}
+                            view={v}
+                            viewProps={viewProps}
+                        />
+                    ))
+                }
+            </ViewContainer>
+        </Splitter>
     )
 }
 
