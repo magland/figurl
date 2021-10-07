@@ -30,6 +30,7 @@ const OverviewClusterView: FunctionComponent<Props> = ({parcelSorting, parcelSor
                 <OverviewClusterWidget
                     parcelSorting={parcelSorting}
                     parcelSortingSelection={parcelSortingSelection}
+                    parcelSortingSelectionDispatch={parcelSortingSelectionDispatch}    
                     featureRanges={featureRanges}
                     width={0} // filled in by splitter
                     height={0} // filled in by splitter

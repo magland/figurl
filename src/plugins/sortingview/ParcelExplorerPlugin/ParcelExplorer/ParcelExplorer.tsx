@@ -7,6 +7,7 @@ import openViewsReducer from './openViewsReducer';
 import ViewContainer from './ViewContainer';
 import ViewLauncher from './ViewLauncher';
 import { initialParcelSortingSelection, parcelSortingSelectionReducer, View, ViewPlugin, ViewProps } from './ViewPlugin';
+import clusterComparisonPlugin from './viewPlugins/clusterComparisonPlugin/clusterComparisonPlugin';
 import overviewClusterPlugin from './viewPlugins/overviewClusterPlugin/overviewClusterPlugin';
 import ViewWidget from './ViewWidget';
 
@@ -36,7 +37,8 @@ const ParcelExplorer: FunctionComponent<Props> = ({parcelSorting, width, height}
     const launchIcon = <span style={{color: 'gray'}}><OpenInBrowserIcon /></span>
 
     const plugins: ViewPlugin[] = useMemo(() => ([
-        overviewClusterPlugin
+        overviewClusterPlugin,
+        clusterComparisonPlugin
     ]), [])
     
     const handleLaunchView = useCallback((plugin: ViewPlugin) => {

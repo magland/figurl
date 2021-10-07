@@ -1,6 +1,7 @@
 import { ParcelSorting } from 'plugins/sortingview/ParcelExplorerPlugin/ParcelExplorerPlugin';
 import React, { FunctionComponent } from 'react';
-import { ParcelSortingSelection, ParcelSortingSelectionDispatch } from '../../ViewPlugin';
+import { parcelRefToString, ParcelSortingSelection, ParcelSortingSelectionDispatch } from '../../ViewPlugin';
+import SegmentsTable from '../segmentsTablePlugin/SegmentsTable';
 
 type Props = {
     parcelSorting: ParcelSorting
@@ -8,9 +9,21 @@ type Props = {
     parcelSortingSelectionDispatch: ParcelSortingSelectionDispatch,
 }
 
-const ParcelSortingSelectionWidget: FunctionComponent<Props> = () => {
+const ParcelSortingSelectionWidget: FunctionComponent<Props> = ({parcelSorting, parcelSortingSelection, parcelSortingSelectionDispatch}) => {
     return (
-        <div></div>
+        <div>
+            <SegmentsTable
+                parcelSorting={parcelSorting}
+                parcelSortingSelection={parcelSortingSelection}
+                parcelSortingSelectionDispatch={parcelSortingSelectionDispatch}
+            />
+            <h3>Selected parcels:</h3>
+            {
+                parcelSortingSelection.selectedParcelRefs.map(r => (
+                    <span>{parcelRefToString(r)}&nbsp;&nbsp;</span>
+                ))
+            }
+        </div>
     )
 }
 

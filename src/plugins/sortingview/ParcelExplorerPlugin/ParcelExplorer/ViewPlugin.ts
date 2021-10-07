@@ -1,16 +1,35 @@
 import { ParcelSorting } from "../ParcelExplorerPlugin"
 
-export type ParcelSortingSelection = {
-    selectedSegmentIndex: number
+export type ParcelRef = {
+    segmentIndex: number
+    parcelIndex: number
 }
 
-export const initialParcelSortingSelection = {
-    selectedSegmentIndex: 0
+export const parcelRefToString = (r: ParcelRef): string => {
+    return `${r.segmentIndex}:${r.parcelIndex}`
+}
+
+export const parcelRefFromString = (x: string): ParcelRef => {
+    const v = x.split(':')
+    return {segmentIndex: Number(v[0]), parcelIndex: Number(v[1])}
+}
+
+export type ParcelSortingSelection = {
+    selectedSegmentIndex: number
+    selectedParcelRefs: ParcelRef[]
+}
+
+export const initialParcelSortingSelection: ParcelSortingSelection = {
+    selectedSegmentIndex: 0,
+    selectedParcelRefs: []
 }
 
 export type ParcelSortingSelectionAction = {
     type: 'setSelectedSegment',
     selectedSegmentIndex: number
+} | {
+    type: 'setSelectedParcels',
+    selectedParcelRefs: ParcelRef[]
 }
 
 export type ParcelSortingSelectionDispatch = (a: ParcelSortingSelectionAction) => void
@@ -20,6 +39,12 @@ export const parcelSortingSelectionReducer = (state: ParcelSortingSelection, act
         return {
             ...state,
             selectedSegmentIndex: action.selectedSegmentIndex
+        }
+    }
+    else if (action.type === 'setSelectedParcels') {
+        return {
+            ...state,
+            selectedParcelRefs: action.selectedParcelRefs
         }
     }
     else {

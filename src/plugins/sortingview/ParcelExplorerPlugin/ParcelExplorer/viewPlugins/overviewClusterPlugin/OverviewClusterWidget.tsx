@@ -1,19 +1,22 @@
 import { ParcelSorting } from 'plugins/sortingview/ParcelExplorerPlugin/ParcelExplorerPlugin';
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
-import { ParcelSortingSelection } from '../../ViewPlugin';
+import React, { FunctionComponent, useCallback, useMemo } from 'react';
+import { ParcelSortingSelection, ParcelSortingSelectionDispatch } from '../../ViewPlugin';
 import ClusterWidget, { PointGroup } from './ClusterWidget';
 
 type Props = {
     parcelSorting: ParcelSorting
     parcelSortingSelection: ParcelSortingSelection
+    parcelSortingSelectionDispatch: ParcelSortingSelectionDispatch
     featureRanges: {range: [number, number]}[]
     width: number
     height: number
 }
 
-const OverviewClusterWidget: FunctionComponent<Props> = ({parcelSorting, parcelSortingSelection, featureRanges, width, height}) => {
+const OverviewClusterWidget: FunctionComponent<Props> = ({parcelSorting, parcelSortingSelection, parcelSortingSelectionDispatch, featureRanges, width, height}) => {
     const segment = useMemo(() => (parcelSorting.segments[parcelSortingSelection.selectedSegmentIndex]), [parcelSorting, parcelSortingSelection.selectedSegmentIndex])
-    const [selectedParcelIndices, setSelectedParcelIndices] = useState<number[]>([])
+    const selectedParcelIndices = useMemo(() => (
+        parcelSortingSelection.selectedParcelRefs.filter(r => (r.segmentIndex === parcelSortingSelection.selectedSegmentIndex)).map(r => (r.parcelIndex))
+    ), [parcelSortingSelection])
     const {pointGroups, selectedPointGroups, xRange, yRange} = useMemo(() => {
         const pointGroups: PointGroup[] = []
         const selectedPointGroups: string[] = []
@@ -36,8 +39,13 @@ const OverviewClusterWidget: FunctionComponent<Props> = ({parcelSorting, parcelS
         return {pointGroups, selectedPointGroups, xRange, yRange}
     }, [segment, featureRanges, selectedParcelIndices])
     const handleSetSelectedPointGroups = useCallback((selectedPointGroups: string[]) => {
-        setSelectedParcelIndices(selectedPointGroups.map(a => (Number(a))))
-    }, [])
+        parcelSortingSelectionDispatch({
+            type: 'setSelectedParcels',
+            selectedParcelRefs: selectedPointGroups.map(a => (
+                {segmentIndex: parcelSortingSelection.selectedSegmentIndex, parcelIndex: Number(a)}
+            ))
+        })
+    }, [parcelSortingSelection.selectedSegmentIndex, parcelSortingSelectionDispatch])
     const W = Math.min(width, height)
     const H = W
     return (
@@ -52,6 +60,7 @@ const OverviewClusterWidget: FunctionComponent<Props> = ({parcelSorting, parcelS
                 yLabel={"Y"}
                 width={W}
                 height={H}
+                pointRadius={1}
             />
         </div>
     )

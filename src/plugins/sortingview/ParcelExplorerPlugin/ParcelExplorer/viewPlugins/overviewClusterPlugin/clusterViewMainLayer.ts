@@ -1,6 +1,6 @@
 import { funcToTransform } from "figurl/labbox-react/components/CanvasWidget"
 import { CanvasPainter } from "figurl/labbox-react/components/CanvasWidget/CanvasPainter"
-import { CanvasWidgetLayer, ClickEvent, ClickEventType, DiscreteMouseEventHandler } from "figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer"
+import { CanvasWidgetLayer, ClickEvent, ClickEventModifiers, ClickEventType, DiscreteMouseEventHandler } from "figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer"
 import { Vec2 } from "figurl/labbox-react/components/CanvasWidget/Geometry"
 import { PointGroup } from "./ClusterWidget"
 
@@ -8,12 +8,13 @@ export type LayerProps = {
     pointGroups: PointGroup[]
     hoveredPointGroup: string,
     onHoverPointGroup: (key: string) => void,
-    onClickPointGroup: (key: string) => void,
+    onClickPointGroup: (key: string, modifiers: ClickEventModifiers) => void,
     selectedPointGroups: string[]
     xRange: [number, number]
     yRange: [number, number]
     width: number
     height: number
+    pointRadius: number
 }
 
 type LayerState = {
@@ -24,12 +25,13 @@ const handleHover: DiscreteMouseEventHandler = (event: ClickEvent, layer: Canvas
     if (event.type !== ClickEventType.Move) return
     const state = layer.getState()
     if (!state.markers) return
+    const props = layer.getProps()
     const p = event.point
     for (let marker of state.markers) {
         const p0 = marker.p
         const delta = [p0[0] - p[0], p0[1] - p[1]]
         const dist = Math.sqrt(delta[0] * delta[0] + delta[1] * delta[1])
-        if (dist <= 5) {
+        if (dist <= props.pointRadius * 3) {
             layer.getProps().onHoverPointGroup(marker.group)
             return
         }
@@ -41,7 +43,7 @@ const handleClick: DiscreteMouseEventHandler = (event: ClickEvent, layer: Canvas
     if (event.type !== ClickEventType.Release) return
     const props = layer.getProps()
     const g = props.hoveredPointGroup
-    props.onClickPointGroup(g)
+    props.onClickPointGroup(g, event.modifiers)
 }
 
 type Marker = {
@@ -54,7 +56,7 @@ type Marker = {
 
 export const createClusterViewMainLayer = () => {
     const onPaint = (painter: CanvasPainter, props: LayerProps, state: LayerState) => {
-        const { pointGroups, selectedPointGroups, hoveredPointGroup, xRange, yRange, width, height } = props
+        const { pointGroups, selectedPointGroups, hoveredPointGroup, xRange, yRange, width, height, pointRadius } = props
         painter.wipe()
         const T = funcToTransform((p: Vec2) => {
             const xFrac = (p[0] - xRange[0]) / (xRange[1] - xRange[0])
@@ -77,7 +79,7 @@ export const createClusterViewMainLayer = () => {
                     p: painter2.transformPointToPixels([x, y]),
                     selected,
                     hovered,
-                    density: 1
+                    density: 0
                 })
             }
         }
@@ -99,7 +101,7 @@ export const createClusterViewMainLayer = () => {
                 j++
             }
         }
-        const maxDensity = Math.max(...markers.map(m => (m.density)))
+        const maxDensity = Math.max(...markers.map(m => (m.density))) + 1
         // all
         for (let marker of markers) {
             const v = marker.density / maxDensity * 255
@@ -109,7 +111,7 @@ export const createClusterViewMainLayer = () => {
             painter.drawMarker(
                 marker.p,
                 {
-                    radius: 1,
+                    radius: pointRadius,
                     pen,
                     brush
                 }
@@ -124,7 +126,7 @@ export const createClusterViewMainLayer = () => {
             painter.drawMarker(
                 marker.p,
                 {
-                    radius: 2,
+                    radius: pointRadius * 2,
                     pen,
                     brush
                 }
@@ -139,7 +141,7 @@ export const createClusterViewMainLayer = () => {
             painter.drawMarker(
                 marker.p,
                 {
-                    radius: 2,
+                    radius: pointRadius * 2,
                     pen,
                     brush
                 }
