@@ -41,6 +41,9 @@ const prepareFeatureTransform = (a: {parcelSorting: ParcelSorting, p1?: ParcelRe
     const subtractVectors = (v1: number[], v2: number[]) => {
         return v1.map((a, ii) => (v1[ii] - v2[ii]))
     }
+    const vectorMidpoint = (v1: number[], v2: number[]) => {
+        return v1.map((a, ii) => ((v1[ii] + v2[ii]) / 2))
+    }
     const normalizeVector = (v: number[]) => {
         const sumsqr = innerProduct(v, v)
         if (sumsqr === 0) return v
@@ -77,13 +80,14 @@ const prepareFeatureTransform = (a: {parcelSorting: ParcelSorting, p1?: ParcelRe
         const mean2 = meanVector(features2)
         const delta = subtractVectors(mean2, mean1)
         const direction1 = normalizeVector(delta)
+        const offset1 = -innerProduct(direction1, vectorMidpoint(mean1, mean2))
         const e1 = principleDirection(N, 0)
         const v2 = subtractOutDirection(e1, direction1)
         const direction2 = normalizeVector(v2)
 
         const transform = (f: number[]): [number, number] => {
             return [
-                innerProduct(f, direction1),
+                innerProduct(f, direction1) + offset1,
                 innerProduct(f, direction2)
             ]
         }

@@ -97,7 +97,7 @@ export const createClusterViewMainLayer = () => {
             groupColors[G.key] = G.color
         }
         painter.wipe()
-        const T = funcToTransform((p: Vec2) => {
+        const transform = funcToTransform((p: Vec2) => {
             const xFrac = (p[0] - xRange[0]) / (xRange[1] - xRange[0])
             const yFrac = (p[1] - yRange[0]) / (yRange[1] - yRange[0])
             return [
@@ -105,7 +105,12 @@ export const createClusterViewMainLayer = () => {
                 (1 - yFrac) * height
             ]
         })
-        const painter2 = painter.transform(T)
+        const painter2 = painter.transform(transform)
+
+        // draw axes
+        painter2.drawLine(xRange[0], 0, xRange[1], 0, {color: 'lightgray', width: 3})
+        painter2.drawLine(0, yRange[0], 0, yRange[1], {color: 'lightgray', width: 3})
+
         const markers: Marker[] = []
         for (let g = 0; g < pointGroups.length; g++) {
             const G = pointGroups[g]
