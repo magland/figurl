@@ -1,24 +1,29 @@
 import { ParcelSorting } from 'plugins/sortingview/ParcelExplorerPlugin/ParcelExplorerPlugin';
 import React, { FunctionComponent, useMemo } from 'react';
+import colorForParcelIndex from '../../../colorForParcelIndex';
 import { SpikeEventRef } from '../../../ViewPlugin';
 import SpikeWaveform from './SpikeWaveform';
 
 type Props = {
     parcelSorting: ParcelSorting
-    spikeEvent: SpikeEventRef
+    spikeEvents: SpikeEventRef[]
     maxAmplitude: number
     width: number
     height: number
 }
 
-const SpikeWaveformWidget: FunctionComponent<Props> = ({parcelSorting, spikeEvent, maxAmplitude, width, height}) => {
-    const waveform = useMemo(() => {
-        return computeSpikeWaveform(parcelSorting, spikeEvent)
-    }, [parcelSorting, spikeEvent])
+const SpikeWaveformWidget: FunctionComponent<Props> = ({parcelSorting, spikeEvents, maxAmplitude, width, height}) => {
+    const waveforms = useMemo(() => {
+        return spikeEvents.map(spikeEvent => (computeSpikeWaveform(parcelSorting, spikeEvent)))
+    }, [parcelSorting, spikeEvents])
+    const colors = useMemo(() => {
+        return spikeEvents.map(spikeEvent => (colorForParcelIndex(spikeEvent.parcelIndex)))
+    }, [spikeEvents])
 
     return (
         <SpikeWaveform
-            waveform={waveform}
+            waveforms={waveforms}
+            colors={colors}
             maxAmplitude={maxAmplitude}
             width={width}
             height={height}

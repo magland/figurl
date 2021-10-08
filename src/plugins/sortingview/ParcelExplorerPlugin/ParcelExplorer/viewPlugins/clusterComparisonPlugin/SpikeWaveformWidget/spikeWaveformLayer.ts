@@ -2,7 +2,8 @@ import { CanvasPainter } from "figurl/labbox-react/components/CanvasWidget/Canva
 import { CanvasWidgetLayer } from "figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer"
 
 type LayerProps = {
-    waveform: number[][] // T x M
+    waveforms: number[][][] // L x T x M
+    colors: string[] // L
     maxAmplitude: number
     width: number
     height: number
@@ -16,12 +17,13 @@ const initialLayerState = {
 }
 
 const onPaint = (painter: CanvasPainter, layerProps: LayerProps, state: LayerState) => {
-    const {waveform, maxAmplitude, width, height} = layerProps
+    const {waveforms, colors, maxAmplitude, width, height} = layerProps
 
     painter.wipe()
 
-    const T = waveform.length
-    const M = waveform[0].length
+    const L = waveforms.length
+    const T = waveforms[0].length
+    const M = waveforms[0][0].length
 
     // let ymin = waveform[0][0]
     // let ymax = waveform[0][0]
@@ -42,12 +44,14 @@ const onPaint = (painter: CanvasPainter, layerProps: LayerProps, state: LayerSta
     }
 
     for (let m=0; m<M; m++) {
-        const path = painter.createPainterPath()
-        for (let t=0; t<T; t++) {
-            const p = transform(t, m, waveform[t][m])
-            path.lineTo(p[0], p[1])
+        for (let l=0; l<L; l++) {
+            const path = painter.createPainterPath()
+            for (let t=0; t<T; t++) {
+                const p = transform(t, m, waveforms[l][t][m])
+                path.lineTo(p[0], p[1])
+            }
+            painter.drawPath(path, {color: colors[l]})
         }
-        painter.drawPath(path, {color: 'black'})
     }
 }
 

@@ -4,19 +4,21 @@ import React, { FunctionComponent, useMemo } from 'react';
 import { createSpikeWaveformLayer } from './spikeWaveformLayer';
 
 type Props = {
-    waveform: number[][] // T x M
+    waveforms: number[][][] // L x T x M
+    colors: string[] // L
     maxAmplitude: number
     width: number
     height: number
 }
 
-const SpikeWaveform: FunctionComponent<Props> = ({waveform, maxAmplitude, width, height}) => {
+const SpikeWaveform: FunctionComponent<Props> = ({waveforms, colors, maxAmplitude, width, height}) => {
     const layerProps = useMemo(() => ({
-        waveform,
+        waveforms,
+        colors,
         maxAmplitude,
         width,
         height
-    }), [waveform, maxAmplitude, width, height])
+    }), [waveforms, colors, maxAmplitude, width, height])
     const layer = useLayer(createSpikeWaveformLayer, layerProps)
     const layers = useLayers([layer])
     return (

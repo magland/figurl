@@ -69,24 +69,35 @@ const prepareFeatureTransform = (a: {parcelSorting: ParcelSorting, p1?: ParcelRe
         return ret
     }
 
-    const features1 = getFeaturesForParcel(p1)
-    const features2 = getFeaturesForParcel(p2)
-    const N = features1.length > 0 ? features1[0].length : 0
-    const mean1 = meanVector(features1)
-    const mean2 = meanVector(features2)
-    const delta = subtractVectors(mean2, mean1)
-    const direction1 = normalizeVector(delta)
-    const e1 = principleDirection(N, 0)
-    const v2 = subtractOutDirection(e1, direction1)
-    const direction2 = normalizeVector(v2)
+    if ((p1) && (p2)) {
+        const features1 = getFeaturesForParcel(p1)
+        const features2 = getFeaturesForParcel(p2)
+        const N = features1.length > 0 ? features1[0].length : 0
+        const mean1 = meanVector(features1)
+        const mean2 = meanVector(features2)
+        const delta = subtractVectors(mean2, mean1)
+        const direction1 = normalizeVector(delta)
+        const e1 = principleDirection(N, 0)
+        const v2 = subtractOutDirection(e1, direction1)
+        const direction2 = normalizeVector(v2)
 
-    const transform = (f: number[]): [number, number] => {
-        return [
-            innerProduct(f, direction1),
-            innerProduct(f, direction2)
-        ]
+        const transform = (f: number[]): [number, number] => {
+            return [
+                innerProduct(f, direction1),
+                innerProduct(f, direction2)
+            ]
+        }
+        return transform
     }
-    return transform
+    else {
+        const transform = (f: number[]): [number, number] => {
+            return [
+                f[0],
+                f[1]
+            ]
+        }
+        return transform
+    }
 }
 
 const ClusterComparisonView: FunctionComponent<Props> = ({parcelSorting, parcelSortingSelection, parcelSortingSelectionDispatch, featureRanges, maxAmplitude, width, height}) => {
@@ -129,12 +140,14 @@ const ClusterComparisonView: FunctionComponent<Props> = ({parcelSorting, parcelS
         setCurrentSpikeEvent(e)
     }, [])
 
-    const W2 = Math.min(150, width / 2)
+    const spikeEvents = useMemo(() => (currentSpikeEvent ? [currentSpikeEvent] : undefined), [currentSpikeEvent])
+
+    const W2 = Math.min(120, width / 2)
     const W1 = Math.min(width - W2 - 20, height)
     const H = W1
 
-    if (parcelSortingSelection.selectedParcelRefs.length !== 2) {
-        return <div>You must select exactly two parcels for comparison</div>
+    if (![1, 2].includes(parcelSortingSelection.selectedParcelRefs.length)) {
+        return <div>You must select one or two parcels for comparison</div>
     }
     return (
         <Grid container>
@@ -151,10 +164,10 @@ const ClusterComparisonView: FunctionComponent<Props> = ({parcelSorting, parcelS
                 onClickPoint={handleClickPoint}
             />
             {
-                currentSpikeEvent && (
+                spikeEvents && (
                     <SpikeWaveformWidget
                         parcelSorting={parcelSorting}
-                        spikeEvent={currentSpikeEvent}
+                        spikeEvents={spikeEvents}
                         maxAmplitude={maxAmplitude}
                         width={W2}
                         height={H}

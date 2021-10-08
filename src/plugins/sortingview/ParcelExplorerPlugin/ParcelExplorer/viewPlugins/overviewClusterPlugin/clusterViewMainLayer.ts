@@ -40,7 +40,7 @@ const handleHover: DiscreteMouseEventHandler = (event: ClickEvent, layer: Canvas
             const p0 = marker.p
             const delta = [p0[0] - p[0], p0[1] - p[1]]
             const dist = Math.sqrt(delta[0] * delta[0] + delta[1] * delta[1])
-            if (dist <= props.pointRadius * 3) {
+            if (dist <= 25) {
                 if ((!closestMarker) || (dist < closestDist)) {
                     closestMarker = marker
                     closestDist = dist
@@ -102,7 +102,7 @@ export const createClusterViewMainLayer = () => {
             const yFrac = (p[1] - yRange[0]) / (yRange[1] - yRange[0])
             return [
                 xFrac * width,
-                yFrac * height
+                (1 - yFrac) * height
             ]
         })
         const painter2 = painter.transform(T)
