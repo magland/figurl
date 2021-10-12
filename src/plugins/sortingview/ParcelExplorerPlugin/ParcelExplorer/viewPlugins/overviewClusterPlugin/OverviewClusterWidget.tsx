@@ -31,21 +31,21 @@ const OverviewClusterWidget: FunctionComponent<Props> = ({parcelSorting, parcelS
     const {pointGroups, selectedPointGroups, xRange, yRange} = useMemo(() => {
         const pointGroups: PointGroup[] = []
         const selectedPointGroups: string[] = []
-        let transform: (feature: number[]) => {x: number, y: number} = (f: number[]) => ({x: 0, y: 0})
+        let transform: (feature: number[], timestamp: number) => {x: number, y: number} = (f: number[], t: number) => ({x: 0, y: 0})
         let xRange: [number, number]
         let yRange: [number, number]
         if (opts.mode === 'mode1') {
-            transform = (feature: number[]) => {
+            transform = (feature: number[], timestamp: number) => {
                 return {x: feature[0], y: feature[1]}
             }
             xRange = featureRanges[0].range
             yRange = featureRanges[1].range
         }
         else if (opts.mode === 'mode2') {
-            transform = (feature: number[]) => {
-                return {x: feature[0], y: feature[2]}
+            transform = (feature: number[], timestamp: number) => {
+                return {x: timestamp, y: feature[0]}
             }
-            xRange = featureRanges[0].range
+            xRange = [segment.start_frame, segment.end_frame]
             yRange = featureRanges[2].range
         }
         else throw Error('Unexpected mode')
@@ -66,7 +66,7 @@ const OverviewClusterWidget: FunctionComponent<Props> = ({parcelSorting, parcelS
                 selectedPointGroups.push(G.key)
             }
             for (let i = 0; i < parcel.features.length; i++) {
-                G.locations.push(transform(parcel.features[i]))
+                G.locations.push(transform(parcel.features[i], parcel.timestamps[i]))
             }
             pointGroups.push(G)
         }
@@ -83,9 +83,20 @@ const OverviewClusterWidget: FunctionComponent<Props> = ({parcelSorting, parcelS
 
     const toolbarHeight = 30
 
-    const W2 = Math.min(120, width / 2)
-    const W1 = Math.min(width - W2 - 20, height - toolbarHeight)
-    const H = W1
+    let W1: number
+    let W2: number
+    let H: number
+    if (opts.mode === 'mode1') {
+        W2 = Math.min(120, width / 2)
+        W1 = Math.min(width - W2 - 20, height - toolbarHeight)
+        H = W1
+    }
+    else if (opts.mode === 'mode2') {
+        W2 = Math.min(120, width / 4)
+        W1 = width - W2 - 20
+        H = height - toolbarHeight
+    }
+    else throw Error('Unexpected mode')
 
     return (
         <div>

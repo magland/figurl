@@ -34,9 +34,10 @@ const useRoute = () => {
     const figureLabel = p === '/fig' ? (query.label as any as string) || undefined : undefined
     // const documentId = p === '/compose' ? (query.document as any as string) || undefined : undefined
     const wiki = p === '/doc' ? (query.wiki as any as string) || undefined : undefined
+    const curationId = p === '/fig' ? (query.curation as any as string) || undefined : undefined
     const routePath: RoutePath = isRoutePath(p) ? p : '/home'
 
-    const setRoute = useCallback((o: {routePath?: RoutePath, figureObjectOrHash?: FigureObject | Sha1Hash, channel?: ChannelName, figureLabel?: string, wiki?: string}) => {
+    const setRoute = useCallback((o: {routePath?: RoutePath, figureObjectOrHash?: FigureObject | Sha1Hash, channel?: ChannelName, figureLabel?: string, wiki?: string, curationId?: string}) => {
         const query2 = {...query}
         let pathname2 = location.pathname
         if (o.routePath) pathname2 = o.routePath
@@ -49,6 +50,9 @@ const useRoute = () => {
                 query2.figureObject = encodeURIComponent(JSONStringifyDeterministic(x))
             }
         }
+        if (o.curationId) {
+            query2.curation = o.curationId
+        }
         if (o.figureLabel) {
             query2.label = o.figureLabel
         }
@@ -58,15 +62,16 @@ const useRoute = () => {
         if (o.wiki) {
             query2.wiki = o.wiki
         }
-        if (o.routePath !== '/fig') {
+        if (pathname2 !== '/fig') {
             delete query2['figureObject']
+            delete query2['curation']
             delete query2['label']
             delete query2['state']
         }
         // if (o.routePath !== '/compose') {
         //     delete query2['document']
         // }
-        if (o.routePath !== '/doc') {
+        if (pathname2 !== '/doc') {
             delete query2['wiki']
         }
         delete query2['workspaceRoute'] // historical
@@ -75,7 +80,7 @@ const useRoute = () => {
         history.push({...location, pathname: pathname2, search: search2})
     }, [location, history, query])
     
-    return {routePath, figureObjectOrHash, channel, figureLabel, wiki, query, setRoute}
+    return {routePath, figureObjectOrHash, channel, figureLabel, wiki, curationId, query, setRoute}
 }
 
 const queryString = (params: { [key: string]: string | string[] }) => {

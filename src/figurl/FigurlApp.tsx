@@ -1,6 +1,5 @@
 import { MuiThemeProvider } from '@material-ui/core';
 import KacheryNodeSetup from 'figurl/kachery-react/KacheryNodeSetup';
-import { GoogleSignInSetup } from 'figurl/labbox-react';
 import MainWindow from 'figurl/labbox-react/MainWindow/MainWindow';
 import { testSignatures } from 'commonInterface/crypto/signatures';
 import { nodeLabel, TaskFunctionId } from 'commonInterface/kacheryTypes';
@@ -13,6 +12,7 @@ import { initialRecentFigures, recentFiguresReducer } from './RecentFigures';
 // import logo from './logo.svg';
 import theme from './theme';
 import { FigurlPlugin } from './types';
+import GoogleSignInSetup from 'commonComponents/googleSignIn/GoogleSignInSetup';
 
 testSignatures()
 

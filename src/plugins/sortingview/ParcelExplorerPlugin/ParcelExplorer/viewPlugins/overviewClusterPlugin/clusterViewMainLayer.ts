@@ -173,7 +173,7 @@ export const createClusterViewMainLayer = () => {
         // selected
         for (let marker of markers.filter(m => (m.selected))) {
             const v = marker.density / maxDensity * 255
-            const color = useDensityColor ? `rgb(200, ${v}, ${v})` : groupColors[marker.group] || 'black'
+            const color = groupColors[marker.group] || 'black'
             const pen = {color, width: 1}
             const brush = {color}
             painter.drawMarker(

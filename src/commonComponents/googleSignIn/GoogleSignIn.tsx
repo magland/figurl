@@ -20,7 +20,8 @@ export const useSignedIn = () => {
     return {
         signedIn: signInClient?.signedIn || false,
         userId: signInClient?.userId,
-        googleIdToken: signInClient?.idToken || undefined
+        googleIdToken: signInClient?.idToken || undefined,
+        gapi: signInClient?.gapi
     }
 }
 

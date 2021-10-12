@@ -1,14 +1,18 @@
+import { faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import OpenInBrowserIcon from '@material-ui/icons/OpenInBrowser';
 import Expandable from 'figurl/labbox-react/components/Expandable/Expandable';
 import Splitter from 'figurl/labbox-react/components/Splitter/Splitter';
 import React, { FunctionComponent, useCallback, useMemo, useReducer } from 'react';
 import { ParcelSorting } from '../ParcelExplorerPlugin';
+import CurationControl from './CurationControl/CurationControl';
 import openViewsReducer from './openViewsReducer';
 import ViewContainer from './ViewContainer';
 import ViewLauncher from './ViewLauncher';
 import { initialParcelSortingSelection, parcelSortingSelectionReducer, View, ViewPlugin, ViewProps } from './ViewPlugin';
 import clusterComparisonPlugin from './viewPlugins/clusterComparisonPlugin/clusterComparisonPlugin';
 import overviewClusterPlugin from './viewPlugins/overviewClusterPlugin/overviewClusterPlugin';
+import mergeCandidatesPlugin from './viewPlugins/mergeCandidatesPlugin/mergeCandidatesPlugin';
 import ViewWidget from './ViewWidget';
 
 type Props = {
@@ -37,10 +41,12 @@ const ParcelExplorer: FunctionComponent<Props> = ({parcelSorting, width, height}
     const [openViews, openViewsDispatch] = useReducer(openViewsReducer, [])
 
     const launchIcon = <span style={{color: 'gray'}}><OpenInBrowserIcon /></span>
+    const curationIcon = <span style={{color: 'gray'}}><FontAwesomeIcon icon={faPencilAlt} /></span>
 
     const plugins: ViewPlugin[] = useMemo(() => ([
         overviewClusterPlugin,
-        clusterComparisonPlugin
+        clusterComparisonPlugin,
+        mergeCandidatesPlugin
     ]), [])
     
     const handleLaunchView = useCallback((plugin: ViewPlugin) => {
@@ -79,6 +85,11 @@ const ParcelExplorer: FunctionComponent<Props> = ({parcelSorting, width, height}
                     <ViewLauncher
                         onLaunchView={handleLaunchView}
                         plugins={plugins}
+                    />
+                </Expandable>
+                {/* Curation */}
+                <Expandable icon={curationIcon} label="Curation" defaultExpanded={true} unmountOnExit={false}>
+                    <CurationControl
                     />
                 </Expandable>
             </div>

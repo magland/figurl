@@ -1,12 +1,11 @@
 import { AppBar, Button, Toolbar } from '@material-ui/core';
+import { useSignedIn } from 'commonComponents/googleSignIn/GoogleSignIn';
 import { useChannel } from 'figurl/kachery-react';
 import ChannelControl from 'figurl/kachery-react/components/SelectChannel/ChannelControl';
 import SelectChannel from 'figurl/kachery-react/components/SelectChannel/SelectChannel';
 import TaskMonitor from 'figurl/kachery-react/components/TaskMonitor/TaskMonitor';
 import TaskMonitorControl from 'figurl/kachery-react/components/TaskMonitor/TaskMonitorControl';
 import ModalWindow from 'figurl/labbox-react/components/ModalWindow/ModalWindow';
-import { useSignedIn } from 'figurl/labbox-react/googleSignIn/GoogleSignIn';
-import useGoogleSignInClient from 'figurl/labbox-react/googleSignIn/useGoogleSignInClient';
 import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import useRoute from '../useRoute';
 
@@ -42,11 +41,12 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
     const {visible: channelVisible, handleOpen: openChannel, handleClose: closeChannel} = useModalDialog()
     const {visible: taskMonitorVisible, handleOpen: openTaskMonitor, handleClose: closeTaskMonitor} = useModalDialog()
 
-    const client = useGoogleSignInClient()
-    const gapi = client?.gapi
+    // const client = useGoogleSignInClient()
+    // const gapi = client?.gapi
     const {setRoute, figureLabel, wiki, routePath} = useRoute()
 
-    const signedIn = useSignedIn()
+    // const signedIn = useSignedIn()
+    const {signedIn, userId, gapi} = useSignedIn()
     const handleLogin = useCallback(() => {
         gapi.auth2.getAuthInstance().signIn();
     }, [gapi])
@@ -78,10 +78,8 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
                 }
                 <span style={{marginLeft: 'auto'}} />
                 {
-                    client && (
-                        signedIn && (
-                            <span style={{fontFamily: 'courier', color: 'lightgray'}}>{client.userId}</span>
-                        )
+                    signedIn && (
+                        <span style={{fontFamily: 'courier', color: 'lightgray'}}>{userId}</span>
                     )
                 }
                 <span style={{paddingBottom: 0, color: 'white'}}>
@@ -91,12 +89,10 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
                     <TaskMonitorControl onOpen={openTaskMonitor} color="white" />
                 </span>
                 {
-                    client && (
-                        signedIn ? (
-                            <Button color="inherit" onClick={handleLogout}>Sign out</Button>
-                        ) : (
-                            <Button color="inherit" onClick={handleLogin}>Sign in</Button>
-                        )
+                    signedIn ? (
+                        <Button color="inherit" onClick={handleLogout}>Sign out</Button>
+                    ) : (
+                        <Button color="inherit" onClick={handleLogin}>Sign in</Button>
                     )
                 }
                 </Toolbar>
