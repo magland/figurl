@@ -4,6 +4,7 @@ import { RecordingSelectionDispatch } from '../../../pluginInterface'
 import ElectrodeGeometry, { Electrode, LayoutMode } from "../../common/sharedDrawnComponents/ElectrodeGeometry"
 import { computeElectrodeLocations, xMargin as xMarginDefault } from '../../common/sharedDrawnComponents/electrodeGeometryLayout'
 import { ElectrodeColors } from '../../common/sharedDrawnComponents/electrodeGeometryPainting'
+import { getSpikeAmplitudeNormalizationFactor } from '../../common/waveformLogic/waveformLogic'
 import Waveform, { WaveformColors, WaveformPoint } from './Waveform'
 
 
@@ -53,6 +54,8 @@ export const defaultWaveformOpts = {
     waveformWidth: 2
 }
 
+// TODO: FIX AVG WAVEFORM NUMPY VIEW
+// TODO: FIX SNIPPET BOX
 const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
     const showLabels = props.showLabels ?? defaultElectrodeOpts.showLabels
     const colors = props.colors ?? defaultElectrodeOpts.colors
@@ -67,21 +70,22 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
         height={height}
         layoutMode={layoutMode}
         colors={colors}
-        showLabels={showLabels} // sic?
+        showLabels={showLabels} // Would we ever not want to show labels for this?
         offsetLabels={true}
         maxElectrodePixelRadius={25} // ??
-        disableSelection={true} // ??
+        disableSelection={true}      // ??
     />, [electrodes, selectedElectrodeIds, selectionDispatch, width, height, layoutMode, colors, showLabels])
 
     // TODO: Don't do this twice, work it out differently
-    const { transform, convertedElectrodes, pixelRadius, xMargin: xMarginBase } = computeElectrodeLocations(width, height, electrodes, layoutMode, 25)
+    const { convertedElectrodes, pixelRadius, xMargin: xMarginBase } = computeElectrodeLocations(width, height, electrodes, layoutMode, 25)
     const xMargin = xMarginBase || xMarginDefault
-    // I have serious questions about this
-    const yScaleFactor = useMemo(() => ((ampScaleFactor || 1) / (props.noiseLevel || 1) * 1/10), [ampScaleFactor, props.noiseLevel]) // TODO: why this math??
-    // console.log(`Noise level is ${props.noiseLevel}`)
+
+    // Spikes are defined as being some factor greater than the baseline noise.
+    const amplitudeNormalizationFactor = useMemo(() => getSpikeAmplitudeNormalizationFactor(props.noiseLevel), [props.noiseLevel])
+    const yScaleFactor = useMemo(() => (ampScaleFactor * amplitudeNormalizationFactor), [ampScaleFactor, amplitudeNormalizationFactor])
 
     // 'waveforms' is a list of lists of points. There's one outer list per channel (so far so good).
-    // The inner list is just a list of numbers, but they should be interpreted as pairs of (amplitude, time).
+    // The inner list is just a list of numbers, which should be interpreted as pairs of (amplitude, time).
     // So to get it into something structured, you need to iterate *pairwise* over the inner list.
     const baseWaveformPoints: WaveformPoint[][] = waveforms?.map(waveformDataSet => 
         {

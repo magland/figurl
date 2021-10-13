@@ -1,5 +1,5 @@
 import { TransformationMatrix, transformPoints, Vec2 } from 'figurl/labbox-react/components/DrawingWidget/Geometry'
-import { matrix, max, min, multiply } from "mathjs"
+import { matrix, multiply } from "mathjs"
 import { useEffect, useMemo, useRef } from 'react'
 import { LayoutMode, PixelSpaceElectrode } from '../../common/sharedDrawnComponents/ElectrodeGeometry'
 import { defaultWaveformOpts } from './WaveformWidget'
@@ -24,8 +24,8 @@ export type WaveformProps = {
         colors?: WaveformColors
         waveformWidth: number
     }
-    oneElectrodeWidth: number // TODO: These are inputs?
-    oneElectrodeHeight: number // TODO: These are inputs?
+    oneElectrodeWidth: number
+    oneElectrodeHeight: number
     yScale: number
     width: number
     height: number
@@ -51,40 +51,14 @@ type PaintProps = {
 
 const computePaths = (transform: TransformationMatrix, waveforms: WaveformPoint[][], electrodes: PixelSpaceElectrode[]): PixelSpacePath[] => {
     const pointsPerWaveform = waveforms[0].length
-    // Note: These transforms could be done by funcToTransform instead, e.g.:
-    // funcToTransform((p: Vec2): Vec2 => {
-    //     const a = canvasWidth/2 + p[0] * (targetPixelW) / 2
-    //     const b = canvasHeight/2 + p[1] * (targetPixelH) / 2
-    //     return [a, b]
-    // })
-    // console.log(`Project into rectangle of ${targetPixelW} x ${targetPixelH}`)
-    // Note that NONE of this is specific to any particular electrode; we could've just passed this in
-    // (Or applied the transform in bulk to the entire set of waveforms)
-    // const waveTransform = matrix([[targetPixelW/pointsPerWaveform, 0, -targetPixelW*(.5 + 1/pointsPerWaveform)],
-    //                               [0, -(yScale*targetPixelH)/2, 0],//targetPixelH/2],
-    //                               [0, 0, 1]]).toArray() as TransformationMatrix
-    // Or if you want to see the steps, that's:
-    // const wavesToUnitScale = matrix([[1/pointsPerWaveform, 0, -1/pointsPerWaveform],
-    //                                  [0, -yScale/2, 0.5],
-    //                                  [0, 0, 1]])
-    // const pointsToCentralBoxXfrm = matrix([[targetPixelW, 0, 0],
-    //                                        [0, targetPixelH, 0],
-    //                                        [0, 0, 1]])
-    // const combinedTransform = multiply(pointsToCentralBoxXfrm, wavesToUnitScale).toArray() as TransformationMatrix
-    
-    // console.log(`Converting Waveform. e.g.: ${sampleWaveformData(waveforms)}`)
-    // Flatten a list of waveforms (waveforms[i] = WaveformPoint[] = array of {time, amplitude}) to Vec2[] for
-    // vectorized point conversion
+    // Flatten a list of waveforms (waveforms[i] = WaveformPoint[] = array of {time, amplitude}) to Vec2[] for vectorized point conversion
     const rawPoints = waveforms.map(waveform => waveform.map(pt => [pt.time, pt.amplitude])).flat(1)
+    const pointsProjectedToElectrodeBox = transformPoints(transform, rawPoints)
 
-    // const pointsProjectedInCentralBox = transformPoints(combinedTransform, rawPoints)
-    const pointsProjectedInCentralBox = transformPoints(transform, rawPoints)
-
-    // Could this be neater/better?
     return electrodes.map((e, ii) => {
         const rangeStart = ii * pointsPerWaveform
-        // rewrite with splice--don't need iterator?
-        const pathForElectrode = pointsProjectedInCentralBox.slice(rangeStart, rangeStart + pointsPerWaveform).map(p => [p[0], p[1]] as Vec2)
+        // rewrite with splice to avoid iterator?
+        const pathForElectrode = pointsProjectedToElectrodeBox.slice(rangeStart, rangeStart + pointsPerWaveform).map(p => [p[0], p[1]] as Vec2)
         return {
             pointsInPaintBox: pathForElectrode,
             offsetFromParentCenter: [e.pixelX, e.pixelY]
@@ -99,27 +73,19 @@ const paint = (props: PaintProps) => {
     if (!canvasRef || typeof canvasRef === 'function') return
     const canvas = canvasRef.current
     const ctxt = canvas && canvas.getContext('2d')
-    if (!ctxt) return  // TODO: log this?
+    if (!ctxt) return  // Should we log when this happens?
 
     const colors = waveformOpts?.colors || defaultWaveformColors
-    ctxt.strokeStyle = 'red'//colors.base
+    ctxt.strokeStyle = colors.base
     ctxt.lineWidth = waveformOpts?.waveformWidth ?? 1
     ctxt.resetTransform()
     ctxt.clearRect(0, 0, ctxt.canvas.width, ctxt.canvas.height)
     ctxt.translate(xMargin, 0)
-    // console.log(`Realized yScale: ${yScale}`)
-    // ctxt.translate(-(targetPixelW || 0)/2, -(targetPixelH || 0)/2) // works for scale-in-path
-    // ctxt.translate(-(targetPixelW || 0)/2, 0)//+(targetPixelH || 0)/2)
-    // console.log(`Setting default transform ${-(targetPixelW || 0)/2}, ${-(targetPixelH || 0)/2}`)
-    // ctxt.scale(1, yScale) // OKAY THIS WON'T WORK--it scales the LINE WIDTH as well as the paths. So it gets Real Bad.
+    // ctxt.scale(1, yScale) // This would be a neat native way to adjust the vertical scaling, BUT it changes the pen aspect ratio.
+    // So it doesn't work, alas. Leaving this comment here as a warning to future generations.
     const baseTransform = ctxt.getTransform()
-    // console.log(`${baseTransform}`)
-    // console.log(`PixelSpace paths: ${pixelSpacePaths}`)
     pixelSpacePaths.forEach((p) => {
-        // console.log(`Offsetting to ${p.offsetFromParentCenter[0]}, ${p.offsetFromParentCenter[1]}`)
-        // console.log(`Offsetting to ${p.offsetFromParentCenter[0]}, ${p.offsetFromParentCenter[1]/(yScale)}`)
-        // ctxt.translate(p.offsetFromParentCenter[0], p.offsetFromParentCenter[1]/(yScale))
-        ctxt.translate(p.offsetFromParentCenter[0], p.offsetFromParentCenter[1]) // works for scale-in-path
+        ctxt.translate(p.offsetFromParentCenter[0], p.offsetFromParentCenter[1])
         ctxt.beginPath()
         ctxt.moveTo(p.pointsInPaintBox[0][0], p.pointsInPaintBox[0][1])
         p.pointsInPaintBox.forEach((pt) => {
@@ -129,92 +95,6 @@ const paint = (props: PaintProps) => {
         ctxt.setTransform(baseTransform)
     })
 }
-
-const computePathsViaElectrodeTransforms = (waveforms: WaveformPoint[][], electrodes: PixelSpaceElectrode[], yScale: number): PixelSpacePath[] => {
-    // console.log(`Realized yscale: ${yScale}`)
-    // The transform is actually mapping from the unit square into pixelspace. So we need to normalize the waveform into the unit square first.
-    // FIRST THINGS FIRST, we will erase the scale if we don't look at the ENTIRE waveform set.
-    const allXs = waveforms.map(w => w.map(pt => pt.time)).flat(2)
-    const allYs = waveforms.map(w => w.map(pt => pt.amplitude)).flat(2)
-    const xmin = min(allXs)
-    const ymin = min(allYs)
-    const xrange = max(allXs) - xmin
-    const yrange = max(allYs) - ymin
-    // we incorporate the yscale factor here to vectorize that too
-    /* RELEVANT EXISTING CODE: FROM waveformLayer.ts
-            const painter2 = painter.transform(e.transform).transform(funcToTransform(p => {
-                return [p[0] / waveform[i].length, 0.5 - (p[1] / 2) * yScaleFactor]
-            }))
-            // This assumes the time codes start at 1 & that every waveform has the same number of frames.
-            // It scales the x-direction to 1/(length)th to fit in a unit square
-            // And scales the y-direction to center on 0.5 and vary as actual measurement, times half the yScaleFactor.
-            // Incidentally, earlier:
-            // const yScaleFactor = (props.ampScaleFactor || 1) / (props.noiseLevel || 1) * 1/10
-            // So y-direction scaling is the requested amplitude scale, divided by (10 * noiseLevel).
-            // (This isn't really explained but seems important)
-    */
-    const wavesToUnits = matrix([[1/xrange, 0, -xmin/xrange],
-                                //  [0, -yScale/yrange, -ymin/yrange],
-                                [0, -yScale/2, 0.5],    // this was in the existing code and I don't know why
-                                 [ 0, 0, 1]])
-    // const wavesToUnits = funcToTransform(p => {
-    //     return [p[0] / xrange, 0.5 - (p[1] /2) * yScale]
-    // })
-    
-    return electrodes.map((e, ii) => {
-        const rawPoints = waveforms[ii].map(pt => [pt.time, pt.amplitude])
-        const currentTransform = matrix(e.transform)
-        const newTransform = multiply(currentTransform, wavesToUnits).toArray() as TransformationMatrix
-
-        const points = transformPoints(newTransform, rawPoints)
-        return {
-            pointsInPaintBox: points,
-            offsetFromParentCenter: [e.pixelX, e.pixelY]
-        }
-    })
-}
-
-const paintViaElectrodeTransforms = (props: PaintProps) => {
-    const { canvasRef, waveformOpts, pixelSpacePaths } = props
-
-    if (!pixelSpacePaths || pixelSpacePaths.length === 0) return
-    if (!canvasRef || typeof canvasRef === 'function') return
-    const canvas = canvasRef.current
-    const ctxt = canvas && canvas.getContext('2d')
-    if (!ctxt) return  // TODO: log this?
-
-    const colors = waveformOpts?.colors || defaultWaveformColors
-    ctxt.strokeStyle = colors.base
-    ctxt.lineWidth = waveformOpts?.waveformWidth ?? 1
-    ctxt.clearRect(0, 0, ctxt.canvas.width, ctxt.canvas.height)
-    pixelSpacePaths.forEach((p) => {
-        ctxt.beginPath()
-        ctxt.moveTo(p.pointsInPaintBox[0][0], p.pointsInPaintBox[0][1])
-        p.pointsInPaintBox.forEach((pt) => {
-            ctxt.lineTo(pt[0], pt[1])
-        })
-        ctxt.stroke()
-    })
-}
-
-// const sampleWaveformData = (waveforms?: WaveformPoint[][]): string => {
-//     if (!waveforms) return ""
-//     const firstWave = waveforms[0]
-//     const start = firstWave.slice(0, 5).map(a => `${a.time}, ${a.amplitude}`)
-//     const mid = firstWave.slice(70, 75).map(a => `${a.time}, ${a.amplitude}`)
-//     const end = firstWave.slice(120, 125).map(a => `${a.time}, ${a.amplitude}`)
-//     return [...start, ...mid, ...end].join('\n')
-// }
-
-// const samplePathData = (paths?: PixelSpacePath[]): string => {
-//     if (!paths) return ""
-//     const firstPath = paths[0]
-//     const start = firstPath.pointsInPaintBox.slice(0, 5).map(a => `${a[0]}, ${a[1]}`)
-//     const mid = firstPath.pointsInPaintBox.slice(70, 75).map(a => `${a[0]}, ${a[1]}`)
-//     const end = firstPath.pointsInPaintBox.slice(120, 125).map(a => `${a[0]}, ${a[1]}`)
-//     const displacement = `adjust to ${firstPath.offsetFromParentCenter[0]}, ${firstPath.offsetFromParentCenter[1]}`
-//     return [...start, ...mid, ...end, displacement].join('\n')
-// }
 
 const Waveform = (props: WaveformProps) => {
     const { electrodes, waveforms, waveformOpts, oneElectrodeHeight, oneElectrodeWidth, yScale, width, height, method, layoutMode } = props
@@ -236,22 +116,113 @@ const Waveform = (props: WaveformProps) => {
         if (!waveforms || waveforms.length === 0) return
         if (method === 'electrode') {
             const paths = computePathsViaElectrodeTransforms(waveforms, electrodes, yScale)
-            // console.log(`Resulting paths ${samplePathData(paths)}`)
             paintViaElectrodeTransforms({canvasRef, yScale, pixelSpacePaths: paths, waveformOpts: opts, xMargin: 0})
         } else {
             const pointsPerWaveform = waveforms[0].length
-            const transform = matrix([[oneElectrodeWidth/pointsPerWaveform, 0, -oneElectrodeWidth*(.5 + 1/pointsPerWaveform)],
-                                      [0, -(yScale*oneElectrodeHeight)/2, 0],//targetPixelH/2],
-                                      [0, 0, 1]]).toArray() as TransformationMatrix
+            const scaleTimes = oneElectrodeWidth/pointsPerWaveform
+            const offsetToCenter = -oneElectrodeWidth*(.5 + 1/pointsPerWaveform)
+            const finalYScale = (yScale*oneElectrodeHeight)/2
+            const transform = matrix([[scaleTimes,               0,   offsetToCenter],
+                                      [         0,    -finalYScale,                0],
+                                      [         0,               0,                1]
+                                    ]).toArray() as TransformationMatrix
             const paths = computePaths(transform, waveforms, electrodes)
             // console.log(`Resulting paths ${samplePathData(paths)}`)
             const xMargin = layoutMode === 'vertical' ? (width - oneElectrodeWidth)/2 : 0
-            console.log(xMargin)
             paint({canvasRef, yScale, waveformOpts: opts, pixelSpacePaths: paths, xMargin })
         }
     }, [method, waveforms, electrodes, yScale, opts, width, height, oneElectrodeWidth, oneElectrodeHeight, layoutMode])
 
     return canvas
+}
+// Note: The transform matrix above could also be computed by funcToTransform, e.g.:
+// funcToTransform((p: Vec2): Vec2 => {
+//     const a = canvasWidth/2 + p[0] * (targetPixelW) / 2
+//     const b = canvasHeight/2 + p[1] * (targetPixelH) / 2
+//     return [a, b]
+// })
+// The transform matrix combines two transforms: one maps waveform data into a roughly-unit-square system,
+// and the other maps a unit-square to the electrode area. Breaking those steps out looks like this:
+// const wavesToUnitScale = matrix([[1/pointsPerWaveform,         0, -1/pointsPerWaveform],
+//                                  [                  0, -yScale/2,                  0.5],
+//                                  [                  0,         0,                    1]])
+// const pointsToCentralBoxXfrm = matrix([[targetPixelW, 0,            0],
+//                                        [0,            targetPixelH, 0],
+//                                        [0,            0,            1]])
+// const combinedTransform = multiply(pointsToCentralBoxXfrm, wavesToUnitScale).toArray() as TransformationMatrix
+// but there's no need to actually make the computer do the math every time since we know what the result
+// should be. (Also notice the -yScale term to invert the axis, since pixel Ys increase as you move downward.)
+
+
+// Data-report functions for debugging:
+// const sampleWaveformData = (waveforms?: WaveformPoint[][]): string => {
+//     if (!waveforms) return ""
+//     const firstWave = waveforms[0]
+//     const start = firstWave.slice(0, 5).map(a => `${a.time}, ${a.amplitude}`)
+//     const mid = firstWave.slice(70, 75).map(a => `${a.time}, ${a.amplitude}`)
+//     const end = firstWave.slice(120, 125).map(a => `${a.time}, ${a.amplitude}`)
+//     return [...start, ...mid, ...end].join('\n')
+// }
+
+// const samplePathData = (paths?: PixelSpacePath[]): string => {
+//     if (!paths) return ""
+//     const firstPath = paths[0]
+//     const start = firstPath.pointsInPaintBox.slice(0, 5).map(a => `${a[0]}, ${a[1]}`)
+//     const mid = firstPath.pointsInPaintBox.slice(70, 75).map(a => `${a[0]}, ${a[1]}`)
+//     const end = firstPath.pointsInPaintBox.slice(120, 125).map(a => `${a[0]}, ${a[1]}`)
+//     const displacement = `adjust to ${firstPath.offsetFromParentCenter[0]}, ${firstPath.offsetFromParentCenter[1]}`
+//     return [...start, ...mid, ...end, displacement].join('\n')
+// }
+
+
+// Note: This code is left as an example of the prior way of doing things, but it's not needed for anything
+// (and also doesn't work properly for vertical-layout.)
+const computePathsViaElectrodeTransforms = (waveforms: WaveformPoint[][], electrodes: PixelSpaceElectrode[], yScale: number): PixelSpacePath[] => {
+    // Each electrode's transform maps the unit square into pixelspace. So we need to normalize the waveform's time (x) dimension
+    // into unit distance. (The y dimension will already be accounted for by noise-scaling factors.)
+    const xrange = waveforms[0].length
+    const wavesToUnits = matrix([[1/xrange,  0,        -1/xrange],
+                                 [ 0,       -yScale/2,       0.5],
+                                 [ 0,        0,                1]])
+    // (The funcToTransform equivalent):
+    // const wavesToUnits = funcToTransform(p => {
+    //     return [p[0] / xrange, 0.5 - (p[1] /2) * yScale]
+    // })
+    
+    return electrodes.map((e, ii) => {
+        const rawPoints = waveforms[ii].map(pt => [pt.time, pt.amplitude])
+        const electrodeBaseTransform = matrix(e.transform)
+        const newTransform = multiply(electrodeBaseTransform, wavesToUnits).toArray() as TransformationMatrix
+
+        const points = transformPoints(newTransform, rawPoints)
+        return {
+            pointsInPaintBox: points,
+            offsetFromParentCenter: [e.pixelX, e.pixelY]
+        }
+    })
+}
+
+const paintViaElectrodeTransforms = (props: PaintProps) => {
+    const { canvasRef, waveformOpts, pixelSpacePaths } = props
+
+    if (!pixelSpacePaths || pixelSpacePaths.length === 0) return
+    if (!canvasRef || typeof canvasRef === 'function') return
+    const canvas = canvasRef.current
+    const ctxt = canvas && canvas.getContext('2d')
+    if (!ctxt) return
+
+    const colors = waveformOpts?.colors || defaultWaveformColors
+    ctxt.strokeStyle = colors.base
+    ctxt.lineWidth = waveformOpts?.waveformWidth ?? 1
+    ctxt.clearRect(0, 0, ctxt.canvas.width, ctxt.canvas.height)
+    pixelSpacePaths.forEach((p) => {
+        ctxt.beginPath()
+        ctxt.moveTo(p.pointsInPaintBox[0][0], p.pointsInPaintBox[0][1])
+        p.pointsInPaintBox.forEach((pt) => {
+            ctxt.lineTo(pt[0], pt[1])
+        })
+        ctxt.stroke()
+    })
 }
 
 export default Waveform

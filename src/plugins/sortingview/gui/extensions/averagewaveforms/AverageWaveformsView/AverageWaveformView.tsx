@@ -65,11 +65,6 @@ const AverageWaveformView: FunctionComponent<Props> = ({ sorting, curation, reco
     })
     const useFilter = visibleElectrodeIds && visibleElectrodeIds.length > 0
     const visibleElectrodes = electrodes.filter((e) => !useFilter || (visibleElectrodeIds || []).includes(e.id))
-    // const electrodeLocations = useMemo(() => {
-    //     return visibleElectrodeIds && visibleElectrodeIds.length > 0
-    //         ? definedPlotData.channel_locations.filter((loc, ii) => (visibleElectrodeIds.includes(definedPlotData.channel_ids[ii])))
-    //         : definedPlotData.channel_locations
-    // }, [visibleElectrodeIds, definedPlotData.channel_ids, definedPlotData.channel_locations])
 
     return plotData
         ? <WaveformWidget

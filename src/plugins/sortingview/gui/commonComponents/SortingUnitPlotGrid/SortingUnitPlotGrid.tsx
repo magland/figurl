@@ -14,7 +14,7 @@ type Props = {
 
 const SortingUnitPlotGrid: FunctionComponent<Props> = ({ sorting, selection, curation, selectionDispatch, unitComponent, sortingSelector }) => {
     const maxUnitsVisibleIncrement = 60
-    const [maxUnitsVisible, setMaxUnitsVisible] = useState(1)
+    const [maxUnitsVisible, setMaxUnitsVisible] = useState(30)
     const sortingInfo: SortingInfo | undefined = useSortingInfo(sorting.sortingPath)
 
     const visibleUnitIds = useMemo(() => selection.visibleUnitIds, [selection.visibleUnitIds])

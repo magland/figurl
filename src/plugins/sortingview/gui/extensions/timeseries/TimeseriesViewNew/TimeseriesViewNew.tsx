@@ -1,6 +1,7 @@
 import Splitter from 'figurl/labbox-react/components/Splitter/Splitter';
 import React, { useMemo, useReducer } from 'react';
 import { RecordingInfo, RecordingSelection, RecordingSelectionDispatch, recordingSelectionReducer, SortingSelection } from '../../../pluginInterface';
+import { getSpikeAmplitudeNormalizationFactor } from '../../common/waveformLogic/waveformLogic';
 import useSpikeAmplitudesData from '../../spikeamplitudes/SpikeAmplitudesView/useSpikeAmplitudesData';
 import ElectrodeGeometryView from './ElectrodeGeometryView';
 import TimeseriesWidgetNew from './TimeseriesWidgetNew';
@@ -48,7 +49,7 @@ const TimeseriesViewNew = (props: Props) => {
     const selectedElectrodeIds = useMemo(() => (recordingSelection.selectedElectrodeIds || []), [recordingSelection.selectedElectrodeIds])
     const visibleElectrodeIds = useMemo(() => (recordingSelection.visibleElectrodeIds || recordingInfo.channel_ids), [recordingSelection.visibleElectrodeIds, recordingInfo.channel_ids])
 
-    const y_scale_factor = 1 / (props.recordingInfo.noise_level || 1) * 1/10
+    const y_scale_factor =  getSpikeAmplitudeNormalizationFactor(props.recordingInfo.noise_level)
 
     if (timeseriesData) {
         return (
