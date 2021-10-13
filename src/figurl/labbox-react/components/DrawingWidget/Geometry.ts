@@ -95,6 +95,18 @@ export const getCenter = (region: RectangularRegion): Vec2 => {
     // because we want this function to work for both inverted and standard coordinate systems.
     return [region.xmin + (getWidth(region) / 2), Math.min(region.ymin, region.ymax) + (getHeight(region) / 2)]
 }
+// Find the rectangle identified by 2 points, then return 4 numbers
+// representing [x, y, width, height]
+// where x & y are the upper left point of the rectangle
+// & width and height are positive.
+export const getRectFromPointPair = (pointA: Vec2, pointB: Vec2): Vec4 => {
+    return [
+        Math.min(pointA[0], pointB[0]),
+        Math.min(pointA[1], pointB[1]),
+        Math.abs(pointA[0] - pointB[0]),
+        Math.abs(pointA[1] - pointB[1])
+    ]
+}
 export const pointSpanToRegion = (pointSpan: Vec4): RectangularRegion => {
     // expected: pointSpan will have form [0] = xmin, [1] = ymin, [2] = width, [3] = height
     return {

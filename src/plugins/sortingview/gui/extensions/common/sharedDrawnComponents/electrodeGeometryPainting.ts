@@ -1,4 +1,4 @@
-import { PixelSpaceElectrode } from "./electrodeGeometryLogic"
+import { PixelSpaceElectrode } from "./ElectrodeGeometry"
 
 export type ElectrodeColors = {
     border: string,
@@ -13,7 +13,7 @@ export type ElectrodeColors = {
     textDark: string
 }
 
-const defaultColors: ElectrodeColors = {
+export const defaultColors: ElectrodeColors = {
     border: 'rgb(30, 30, 30)',
     base: 'rgb(0, 0, 255)',
     selected: 'rgb(196, 196, 128)',
@@ -26,9 +26,8 @@ const defaultColors: ElectrodeColors = {
     textDark: 'rgb(32, 32, 32)'    
 }
 
-
 // HANDLE SELECTION STATE DISABLED BY ENSURING SELECTION TOOLS ARE DISABLED
-type PaintProps = {
+export type PaintProps = {
     pixelElectrodes: PixelSpaceElectrode[]
     selectedElectrodeIds: number[]
     hoveredElectrodeId?: number
@@ -37,8 +36,9 @@ type PaintProps = {
     showLabels: boolean
     offsetLabels: boolean
     layoutMode: 'geom' | 'vertical'
+    colors?: ElectrodeColors
+    xMargin: number
     // omitting hideElectrodes b/c what are we drawing if we don't draw electrodes??
-    // could also customize colors, offsets, etc. Don't worry for right now
 }
 
 const circle = 2 * Math.PI
@@ -56,58 +56,72 @@ export const paint = (canvasRef: React.MutableRefObject<HTMLCanvasElement | null
 }
 
 const paintVertical = (ctxt: CanvasRenderingContext2D, props: PaintProps) => {
-    const { pixelElectrodes, pixelRadius, showLabels } = props
+    const { pixelElectrodes, pixelRadius, showLabels, xMargin } = props
     const useLabels = pixelRadius > 5 && showLabels
+    const colors = props.colors ?? defaultColors
 
+    // One Em should be the pixel size of the font; numeric labels should fit in two ems' space
+    const labelOffset = useLabels ? 2 * pixelRadius : 0
     ctxt.clearRect(0, 0, ctxt.canvas.width, ctxt.canvas.height)
-    // TODO: This should be the full width of the drawing space less margin...
-    // THIS IS A HACK AND NOT CORRECT, FIX IT
-    const xmin = pixelElectrodes[0].pixelX - pixelRadius
-    const xmax = pixelElectrodes[0].pixelX + pixelRadius
+    const xmin = xMargin + labelOffset
+    const xmax = ctxt.canvas.width - xMargin
     ctxt.beginPath()
     pixelElectrodes.forEach(e => {
         ctxt.moveTo(xmin, e.pixelY)
         ctxt.lineTo(xmax, e.pixelY)
     })
-    ctxt.strokeStyle = defaultColors.border
+    ctxt.strokeStyle = colors.border
     ctxt.stroke()
 
     if (useLabels) {
-        // TODO: DRAW LABELS!!!
+        // In vertical mode, we should always use offset labels.
+        // So dark text, aligned right, at set offset from electrode
+        const textRight = xmin - 0.5*pixelRadius
+        ctxt.font = `${pixelRadius-3}px Arial` // Is this the right thing to do?
+        ctxt.fillStyle = colors.textDark
+        ctxt.textAlign = 'right'
+        ctxt.textBaseline = 'middle'
+        pixelElectrodes.forEach(e => {
+            ctxt.fillText(`${e.e.label}`, textRight, e.pixelY)
+        })
     }
 }
 
 const paintGeometryView = (ctxt: CanvasRenderingContext2D, props: PaintProps) => {
     const { pixelElectrodes, selectedElectrodeIds, hoveredElectrodeId, draggedElectrodeIds, pixelRadius, showLabels, offsetLabels } = props
     const useLabels = pixelRadius > 5 && showLabels
+    const colors = props.colors ?? defaultColors
+
     // set up fills
-    const coloredElectrodes = pixelElectrodes.map(e => {
+    const electrodesWithColors = pixelElectrodes.map(e => {
         const selected = selectedElectrodeIds.includes(e.e.id)
         const hovered = (hoveredElectrodeId ?? -1) === e.e.id
         const dragged = draggedElectrodeIds.includes(e.e.id)
         const color = selected 
             ? dragged
-                ? defaultColors.draggedSelected
+                ? colors.draggedSelected
                 : hovered
-                    ? defaultColors.selectedHover
-                    : defaultColors.selected
+                    ? colors.selectedHover
+                    : colors.selected
             : dragged
-                ? defaultColors.dragged
+                ? colors.dragged
                 : hovered
-                    ? defaultColors.hover
-                    : defaultColors.base
+                    ? colors.hover
+                    : colors.base
         return {
             ...e,
             color: color,
-            textColor: (selected || (hovered && !dragged)) ? defaultColors.textDark : defaultColors.textLight
+            textColor: (selected || (hovered && !dragged)) ? colors.textDark : colors.textLight
         }
     })
 
+    ctxt.clearRect(0, 0, ctxt.canvas.width, ctxt.canvas.height)
     // Draw fills
-    // all-colors-at-once style: involves a lot fewer strokes but probably not enough to matter
-    // coloredElectrodes.sort((a, b) => { return a.color.localeCompare(b.color) })
+    // all-colors-at-once style: involves a lot fewer strokes & state resets but probably not enough to matter
+    // (or to justify the extra complication of breaking out the electrodes into subgroups)
+    // electrodesWithColors.sort((a, b) => { return a.color.localeCompare(b.color) })
     // let lastColor = ''
-    // coloredElectrodes.forEach(e => {
+    // electrodesWithColors.forEach(e => {
     //     if (lastColor !== e.color) {
     //         ctxt.fill()
     //         lastColor = e.color
@@ -115,7 +129,7 @@ const paintGeometryView = (ctxt: CanvasRenderingContext2D, props: PaintProps) =>
     //         ctxt.beginPath()
     //     }
     // })
-    coloredElectrodes.forEach(e => {
+    electrodesWithColors.forEach(e => {
         ctxt.fillStyle = e.color
         ctxt.beginPath()
         ctxt.ellipse(e.pixelX, e.pixelY, pixelRadius, pixelRadius, 0, 0, circle)
@@ -134,12 +148,11 @@ const paintGeometryView = (ctxt: CanvasRenderingContext2D, props: PaintProps) =>
     if (useLabels) {
         ctxt.font = `${pixelRadius}px Arial`
         ctxt.textAlign = offsetLabels ? 'right' : 'center'
-        ctxt.textBaseline = offsetLabels ? 'bottom' : 'middle'
-        const xOffset = offsetLabels ? 1.9 * pixelRadius : 0
-        const yOffset = offsetLabels ? 1.7 * pixelRadius : 0
-        coloredElectrodes.forEach(e => {
-            ctxt.fillStyle = e.textColor
-            ctxt.fillText(`${e.e.id}`, e.pixelX - xOffset, e.pixelY - yOffset)
+        ctxt.textBaseline = 'middle'
+        const xOffset = offsetLabels ? 1.4 * pixelRadius : 0
+        electrodesWithColors.forEach(e => {
+            ctxt.fillStyle = offsetLabels ? colors.textDark : e.textColor
+            ctxt.fillText(`${e.e.label}`, e.pixelX - xOffset, e.pixelY)
         })
     }
 }

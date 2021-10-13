@@ -1,6 +1,5 @@
 // import { createCalculationPool } from 'labbox';
 import { KeypressMap } from 'figurl/labbox-react/components/CanvasWidget';
-import WaveformWidget from 'plugins/sortingview/gui/extensions/averagewaveforms/AverageWaveformsView/WaveformWidget';
 import { SortingSelection, SortingSelectionDispatch } from 'plugins/sortingview/gui/pluginInterface';
 import React, { FunctionComponent, useMemo } from 'react';
 import { ElectrodeOpts } from '../gui/extensions/common/sharedCanvasLayers/electrodesLayer';
@@ -55,24 +54,7 @@ const AverageWaveformNumpyView: FunctionComponent<Props> = (props) => {
     const visibleElectrodeIds = selection.visibleElectrodeIds
     const electrodeIds = plotData.channel_ids.filter(id => ((!visibleElectrodeIds) || (visibleElectrodeIds.includes(id))))
     const electrodeLocations = plotData.channel_locations.filter((loc, ii) => ((!visibleElectrodeIds) || (visibleElectrodeIds.includes(plotData.channel_ids[ii]))))
-    return (
-        <WaveformWidget
-            waveform={plotData.average_waveform}
-            ampScaleFactor={1}
-            layoutMode={selection.waveformsMode || 'geom'}
-            width={width}
-            height={height}
-            selectedElectrodeIds={selection.selectedElectrodeIds || []}
-            selectionDispatch={selectionDispatch}
-            electrodeOpts={electrodeOpts}
-            keypressMap={keypressMap ?? {}}
-            noiseLevel={noiseLevel}
-            electrodeIds={electrodeIds}
-            electrodeLocations={electrodeLocations}
-            samplingFrequency={plotData.sampling_frequency}
-            waveformOpts={{waveformWidth: 1}}
-        />
-    )
+    return ( <br />)
 }
 
 export default AverageWaveformNumpyView

@@ -1,27 +1,25 @@
-import CanvasWidget, { funcToTransform, KeypressMap, PainterPath } from 'figurl/labbox-react/components/CanvasWidget'
-import { toTransformationMatrix } from 'figurl/labbox-react/components/CanvasWidget/Geometry'
-import { useLayer, useLayers } from 'figurl/labbox-react/components/CanvasWidget/useLayer'
-import { matrix, multiply } from 'mathjs'
-import React, { FunctionComponent, useMemo } from 'react'
+import { KeypressMap } from 'figurl/labbox-react/components/CanvasWidget'
+import { FunctionComponent, useMemo } from 'react'
 import { RecordingSelectionDispatch } from '../../../pluginInterface'
-import { createElectrodesLayer, ElectrodeColors, ElectrodeLayerProps, ElectrodeOpts } from '../../common/sharedCanvasLayers/electrodesLayer'
-import setupElectrodes, { ElectrodeBox } from '../../common/sharedCanvasLayers/setupElectrodes'
-import { createWaveformLayer, WaveformColors, WaveformLayerProps } from './waveformLayer'
+import ElectrodeGeometry, { Electrode, LayoutMode } from "../../common/sharedDrawnComponents/ElectrodeGeometry"
+import { computeElectrodeLocations, xMargin as xMarginDefault } from '../../common/sharedDrawnComponents/electrodeGeometryLayout'
+import { ElectrodeColors } from '../../common/sharedDrawnComponents/electrodeGeometryPainting'
+import Waveform, { WaveformColors, WaveformPoint } from './Waveform'
 
 
 export type WaveformWidgetProps = {
-    waveform?: number[][]
+    waveforms?: number[][]
     ampScaleFactor: number
-    layoutMode: 'geom' | 'vertical'
+    electrodes: Electrode[]
+    layoutMode: LayoutMode
     width: number
     height: number
     selectedElectrodeIds: number[]
     selectionDispatch: RecordingSelectionDispatch
-    electrodeOpts: ElectrodeOpts
+    colors?: ElectrodeColors
+    showLabels?: boolean
     keypressMap?: KeypressMap
     noiseLevel: number
-    electrodeIds: number[]
-    electrodeLocations: number[][]
     samplingFrequency: number
     waveformOpts: {
         colors?: WaveformColors
@@ -56,73 +54,72 @@ export const defaultWaveformOpts = {
 }
 
 const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
-    const electrodeOpts = useMemo(() => ({...defaultElectrodeOpts, ...props.electrodeOpts}), [props.electrodeOpts])
+    const showLabels = props.showLabels ?? defaultElectrodeOpts.showLabels
+    const colors = props.colors ?? defaultElectrodeOpts.colors
     const waveformOpts = useMemo(() => ({...defaultWaveformOpts, ...props.waveformOpts}), [props.waveformOpts])
+    const {electrodes, selectedElectrodeIds, selectionDispatch, waveforms, ampScaleFactor, layoutMode, width, height} = props
 
-    const electrodesSetup = useMemo(() => {
-        return setupElectrodes({
-            width: props.width,
-            height: props.height,
-            electrodeLocations: props.electrodeLocations,
-            electrodeIds: props.electrodeIds,
-            layoutMode: props.layoutMode,
-            maxElectrodePixelRadius: electrodeOpts.maxElectrodePixelRadius})
-    }, [props.width, props.height, props.electrodeLocations, props.electrodeIds, props.layoutMode, electrodeOpts.maxElectrodePixelRadius])
+    const geometry = useMemo(() => <ElectrodeGeometry
+        electrodes={electrodes}
+        selectedElectrodeIds={selectedElectrodeIds}
+        selectionDispatch={selectionDispatch}
+        width={width}
+        height={height}
+        layoutMode={layoutMode}
+        colors={colors}
+        showLabels={showLabels} // sic?
+        offsetLabels={true}
+        maxElectrodePixelRadius={25} // ??
+        disableSelection={true} // ??
+    />, [electrodes, selectedElectrodeIds, selectionDispatch, width, height, layoutMode, colors, showLabels])
 
-    const yScaleFactor = useMemo(() => ((props.ampScaleFactor || 1) / (props.noiseLevel || 1) * 1/10), [props.ampScaleFactor, props.noiseLevel])
-    const waveformLength = useMemo(() => ((props?.waveform && props.waveform[0]?.length) || 1), [props.waveform])
-    const scaledTransform = useMemo(() => {
-        return funcToTransform(p => {return [p[0] / waveformLength, 0.5 - (p[1] / 2) * yScaleFactor]})
-    }, [waveformLength, yScaleFactor])
-    // This works, given the (pretty weak) assumption that all waveforms have the same number of time points
-    const configuredElectrodeBoxes: ElectrodeBox[] = useMemo(() => {
-        return electrodesSetup.electrodeBoxes.map((box) => {
-            return {...box, transform: toTransformationMatrix(multiply(matrix(box.transform), matrix(scaledTransform)))}
-        })
-    }, [electrodesSetup.electrodeBoxes, scaledTransform])
+    // TODO: Don't do this twice, work it out differently
+    const { transform, convertedElectrodes, pixelRadius, xMargin: xMarginBase } = computeElectrodeLocations(width, height, electrodes, layoutMode, 25)
+    const xMargin = xMarginBase || xMarginDefault
+    // I have serious questions about this
+    const yScaleFactor = useMemo(() => ((ampScaleFactor || 1) / (props.noiseLevel || 1) * 1/10), [ampScaleFactor, props.noiseLevel]) // TODO: why this math??
+    // console.log(`Noise level is ${props.noiseLevel}`)
 
-    const paths: PainterPath[] = useMemo(() => {
-        return ((props.waveform || []).map((wave) => {
-            const path = new PainterPath()
-            wave.forEach((naturalAmplitude, t) => {
-                path.lineTo(t, naturalAmplitude)
+    // 'waveforms' is a list of lists of points. There's one outer list per channel (so far so good).
+    // The inner list is just a list of numbers, but they should be interpreted as pairs of (amplitude, time).
+    // So to get it into something structured, you need to iterate *pairwise* over the inner list.
+    const baseWaveformPoints: WaveformPoint[][] = waveforms?.map(waveformDataSet => 
+        {
+            return waveformDataSet.map((amplitude, time) => {
+                return { amplitude, time } as WaveformPoint
             })
-            return path
-        }))
-    }, [props.waveform])
+        }) ?? []
+    
+    // TODO: THIS LOGIC PROBABLY SHOULDN'T BE REPEATED HERE AND IN THE ELECTRODE GEOMETRY PAINT FUNCTION
+    const oneElectrodeHeight = layoutMode === 'geom' ? pixelRadius * 2 : height / electrodes.length
+    const oneElectrodeWidth = layoutMode === 'geom' ? pixelRadius * 2 : width - xMargin - (showLabels ? 2*pixelRadius : 0)
+    const waveform = <Waveform
+        electrodes={convertedElectrodes}
+        waveforms={baseWaveformPoints}
+        waveformOpts={waveformOpts}
+        oneElectrodeHeight={oneElectrodeHeight}
+        oneElectrodeWidth={oneElectrodeWidth}
+        yScale={yScaleFactor}
+        width={width}
+        height={height}
+        // method={"electrode"}
+        method={"combined"}
+        layoutMode={layoutMode}
+    />
 
-    const waveformLayerProps: WaveformLayerProps = useMemo(() => ({
-        electrodeBoxes: configuredElectrodeBoxes,
-        paths: paths,
-        transform: electrodesSetup.transform,
-        waveformOpts,
-        width: props.width,
-        height: props.height
-    }), [configuredElectrodeBoxes, paths, electrodesSetup.transform, waveformOpts, props.width, props.height])
-
-    const electrodeLayerProps: ElectrodeLayerProps = useMemo(() => {
-        return {
-            transform: electrodesSetup.transform,
-            electrodeBoxes: electrodesSetup.electrodeBoxes,
-            radius: electrodesSetup.radius,
-            pixelRadius: electrodesSetup.pixelRadius,
-            layoutMode: props.layoutMode,
-            width: props.width,
-            height: props.height,
-            selectedElectrodeIds: props.selectedElectrodeIds,
-            selectionDispatch: props.selectionDispatch,
-            electrodeOpts
-        }
-    }, [electrodesSetup, props.layoutMode, props.width, props.height, props.selectedElectrodeIds, props.selectionDispatch, electrodeOpts])
-
-    const electrodesLayer = useLayer(createElectrodesLayer, electrodeLayerProps)
-    const waveformLayer = useLayer(createWaveformLayer, waveformLayerProps)
-    const layers = useLayers([electrodesLayer, waveformLayer])
     return (
-        <CanvasWidget
-            layers={layers}
-            {...{width: props.width, height: props.height}}
-        />
+        <div
+            style={{
+                width: width,
+                height: height,
+                position: 'relative',
+                left: 0,
+                top: 0
+            }}
+        >
+            {geometry}
+            {waveform}
+        </div>
     )
 }
 

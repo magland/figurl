@@ -1,12 +1,12 @@
-import DragCanvas, { DragState } from 'figurl/labbox-react/components/DrawingWidget/DragCanvas'
-// import { DragState } from 'figurl/labbox-react/components/DrawingWidget/DragCanvas'
-// import DragLayer from 'figurl/labbox-react/components/DrawingWidget/DragLayer'
-import { pointSpanToRegion, Vec2 } from 'figurl/labbox-react/components/DrawingWidget/Geometry'
-import { copyMouseEvent } from 'figurl/labbox-react/components/DrawingWidget/utility'
+import DragCanvas, { COMPUTE_DRAG, DragAction, END_DRAG, getDragActionFromEvent, RESET_DRAG } from 'figurl/labbox-react/components/DrawingWidget/DragCanvas'
+import { TransformationMatrix, Vec2 } from 'figurl/labbox-react/components/DrawingWidget/Geometry'
 import { RecordingSelectionDispatch } from "plugins/sortingview/gui/pluginInterface"
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { computeElectrodeLocations, getDraggedElectrodeIds, getElectrodeAtPoint } from "./electrodeGeometryLogic"
-import { paint } from './electrodeGeometryPainting'
+import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
+import { defaultColors, ElectrodeColors, paint } from './electrodeGeometryPainting'
+import { ElectrodeGeometryActionType, electrodeGeometryReducer } from './electrodeGeometryStateManagement'
+import SvgElectrodeLayout from './ElectrodeGeometrySvg'
+
+const USE_SVG = false
 
 export type Electrode = {
     id: number
@@ -15,15 +15,27 @@ export type Electrode = {
     y: number
 }
 
+export type PixelSpaceElectrode = {
+    e: Electrode
+    pixelX: number
+    pixelY: number
+    transform: TransformationMatrix // Dunno if we really need this?
+}
+
+export type LayoutMode = 'geom' | 'vertical'
+
 interface WidgetProps {
     electrodes: Electrode[],
     selectedElectrodeIds: number[]
     selectionDispatch: RecordingSelectionDispatch
     width: number
     height: number
+    colors?: ElectrodeColors
     layoutMode?: 'geom' | 'vertical'
     showLabels?: boolean
     maxElectrodePixelRadius?: number
+    offsetLabels?: boolean
+    disableSelection?: boolean
 }
 
 const defaultElectrodeLayerProps = {
@@ -40,102 +52,131 @@ const getEventPoint = (e: React.MouseEvent) => {
 
 const ElectrodeGeometry = (props: WidgetProps) => {
     const { width, height, electrodes, selectedElectrodeIds, selectionDispatch } = props
-    const layoutMode = 'geom'
+    const disableSelection = props.disableSelection ?? false
+    const offsetLabels = props.offsetLabels ?? false
+    const colors = props.colors ?? defaultColors
+    const layoutMode: LayoutMode = props.layoutMode ?? 'geom'
     const maxElectrodePixelRadius = props.maxElectrodePixelRadius || defaultElectrodeLayerProps.maxElectrodePixelRadius
-    const [draggedElectrodeIds, setDraggedElectrodeIds] = useState<number[]>([])
-    const [hoveredElectrodeId, setHoveredElectrodeId] = useState<number | undefined>(undefined)
+    const [state, dispatchState] = useReducer(electrodeGeometryReducer, {
+            convertedElectrodes: [],
+            pixelRadius: -1,
+            draggedElectrodeIds: [],
+            pendingSelectedElectrodeIds: selectedElectrodeIds,
+            dragState: {isActive: false},
+            xMarginWidth: -1
+        })
 
-    const { convertedElectrodes, pixelRadius } = useMemo(() => {
-        return computeElectrodeLocations(width, height, electrodes, layoutMode, maxElectrodePixelRadius)
+    useEffect(() => {
+        const type: ElectrodeGeometryActionType = 'INITIALIZE'
+        const a = {
+            type: type,
+            electrodes: electrodes,
+            width: width,
+            height: height,
+            maxElectrodePixelRadius: maxElectrodePixelRadius,
+            layoutMode: layoutMode
+        }
+        dispatchState(a)
     }, [width, height, electrodes, layoutMode, maxElectrodePixelRadius])
 
-    const [dragState, setDragState] = useState<DragState>({isFinal: true})
-    const dragCanvasRef = useRef<HTMLCanvasElement | null>(null)
-    const dragCanvas = <DragCanvas ref={dragCanvasRef} width={width} height={height} onDragStateChanged={setDragState} />
-
+    // Call to update selected electrode IDs if our opinion differs from the one that was passed in
+    // (but only if our opinion has changed)
     useEffect(() => {
-        setDraggedElectrodeIds([])
-        if (!dragState || !dragState.isFinal) return // don't deselect everything if we just started a drag
+        selectionDispatch({type: 'SetSelectedElectrodeIds', selectedElectrodeIds: state.pendingSelectedElectrodeIds})
+    }, [selectionDispatch, state.pendingSelectedElectrodeIds])
 
-        console.log(`Drag state finality changed. Now ${JSON.stringify(dragState)}`)
-        const currentSelected = dragState?.shift ? selectedElectrodeIds : []
-        const dragRectAsMaxMin = pointSpanToRegion(dragState?.dragRect || [0, 0, 0, 0])
-        const dragSelected = getDraggedElectrodeIds(convertedElectrodes, dragRectAsMaxMin, pixelRadius)
-        selectionDispatch({type: 'SetSelectedElectrodeIds', selectedElectrodeIds: [...currentSelected, ...dragSelected]})
-        // This should only fire on drag release, and intentionally is not listing other dependencies.
-        // (we don't want to be firing selection logic based on drag state every time the selection changes without a drag state change.)
-    }, [dragState?.isFinal, convertedElectrodes, pixelRadius, selectionDispatch])
+    const dragCanvas = disableSelection || <DragCanvas width={width} height={height} newState={state.dragState} />
 
-    useEffect(() => {
-        const dragRectAsMaxMin = pointSpanToRegion(dragState?.dragRect || [0, 0, 0, 0])
-        const newElectrodeIds = getDraggedElectrodeIds(convertedElectrodes, dragRectAsMaxMin, pixelRadius)
-        if (newElectrodeIds.length !== draggedElectrodeIds.length
-                || newElectrodeIds.filter(id => !draggedElectrodeIds.includes(id)).length > 0) {
-            setDraggedElectrodeIds(newElectrodeIds)
+    const nextDragStateUpdate = useRef<DragAction | null>(null)
+    const nextFrame = useRef<number>(0)
+
+    // This function debounces drag state updates.
+    // It uses requestAnimationFrame() to schedule updates at an appropriate rate.
+    // When the timer is up, if there's no pending update, it cancels the cycle.
+    // However, if there is a pending update, it applies the update & sets another timer.
+    const updateDragState = useCallback(() => {
+        if (nextDragStateUpdate.current === null) {
+            window.cancelAnimationFrame(nextFrame.current)
+            nextFrame.current = 0
+        } else {
+            dispatchState({
+                type: 'DRAGUPDATE',
+                dragAction: nextDragStateUpdate.current,
+                selectedElectrodeIds: selectedElectrodeIds
+            })
+            nextFrame.current = requestAnimationFrame(updateDragState)
         }
-    }, [dragState?.dragRect, convertedElectrodes, draggedElectrodeIds, pixelRadius])
+        nextDragStateUpdate.current = null
+    }, [nextDragStateUpdate, nextFrame, dispatchState, selectedElectrodeIds])
 
-    const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        const eventCopy = copyMouseEvent(e)
-        dragCanvasRef.current?.dispatchEvent(eventCopy)
-        const point = getEventPoint(e)
-        // Hovering doesn't count if we're dragging
-        const newHovered = e.buttons === 1 ? undefined : getElectrodeAtPoint(convertedElectrodes, pixelRadius, point)
-        if (newHovered !== hoveredElectrodeId) setHoveredElectrodeId(newHovered)
-    }, [convertedElectrodes, pixelRadius, hoveredElectrodeId, setHoveredElectrodeId])
+    const handleMouseMove = useCallback((e: React.MouseEvent) => {
+        const action: DragAction = {
+            ...getDragActionFromEvent(e),
+            type: COMPUTE_DRAG
+        }
+        // with mouse button down, this is a drag situation.
+        // But we debounce drag-state updates. So check if we're in the cooldown between updates.
+        // If an update is pending, tell it to apply the new change; otherwise, schedule an update.
+        if (action.mouseButtonIsDown) {
+            nextDragStateUpdate.current = action
+            if (nextFrame.current === 0) {
+                updateDragState()
+            }
+        } else { // if mouse button up, don't dispatch a drag action, but maybe update hover status.
+            const point = getEventPoint(e)
+            dispatchState({
+                type: 'UPDATEHOVER',
+                point: point
+            })
+        }
+    }, [nextDragStateUpdate, nextFrame, updateDragState])
+
+    const handleMouseDown = useCallback((e: React.MouseEvent) => {
+        nextDragStateUpdate.current = null
+        dispatchState({
+            type: 'DRAGUPDATE',
+            dragAction: {type: RESET_DRAG},
+            selectedElectrodeIds: [] // we won't actually use these for this, so reduce the dependencies.
+        })
+    }, [nextDragStateUpdate, dispatchState])
 
     const handleMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        const point = getEventPoint(e)
-        // To play nicely with dragstate, we need to abort any other action & let dragstate handle it
-        // if there is an active dragstate already.
-        // NB There is probably a neater way to do this without creating a race condition in the
-        // state of the selected electrode ids.
-        if (!dragState.isFinal) {
-            console.log(`This ends a drag state.`)
-            // a non-final dragState means there's an active drag that this mouseup will end.
-            // in that case, just dispatch the event to the drag layer.
-            dragCanvasRef.current?.dispatchEvent(copyMouseEvent(e))
-        } else { // dragState is final before processing the event, i.e. not dragging.
-            const clickedId = getElectrodeAtPoint(convertedElectrodes, pixelRadius, point)
-            console.log(`got click on ${clickedId} with shift? ${e.shiftKey} ctrl? ${e.ctrlKey}`)
-            console.log(`Currently selected: ${selectedElectrodeIds}`)
-            if (clickedId === 0 || clickedId === undefined) {
-                if (!(e.shiftKey || e.ctrlKey) && selectedElectrodeIds.length > 0) {
-                    selectionDispatch({type: 'SetSelectedElectrodeIds', selectedElectrodeIds: []})
-                }
-                return
-            } else {
-                // Something was clicked. How it's handled depends on the modifier keys.
-                const newSelection = e.ctrlKey  // ctrl-click means toggle state of target electrode
-                    ? selectedElectrodeIds.includes(clickedId)
-                        ? selectedElectrodeIds.filter(id => id !== clickedId)
-                        : [...selectedElectrodeIds, clickedId]
-                    : e.shiftKey
-                        ? [...selectedElectrodeIds, clickedId] // shift-click: add new item to selection
-                        : [clickedId] // unmodified click: set selection to target only
-                selectionDispatch({type: 'SetSelectedElectrodeIds', selectedElectrodeIds: newSelection})
-            }
+        if (state.dragState.isActive) {
+            // if we have an active drag and we get a mouse up, that should end the drag & that's it.
+            nextDragStateUpdate.current = null
+            dispatchState({
+                type: 'DRAGUPDATE',
+                dragAction: { ...getDragActionFromEvent(e), type: END_DRAG },
+                selectedElectrodeIds: selectedElectrodeIds
+            })
+        } else {
+            // if there was no active drag, then the mouseup is a click. Treat it as such.
+            const point = getEventPoint(e)
+            dispatchState({
+                type: 'UPDATECLICK',
+                point: point,
+                shift: e.shiftKey,
+                ctrl: e.ctrlKey,
+                selectedElectrodeIds: selectedElectrodeIds
+            })
         }
-    }, [dragState.isFinal, convertedElectrodes, pixelRadius, selectedElectrodeIds, selectionDispatch])
-
-    const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        dragCanvasRef.current?.dispatchEvent(copyMouseEvent(e))
-    }, [])
+    }, [state.dragState.isActive, selectedElectrodeIds])
 
     useEffect(() => {
-        console.log('Calling main paint call.')
         const paintProps = {
-            pixelElectrodes: convertedElectrodes,
+            pixelElectrodes: state.convertedElectrodes,
             selectedElectrodeIds: selectedElectrodeIds,
-            hoveredElectrodeId: hoveredElectrodeId,
-            draggedElectrodeIds: draggedElectrodeIds,
-            pixelRadius: pixelRadius,
+            hoveredElectrodeId: state.hoveredElectrodeId,
+            draggedElectrodeIds: state.draggedElectrodeIds,
+            pixelRadius: state.pixelRadius,
             showLabels: props.showLabels ?? defaultElectrodeLayerProps.showLabels,
-            offsetLabels: false, // TODO
-            layoutMode: props.layoutMode ?? 'geom'
+            offsetLabels: offsetLabels,
+            layoutMode: props.layoutMode ?? 'geom',
+            xMargin: state.xMarginWidth,
+            colors: colors
         }
         paint(canvasRef, paintProps)
-    }, [convertedElectrodes, selectedElectrodeIds, hoveredElectrodeId, draggedElectrodeIds, pixelRadius, props.showLabels, props.layoutMode])
+    }, [state.convertedElectrodes, selectedElectrodeIds, state.hoveredElectrodeId, state.draggedElectrodeIds, state.pixelRadius, props.showLabels, offsetLabels, props.layoutMode, state.xMarginWidth, colors])
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const canvas = useMemo(() => {
@@ -145,8 +186,39 @@ const ElectrodeGeometry = (props: WidgetProps) => {
             height={height}
             style={{position: 'absolute', left: 0, top: 0}}
         />
-    }, [canvasRef, width, height])
+    }, [width, height])
 
+    const svg = useMemo(() => {
+        return USE_SVG && <SvgElectrodeLayout 
+            pixelElectrodes={state.convertedElectrodes}
+            selectedElectrodeIds={selectedElectrodeIds}
+            hoveredElectrodeId={state.hoveredElectrodeId}
+            draggedElectrodeIds={state.draggedElectrodeIds}
+            pixelRadius={state.pixelRadius}
+            showLabels={props.showLabels ?? defaultElectrodeLayerProps.showLabels}
+            offsetLabels={offsetLabels}
+            layoutMode={props.layoutMode ?? 'geom'}
+            xMargin={state.xMarginWidth}
+            width={width}
+            height={height}
+            colors={colors}
+        />
+    }, [state.convertedElectrodes, selectedElectrodeIds, state.hoveredElectrodeId, state.draggedElectrodeIds, state.pixelRadius, props.showLabels, offsetLabels, props.layoutMode, state.xMarginWidth, width, height, colors])
+
+    const editProps = {
+        onMouseMove: (e: any) => handleMouseMove(e),
+        onMouseUp: (e: any) => handleMouseUp(e),
+        onMouseDown: (e: any) => handleMouseDown(e)
+    }
+
+    // ENCAPSULATE PARENT DIV STYLING --> maybe add a React component that defines these by default?
+    // --> For greater composability? (Follow up this thought)
+    // TODO: Avoid boilerplate to get a context from a canvasref (functionalize)
+    // TODO: Revisit the idea of encapsulating canvas in a useCanvas hook/ CanvasDiv
+    // TODO: Make a Hello World example to show usage.
+    // TODO: Library functions?
+    // TODO: Think about TimeSeriesWidget.
+    // TODO: There's still more that could be done to make the drag canvas/drag functionality more encapsulated.
     return <div
         style={{
             width: props.width,
@@ -155,12 +227,11 @@ const ElectrodeGeometry = (props: WidgetProps) => {
             left: 0,
             top: 0
         }}
-        onMouseMove={(e) => handleMouseMove(e)}
-        onMouseUp={(e) => handleMouseUp(e)}
-        onMouseDown={(e) => handleMouseDown(e)}
+        {...(disableSelection || {...editProps})}
     >
-        {canvas}
         {dragCanvas}
+        {USE_SVG && svg}
+        {!USE_SVG && canvas}
     </div>
 }
 

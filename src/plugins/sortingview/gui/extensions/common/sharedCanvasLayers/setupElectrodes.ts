@@ -148,7 +148,6 @@ const setupElectrodes = (args: {width: number, height: number, electrodeLocation
         boundingBox = { xmin: boundingBox.ymin, xmax: boundingBox.ymax, ymin: -boundingBox.xmax, ymax: -boundingBox.xmin }
         boxAspect = getWidth(boundingBox) / getHeight(boundingBox)
     }
-
     let scaleFactor: number
     if (boxAspect > canvasAspect) {
         // we are constrained in width
@@ -168,7 +167,6 @@ const setupElectrodes = (args: {width: number, height: number, electrodeLocation
 
     const xMargin = (width - getWidth(boundingBox) * scaleFactor) / 2
     const yMargin = (height - getHeight(boundingBox) * scaleFactor) / 2
-
     const transform = funcToTransform((p: Vec2): Vec2 => {
         const x = xMargin + (p[0] - boundingBox.xmin) * scaleFactor
         const y = yMargin + (p[1] - boundingBox.ymin) * scaleFactor
@@ -187,7 +185,6 @@ const setupElectrodes = (args: {width: number, height: number, electrodeLocation
         return { label: electrodeIds[i] + '', id: electrodeIds[i], x: x, y: y, rect, transform: transform0}}
     )
     const pixelRadius = transformDistance(transform, [radius, 0])[0]
-    console.log(`Calculated pixel radius as ${pixelRadius} (traditional way)`)
     return {electrodeBoxes, transform, radius, pixelRadius}
 }
 

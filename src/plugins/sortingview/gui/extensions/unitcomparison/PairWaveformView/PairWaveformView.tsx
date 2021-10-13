@@ -7,7 +7,6 @@ import { KeypressMap } from 'figurl/labbox-react/components/CanvasWidget';
 import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds';
 import React, { FunctionComponent, useMemo } from 'react';
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelection, SortingSelectionDispatch } from '../../../pluginInterface';
-import WaveformWidget, { defaultWaveformOpts } from '../../averagewaveforms/AverageWaveformsView/WaveformWidget';
 import { ElectrodeOpts } from '../../common/sharedCanvasLayers/electrodesLayer';
 
 type PlotData = {
@@ -119,7 +118,8 @@ const PairWaveformView: FunctionComponent<Props> = ({ sorting, curation, recordi
                 </TableRow>
                 <TableRow>
                     <TableCell>
-                        <WaveformWidget
+                        <p>FIXME -- PairWaveformView</p>
+                        {/* <WaveformWidget
                             waveform={plotData1b.average_waveform}
                             layoutMode={selection.waveformsMode || 'geom'}
                             noiseLevel={noiseLevel}
@@ -134,10 +134,11 @@ const PairWaveformView: FunctionComponent<Props> = ({ sorting, curation, recordi
                             selectionDispatch={selectionDispatch}
                             electrodeOpts={electrodeOpts}
                             waveformOpts={defaultWaveformOpts}
-                        />
+                        /> */}
                     </TableCell>
                     <TableCell>
-                        <WaveformWidget
+                        <p>FIXME -- PairWaveformView</p>
+                        {/* <WaveformWidget
                             waveform={plotData2b.average_waveform}
                             layoutMode={selection.waveformsMode || 'geom'}
                             noiseLevel={noiseLevel}
@@ -152,7 +153,7 @@ const PairWaveformView: FunctionComponent<Props> = ({ sorting, curation, recordi
                             selectionDispatch={selectionDispatch}
                             electrodeOpts={electrodeOpts}
                             waveformOpts={defaultWaveformOpts}
-                        />
+                        /> */}
                     </TableCell>
                 </TableRow>
             </TableBody>

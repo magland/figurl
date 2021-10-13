@@ -1,14 +1,13 @@
-// import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView'
+import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView'
 import useChannel from 'figurl/kachery-react/useChannel'
 import usePureCalculationTask from 'figurl/kachery-react/usePureCalculationTask'
 import { KeypressMap } from 'figurl/labbox-react/components/CanvasWidget'
-// import DragLayerTest from 'figurl/labbox-react/components/DrawingWidget/DragLayerTest'
-import DragLayer from 'figurl/labbox-react/components/DrawingWidget/DragLayer'
 import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds'
-import React, { FunctionComponent, useMemo } from 'react'
+import React, { FunctionComponent } from 'react'
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelectionDispatch } from '../../../pluginInterface'
-import { ElectrodeOpts } from '../../common/sharedCanvasLayers/electrodesLayer'
-// import WaveformWidget, { defaultWaveformOpts } from './WaveformWidget'
+import WaveformWidget, { defaultWaveformOpts } from './WaveformWidget'
+
+// TODO: Keypresses
 
 export type PlotData = {
     average_waveform: number[][]
@@ -37,12 +36,9 @@ type Props = {
 
 // const calculationPool = createCalculationPool({maxSimultaneous: 6})
 
-const AverageWaveformView: FunctionComponent<Props> = ({ sorting, curation, recording, unitId, selectionDispatch, width, height, noiseLevel, keypressMap, snippetLen, visibleElectrodeIds, selectedElectrodeIds, ampScaleFactor, applyMerges, waveformsMode }) => {
+const defaultPlotData = { channel_ids: [], channel_locations: [], average_waveform: [], sampling_frequency: 1 }
 
-    const electrodeOpts: ElectrodeOpts = useMemo(() => ({
-        showLabels: true,
-        offsetLabels: true
-    }), [])
+const AverageWaveformView: FunctionComponent<Props> = ({ sorting, curation, recording, unitId, selectionDispatch, width, height, noiseLevel, keypressMap, snippetLen, visibleElectrodeIds, selectedElectrodeIds, ampScaleFactor, applyMerges, waveformsMode }) => {
     const {channelName} = useChannel()
 
     const {returnValue: plotData, task} = usePureCalculationTask<PlotData>(
@@ -58,42 +54,40 @@ const AverageWaveformView: FunctionComponent<Props> = ({ sorting, curation, reco
         }
     )
 
-    const definedPlotData = plotData || { channel_ids: [], channel_locations: [], average_waveform: [], sampling_frequency: 1 }
+    const definedPlotData = plotData || defaultPlotData
+    const electrodes = definedPlotData.channel_ids.map((id, ii) => {
+        return {
+            id: id,
+            label: `${id}`,
+            x: definedPlotData.channel_locations[ii][0],
+            y: definedPlotData.channel_locations[ii][1]
+        }
+    })
+    const useFilter = visibleElectrodeIds && visibleElectrodeIds.length > 0
+    const visibleElectrodes = electrodes.filter((e) => !useFilter || (visibleElectrodeIds || []).includes(e.id))
+    // const electrodeLocations = useMemo(() => {
+    //     return visibleElectrodeIds && visibleElectrodeIds.length > 0
+    //         ? definedPlotData.channel_locations.filter((loc, ii) => (visibleElectrodeIds.includes(definedPlotData.channel_ids[ii])))
+    //         : definedPlotData.channel_locations
+    // }, [visibleElectrodeIds, definedPlotData.channel_ids, definedPlotData.channel_locations])
 
-    const electrodeIds = useMemo(() => {
-        return visibleElectrodeIds && visibleElectrodeIds.length > 0
-            ? definedPlotData.channel_ids.filter(id => (visibleElectrodeIds.includes(id)))
-            : definedPlotData.channel_ids
-    }, [visibleElectrodeIds, definedPlotData.channel_ids])
-    const electrodeLocations = useMemo(() => {
-        return visibleElectrodeIds && visibleElectrodeIds.length > 0
-            ? definedPlotData.channel_locations.filter((loc, ii) => (visibleElectrodeIds.includes(definedPlotData.channel_ids[ii])))
-            : definedPlotData.channel_locations
-    }, [visibleElectrodeIds, definedPlotData.channel_ids, definedPlotData.channel_locations])
-
-    return <DragLayer
-        width={width}
-        height={height}
-    />
-
-    // return plotData
-    //     ? <WaveformWidget
-    //         waveform={definedPlotData.average_waveform}
-    //         layoutMode={waveformsMode || 'geom'}
-    //         noiseLevel={noiseLevel}
-    //         electrodeIds={electrodeIds}
-    //         electrodeLocations={electrodeLocations}
-    //         samplingFrequency={definedPlotData.sampling_frequency}
-    //         width={width}
-    //         height={height}
-    //         selectedElectrodeIds={selectedElectrodeIds || []}
-    //         ampScaleFactor={ampScaleFactor || 1}
-    //         keypressMap={keypressMap}
-    //         selectionDispatch={selectionDispatch}
-    //         electrodeOpts={electrodeOpts}
-    //         waveformOpts={defaultWaveformOpts}
-    //     />
-    //     : <TaskStatusView task={task} label="fetch avg waveform" />
+    return plotData
+        ? <WaveformWidget
+            waveforms={definedPlotData.average_waveform}
+            ampScaleFactor={ampScaleFactor || 1}
+            electrodes={visibleElectrodes}
+            layoutMode={waveformsMode || 'geom'}
+            noiseLevel={noiseLevel}
+            samplingFrequency={definedPlotData.sampling_frequency}
+            width={width}
+            height={height}
+            selectedElectrodeIds={selectedElectrodeIds || []}
+            keypressMap={keypressMap}
+            selectionDispatch={selectionDispatch}
+            showLabels={true}
+            waveformOpts={defaultWaveformOpts}
+        />
+        : <TaskStatusView task={task} label="fetch avg waveform" />
 }
 
 export default AverageWaveformView

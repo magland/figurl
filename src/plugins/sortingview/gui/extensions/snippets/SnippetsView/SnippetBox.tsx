@@ -1,7 +1,6 @@
 import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import VisibilitySensor from 'react-visibility-sensor';
 import { SortingSelectionDispatch, WaveformsMode } from "../../../pluginInterface";
-import WaveformWidget, { defaultWaveformOpts } from '../../averagewaveforms/AverageWaveformsView/WaveformWidget';
 
 type Props = {
     timepoint?: number
@@ -39,7 +38,7 @@ const SnippetBox: FunctionComponent<Props> = ({ timepoint, waveform, currentTime
             {
                 hasBeenVisible && _waveform && _waveform.length > 0 ? (
                     <div className={selected ? "plotSelectedStyle" : ""} onClick={handleClick}>
-                        <WaveformWidget
+                        {/* <WaveformWidget
                             waveform={_waveform}
                             layoutMode={waveformsMode || 'geom'}
                             ampScaleFactor={ampScaleFactor || 1}
@@ -47,7 +46,8 @@ const SnippetBox: FunctionComponent<Props> = ({ timepoint, waveform, currentTime
                             {...{selectionDispatch, noiseLevel, samplingFrequency, electrodeIds, electrodeLocations, width, height}}
                             electrodeOpts={{disableSelection: true}}
                             waveformOpts={defaultWaveformOpts}
-                        />
+                        /> */}
+                        <p>FIXME SnippetBox</p>
                     </div>
                 ) : (
                     <div style={{position: 'absolute', width, height}} />

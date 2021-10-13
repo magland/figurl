@@ -1,17 +1,10 @@
 import { funcToTransform } from 'figurl/labbox-react/components/CanvasWidget'
 import { getBoundingBoxForEllipse, getHeight, getWidth, RectangularRegion, TransformationMatrix, transformPoints, Vec2 } from 'figurl/labbox-react/components/DrawingWidget/Geometry'
-import { ceil, min, norm } from "mathjs"
+import { min, norm } from "mathjs"
 import { getArrayMax, getArrayMin } from "../utility"
-import { Electrode } from './ElectrodeGeometry'
+import { Electrode, PixelSpaceElectrode } from './ElectrodeGeometry'
 
-export type PixelSpaceElectrode = {
-    e: Electrode
-    pixelX: number
-    pixelY: number
-    transform: TransformationMatrix // Dunno if we really need this?
-}
-
-const xMargin = 10
+export const xMargin = 10
 const yMargin = 10
 
 const computeRadiusCache = new Map<string, number>()
@@ -33,7 +26,7 @@ const computeRadiusDataSpace = (electrodes: Electrode[]): number => {
         })
     })
     // (might set a hard cap, but remember these numbers are in electrode-space coordinates)
-    const radius = 0.4 * leastNorm
+    const radius = 0.45 * leastNorm
     computeRadiusCache.set(key, radius)
     return radius
 }
@@ -101,7 +94,8 @@ const convertElectrodesToPixelSpaceVerticalLayout = (electrodes: Electrode[], tr
             e: e,
             pixelX: pixelX,
             pixelY: pixelY,
-            // Note to self: I think this actually is the transform from nativespace to the electrode bounding box's pixelspace directly...
+            // This is the transform *from the unit square* to the electrode bounding box's pixelspace directly
+            // If you want to project anything into that space you need to normalize to the unit square first.
             transform: funcToTransform((p: Vec2): Vec2 => {
                 const a = electrodeBoundingBox.xmin + p[0] * (electrodeBoundingBox.xmax - electrodeBoundingBox.xmin)
                 const b = electrodeBoundingBox.ymin + p[1] * (electrodeBoundingBox.ymax - electrodeBoundingBox.ymin)
@@ -139,7 +133,7 @@ const computeDataToPixelTransform = (width: number, height: number, scaleFactor:
     // Since we computed scale using a default margin, the final margin will never be less than the default.
     const electrodeBoxWidth = getWidth(electrodeLayoutBoundingBox)
     const electrodeBoxHeight = getHeight(electrodeLayoutBoundingBox)
-    const xMarginFinal = (width - electrodeBoxWidth * scaleFactor) / 2
+    const xMarginFinal = (width - electrodeBoxWidth * scaleFactor) / 2 
     const yMarginFinal = (height - electrodeBoxHeight * scaleFactor) / 2
 
     return funcToTransform((p: Vec2): Vec2 => {
@@ -207,7 +201,7 @@ export const getDraggedElectrodeIds = (electrodes: PixelSpaceElectrode[], dragRe
         .map((e) => e.e.id)
 }
 
-// Consumer cares about overall transform, electrode pixel locations, and pixel radius. That's all.
+// Consumer cares about overall transform, electrode pixel locations, and pixel radius. That's all. Oh and I guess the x-margin for vertical mode.
 export const computeElectrodeLocations = (canvasWidth: number, canvasHeight: number, electrodes: Electrode[], mode: 'geom' | 'vertical' = 'geom', maxElectrodePixelRadius: number = 25) => {
     if (mode === 'vertical') {
         const transform = computeDataToPixelTransformVerticalLayout(canvasWidth, canvasHeight)
@@ -227,28 +221,15 @@ export const computeElectrodeLocations = (canvasWidth: number, canvasHeight: num
     const scaleFactor = getScalingFactor(canvasWidth, canvasHeight, nativeRadius, maxElectrodePixelRadius, nativeBoundingBox)
     const pixelRadius = nativeRadius * scaleFactor
     const transform = computeDataToPixelTransform(canvasWidth, canvasHeight, scaleFactor, nativeBoundingBox)
+    const xMarginFinal = (canvasWidth - getWidth(nativeBoundingBox) * scaleFactor) / 2 
     const convertedElectrodes = convertElectrodesToPixelSpace(normalizedElectrodes, transform, pixelRadius)
-    console.log(`Calculated pixel radius as ${pixelRadius}`)
     return {
         transform: transform,
         convertedElectrodes: convertedElectrodes,
-        pixelRadius: ceil(pixelRadius)
-        // pixelRadius: pixelRadius
+        pixelRadius: pixelRadius,
+        xMargin: xMarginFinal
     }
 }
 
 
-// We need to be able to do several things:
-// DONE compute the transformation matrix from dataspace to pixelspace.
-// DONE compute electrode bounding boxes (in pixelspace)
-// ----> NOTE: FOR NOW, we're going to build these on the assumption we'll need them.
-//      However in reality we may not, if we convert to pixelspace & draw.
-//      QUERY: Should we be trying to do any of this by manipulating the context translation???
-// DONE compute pixelspace electrode locations
-//    and the (shared) radius (DONE)
-// DONE As part of this, compute the orientation and adjust accordingly
-// DONE provide logic to determine lists of which electrodes are hovered/drag-selected/clicked
-// --> (that can maybe go away in an svg implementation)
-
-// Paint method belongs to the other guy
 
