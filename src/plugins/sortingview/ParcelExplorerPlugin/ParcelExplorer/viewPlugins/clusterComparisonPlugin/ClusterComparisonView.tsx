@@ -16,8 +16,8 @@ type Props = {
     height: number
 }
 
-const prepareFeatureTransform = (a: {parcelSorting: ParcelSorting, p1?: ParcelRef, p2?: ParcelRef}) => {
-    const {parcelSorting, p1, p2} = a
+const prepareFeatureTransform = (a: {parcelSorting: ParcelSorting, p1?: ParcelRef, p2?: ParcelRef, mode: 'mode1' | 'mode2'}) => {
+    const {parcelSorting, p1, p2, mode} = a
 
     const getFeaturesForParcel = (p?: ParcelRef) => {
         if (!p) return []
@@ -72,6 +72,7 @@ const prepareFeatureTransform = (a: {parcelSorting: ParcelSorting, p1?: ParcelRe
         return ret
     }
 
+    let transform: (f: number[], t: number) => [number, number]
     if ((p1) && (p2)) {
         const features1 = getFeaturesForParcel(p1)
         const features2 = getFeaturesForParcel(p2)
@@ -85,23 +86,33 @@ const prepareFeatureTransform = (a: {parcelSorting: ParcelSorting, p1?: ParcelRe
         const v2 = subtractOutDirection(e1, direction1)
         const direction2 = normalizeVector(v2)
 
-        const transform = (f: number[]): [number, number] => {
-            return [
-                innerProduct(f, direction1) + offset1,
-                innerProduct(f, direction2)
-            ]
+        if (mode === 'mode1') {
+            transform = (f: number[], t: number): [number, number] => {
+                return [
+                    innerProduct(f, direction1) + offset1,
+                    innerProduct(f, direction2)
+                ]
+            }
         }
-        return transform
+        else if (mode === 'mode2') {
+            transform = (f: number[], t: number): [number, number] => {
+                return [
+                    t,
+                    innerProduct(f, direction1) + offset1
+                ]
+            }
+        }
+        else throw Error('unexpected mode')
     }
     else {
-        const transform = (f: number[]): [number, number] => {
+        transform = (f: number[]): [number, number] => {
             return [
                 f[0],
                 f[1]
             ]
         }
-        return transform
     }
+    return transform
 }
 
 const ClusterComparisonView: FunctionComponent<Props> = ({parcelSorting, parcelSortingSelection, parcelSortingSelectionDispatch, featureRanges, maxAmplitude, width, height}) => {
@@ -112,7 +123,7 @@ const ClusterComparisonView: FunctionComponent<Props> = ({parcelSorting, parcelS
 
     const {pointGroups, xRange, yRange} = useMemo(() => {
         const pointGroups: PointGroup[] = []
-        const transform = prepareFeatureTransform({parcelSorting, p1, p2})
+        const transform = prepareFeatureTransform({parcelSorting, p1, p2, mode: 'mode1'})
         for (let p of [p1, p2]) {
             if (p) {
                 const segment = parcelSorting.segments[p.segmentIndex]
@@ -123,7 +134,7 @@ const ClusterComparisonView: FunctionComponent<Props> = ({parcelSorting, parcelS
                     color: colorForParcelIndex(p.parcelIndex)
                 }
                 for (let i = 0; i < parcel.features.length; i++) {
-                    const a = transform(parcel.features[i])
+                    const a = transform(parcel.features[i], parcel.timestamps[i])
                     G.locations.push({x: a[0], y: a[1]})
                 }
                 pointGroups.push(G)

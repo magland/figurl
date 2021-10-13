@@ -1,10 +1,15 @@
-import { blue, lightGreen } from '@material-ui/core/colors';
+import { blue, blueGrey, cyan, lightGreen } from '@material-ui/core/colors';
 import { createTheme, ThemeOptions } from '@material-ui/core/styles';
 
 
 const themeOptions: ThemeOptions = {
     palette: {
-        primary: blue,
+        primary: {
+            light: '#1122ff',
+            main: '#65a6fc',
+            dark: '#778899',
+            contrastText: '#fff',
+        },
         secondary: lightGreen,
     },
     overrides: {

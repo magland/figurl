@@ -1,5 +1,7 @@
 # figurl
 
+<img src="./figurl.png" width="200px" />
+
 Shareable, interactive, data-backed figures generated using Python
 
 ## Applications

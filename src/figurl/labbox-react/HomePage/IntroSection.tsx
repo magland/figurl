@@ -6,7 +6,9 @@ type Props = {
 const IntroSection: FunctionComponent<Props> = () => {
     return (
         <div className="IntroSection HomeSection">
-            <h3>Shareable, interactive, data-backed figures created using Python</h3>
+            <p>&nbsp;</p>
+            <img src="/figurl.png" alt="figurl" width="200px" />
+            <p>Shareable, interactive, data-backed figures created using Python</p>
             <p><a href="https://github.com/magland/figurl">Figurl overview</a></p>
         </div>
     )

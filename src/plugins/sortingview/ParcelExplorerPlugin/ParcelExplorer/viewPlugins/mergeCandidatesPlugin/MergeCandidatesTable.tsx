@@ -157,22 +157,22 @@ const vectorNorm = (v: number[]) => {
     return Math.sqrt(sumsqr)
 }
 
-const computeNormalizedDistanceMatrix = (vectors: number[][]): number[][] => {
-    if (vectors.length === 0) return []
-    const n = vectors[0].length
-    const ret = zerosMatrix(n, n)
-    for (let i=0; i<n; i++) {
-        for (let j=0; j<n; j++) {
-            if (j > i) {
-                ret[i][j] = vectorDistance(vectors[i], vectors[j]) / Math.sqrt(vectorNorm(vectors[i]) * vectorNorm(vectors[j]))
-            }
-            else {
-                ret[i][j] = ret[j][i]
-            }
-        }
-    }
-    return ret
-}
+// const computeNormalizedDistanceMatrix = (vectors: number[][]): number[][] => {
+//     if (vectors.length === 0) return []
+//     const n = vectors[0].length
+//     const ret = zerosMatrix(n, n)
+//     for (let i=0; i<n; i++) {
+//         for (let j=0; j<n; j++) {
+//             if (j > i) {
+//                 ret[i][j] = vectorDistance(vectors[i], vectors[j]) / Math.sqrt(vectorNorm(vectors[i]) * vectorNorm(vectors[j]))
+//             }
+//             else {
+//                 ret[i][j] = ret[j][i]
+//             }
+//         }
+//     }
+//     return ret
+// }
 
 const vectorDistance = (v1: number[], v2: number[]) => {
     const n = v1.length

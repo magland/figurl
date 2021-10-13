@@ -14,7 +14,7 @@ type Props = {
 
 const SpikeWaveformWidget: FunctionComponent<Props> = ({parcelSorting, spikeEvents, maxAmplitude, width, height}) => {
     const waveforms = useMemo(() => {
-        return spikeEvents.map(spikeEvent => (computeSpikeWaveform(parcelSorting, spikeEvent)))
+        return spikeEvents.map(spikeEvent => (computeSpikeWaveform(parcelSorting, spikeEvent))).filter(w => (w !== undefined)) as number[][][]
     }, [parcelSorting, spikeEvents])
     const colors = useMemo(() => {
         return spikeEvents.map(spikeEvent => (colorForParcelIndex(spikeEvent.parcelIndex)))
@@ -34,6 +34,7 @@ const SpikeWaveformWidget: FunctionComponent<Props> = ({parcelSorting, spikeEven
 const computeSpikeWaveform = (parcelSorting: ParcelSorting, spikeEvent: SpikeEventRef) => {
     const featureComponents = parcelSorting.feature_components
     const segment = parcelSorting.segments[spikeEvent.segmentIndex]
+    if (!segment) return undefined
     const parcel = segment.parcels[spikeEvent.parcelIndex]
     const feature = parcel.features[spikeEvent.spikeEventIndex]
 
