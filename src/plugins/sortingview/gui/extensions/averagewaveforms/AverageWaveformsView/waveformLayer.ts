@@ -33,11 +33,11 @@ const initialLayerState = {
 // If any custom actions have been set (that is, something a user of this component wants to happen in response to a key press)
 // expect them to have been passed in with the key 'customActions' & call them here.
 export const handleKeyboardEvent: KeyboardEventHandler = (e: KeyboardEvent, layer: CanvasWidgetLayer<WaveformLayerProps, LayerState>): boolean => {
-    console.log(`Got keystroke: ${e.keyCode}`) // This never actually triggers--keystrokes aren't getting through to the canvas layer
+    console.log(`Got keystroke: ${e.key}`) // This never actually triggers--keystrokes aren't getting through to the canvas layer
     const props = layer.getProps()
     if (!props || !props.keypressMap) return true
-    if (e.keyCode in props.keypressMap) {
-        props.keypressMap[e.keyCode]()
+    if (e.key in props.keypressMap) {
+        // props.keypressMap[e.key]()
         return false
     }
     return true

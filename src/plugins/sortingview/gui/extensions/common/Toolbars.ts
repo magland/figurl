@@ -5,7 +5,7 @@ export interface ActionItem {
     title: string
     icon: any
     selected?: boolean
-    keyCode?: number
+    key?: string
     disabled?: boolean
 }
 
@@ -26,7 +26,7 @@ export interface ToggleableItem {
     callback: () => void
     title: string
     selected?: boolean
-    keyCode?: number
+    key?: string
     disabled?: boolean
 }
 

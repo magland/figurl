@@ -169,7 +169,6 @@ const convertElectrodesToPixelSpace = (electrodes: Electrode[], transform: Trans
             e: e,
             pixelX: pixelX,
             pixelY: pixelY,
-            // Note to self: I think this actually is the transform from nativespace to the electrode bounding box's pixelspace directly...
             transform: funcToTransform((p: Vec2): Vec2 => {
                 const a = electrodeBoundingBox.xmin + p[0] * (electrodeBoundingBox.xmax - electrodeBoundingBox.xmin)
                 const b = electrodeBoundingBox.ymin + p[1] * (electrodeBoundingBox.ymax - electrodeBoundingBox.ymin)

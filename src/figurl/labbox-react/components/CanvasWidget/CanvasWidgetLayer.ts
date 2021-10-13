@@ -40,7 +40,7 @@ export interface CanvasDragEvent {
 
 export interface KeyboardEvent {
     type: KeyEventType,
-    keyCode: number
+    key: string
 }
 
 export interface KeypressMap {
@@ -110,7 +110,7 @@ export const formWheelEvent = (e: React.WheelEvent<HTMLDivElement>): WheelEvent 
 export const formKeyboardEvent = (type: KeyEventType, e: React.KeyboardEvent<HTMLDivElement>): KeyboardEvent => {
     return {
         type,
-        keyCode: e.keyCode
+        key: e.key
     }
 }
 

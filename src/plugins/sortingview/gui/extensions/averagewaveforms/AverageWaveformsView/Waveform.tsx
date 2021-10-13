@@ -29,7 +29,6 @@ export type WaveformProps = {
     yScale: number
     width: number
     height: number
-    method: 'electrode' | 'combined'
     layoutMode?: LayoutMode
 }
 
@@ -45,7 +44,6 @@ type PaintProps = {
         waveformWidth: number
     }
     pixelSpacePaths: PixelSpacePath[]
-    yScale: number
     xMargin: number
 }
 
@@ -97,13 +95,11 @@ const paint = (props: PaintProps) => {
 }
 
 const Waveform = (props: WaveformProps) => {
-    const { electrodes, waveforms, waveformOpts, oneElectrodeHeight, oneElectrodeWidth, yScale, width, height, method, layoutMode } = props
-    // console.log(`Rendering Waveform. e.g.: ${sampleWaveformData(waveforms)}`)
+    const { electrodes, waveforms, waveformOpts, oneElectrodeHeight, oneElectrodeWidth, yScale, width, height, layoutMode } = props
     const opts = waveformOpts ?? defaultWaveformOpts
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
     const canvas = useMemo(() => {
-        // console.log(`Creating canvas element with width ${width} and height ${height}`)
         return <canvas
             ref={canvasRef}
             width={width}
@@ -114,35 +110,25 @@ const Waveform = (props: WaveformProps) => {
 
     useEffect(() => {
         if (!waveforms || waveforms.length === 0) return
-        if (method === 'electrode') {
-            const paths = computePathsViaElectrodeTransforms(waveforms, electrodes, yScale)
-            paintViaElectrodeTransforms({canvasRef, yScale, pixelSpacePaths: paths, waveformOpts: opts, xMargin: 0})
-        } else {
-            const pointsPerWaveform = waveforms[0].length
-            const scaleTimes = oneElectrodeWidth/pointsPerWaveform
-            const offsetToCenter = -oneElectrodeWidth*(.5 + 1/pointsPerWaveform)
-            const finalYScale = (yScale*oneElectrodeHeight)/2
-            const transform = matrix([[scaleTimes,               0,   offsetToCenter],
-                                      [         0,    -finalYScale,                0],
-                                      [         0,               0,                1]
-                                    ]).toArray() as TransformationMatrix
-            const paths = computePaths(transform, waveforms, electrodes)
-            // console.log(`Resulting paths ${samplePathData(paths)}`)
-            const xMargin = layoutMode === 'vertical' ? (width - oneElectrodeWidth)/2 : 0
-            paint({canvasRef, yScale, waveformOpts: opts, pixelSpacePaths: paths, xMargin })
-        }
-    }, [method, waveforms, electrodes, yScale, opts, width, height, oneElectrodeWidth, oneElectrodeHeight, layoutMode])
+        const pointsPerWaveform = waveforms[0].length           // assumed constant across snippets
+        const scaleTimes = oneElectrodeWidth/pointsPerWaveform  // converts the frame numbers (1..130 or w/e) to pixel width of electrode
+        const offsetToCenter = -oneElectrodeWidth*(.5 + 1/pointsPerWaveform) // adjusts the waveforms to start at the left of the electrode, not its center
+        const finalYScale = (yScale*oneElectrodeHeight)/2       // scales waveform amplitudes to the pixel height of a single electrode
+                                                                // (...roughly. We'll exceed that height if the user dials up the scaling.)
+        const transform = matrix([[scaleTimes,               0,   offsetToCenter],
+                                  [         0,    -finalYScale,                0],
+                                  [         0,               0,                1]]
+                                ).toArray() as TransformationMatrix
+        const paths = computePaths(transform, waveforms, electrodes)
+        const xMargin = layoutMode === 'vertical' ? (width - oneElectrodeWidth)/2 : 0
+        paint({canvasRef, waveformOpts: opts, pixelSpacePaths: paths, xMargin })
+    }, [waveforms, electrodes, yScale, opts, width, height, oneElectrodeWidth, oneElectrodeHeight, layoutMode])
 
     return canvas
 }
-// Note: The transform matrix above could also be computed by funcToTransform, e.g.:
-// funcToTransform((p: Vec2): Vec2 => {
-//     const a = canvasWidth/2 + p[0] * (targetPixelW) / 2
-//     const b = canvasHeight/2 + p[1] * (targetPixelH) / 2
-//     return [a, b]
-// })
+// (Note: The transform matrix above could also be computed by funcToTransform.)
 // The transform matrix combines two transforms: one maps waveform data into a roughly-unit-square system,
-// and the other maps a unit-square to the electrode area. Breaking those steps out looks like this:
+// and the other maps a unit-square to the pixel area of one electrode. Breaking those steps out looks like this:
 // const wavesToUnitScale = matrix([[1/pointsPerWaveform,         0, -1/pointsPerWaveform],
 //                                  [                  0, -yScale/2,                  0.5],
 //                                  [                  0,         0,                    1]])

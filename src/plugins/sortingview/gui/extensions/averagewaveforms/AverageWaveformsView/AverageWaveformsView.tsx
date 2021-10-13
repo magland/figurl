@@ -1,7 +1,6 @@
 import { IconButton } from '@material-ui/core'
 import { Help } from '@material-ui/icons'
 import { useVisible } from 'figurl/labbox-react'
-import { useKeymap } from 'figurl/labbox-react/components/CanvasWidget'
 import MarkdownDialog from 'figurl/labbox-react/components/Markdown/MarkdownDialog'
 import Splitter from 'figurl/labbox-react/components/Splitter/Splitter'
 import { useRecordingInfo } from 'plugins/sortingview/gui/pluginInterface/useRecordingInfo'
@@ -10,12 +9,11 @@ import SortingUnitPlotGrid from '../../../commonComponents/SortingUnitPlotGrid/S
 import info from '../../../helpPages/AverageWaveforms.md.gen'
 import { SortingViewProps } from '../../../pluginInterface'
 import AmplitudeScaleToolbarEntries from '../../common/sharedToolbarSets/AmplitudeScaleToolbarEntries'
-import { ActionItem, DividerItem, TextItem, ToggleableItem } from '../../common/Toolbars'
+import { ToolbarItem } from '../../common/Toolbars'
 import ViewToolbar from '../../common/ViewToolbar'
 import AverageWaveformView from './AverageWaveformView'
 
 
-export type AverageWaveformAction = ActionItem  | ToggleableItem | DividerItem | TextItem
 
 const TOOLBAR_INITIAL_WIDTH = 36 // hard-coded for now
 
@@ -39,13 +37,7 @@ const AverageWaveformsView: FunctionComponent<SortingViewProps> = (props) => {
         return AmplitudeScaleToolbarEntries({selectionDispatch, ampScaleFactor})
     }, [selectionDispatch, ampScaleFactor])
 
-    // const keypressMap: KeypressMap = useMemo(() => {
-    //     return Object.assign({}, ...amplitudeScaleControls.map((c) => (c.type === 'button' && c.keyCode ? {[c.keyCode]: c.callback } : {})))
-    // }, [amplitudeScaleControls])
-
-    const keypressMap = useKeymap(amplitudeScaleControls)
-
-    const actions: AverageWaveformAction[] = useMemo(() => {
+    const actions: ToolbarItem[] = useMemo(() => {
         return [...(amplitudeScaleControls || []),
         {
             type: 'divider'
@@ -66,7 +58,6 @@ const AverageWaveformsView: FunctionComponent<SortingViewProps> = (props) => {
                 width={boxWidth}
                 height={boxHeight}
                 noiseLevel={noiseLevel}
-                keypressMap={keypressMap}
                 snippetLen={snippetLen}
                 visibleElectrodeIds={visibleElectrodeIds}
                 selectedElectrodeIds={selectedElectrodeIds}
@@ -74,7 +65,7 @@ const AverageWaveformsView: FunctionComponent<SortingViewProps> = (props) => {
                 applyMerges={applyMerges}
                 waveformsMode={waveformsMode}
             />
-    ), [sorting, recording, selectionDispatch, noiseLevel, keypressMap, curation, snippetLen, visibleElectrodeIds, selectedElectrodeIds, ampScaleFactor, applyMerges, waveformsMode])
+    ), [sorting, recording, selectionDispatch, noiseLevel, curation, snippetLen, visibleElectrodeIds, selectedElectrodeIds, ampScaleFactor, applyMerges, waveformsMode])
 
     const infoVisible = useVisible()
 
@@ -94,7 +85,14 @@ const AverageWaveformsView: FunctionComponent<SortingViewProps> = (props) => {
                     />
                 }
                 {
-                    <div>
+                    <div
+                        onKeyDown={(e) => {
+                            console.log(e)
+                            const action = actions.find(a => a.type === 'button' && a.key === e.key)
+                            action && action.type === 'button' && action.callback()
+                            e.preventDefault()
+                        }}
+                    >
                         <div>
                             <IconButton onClick={infoVisible.show}><Help /></IconButton>
                         </div>

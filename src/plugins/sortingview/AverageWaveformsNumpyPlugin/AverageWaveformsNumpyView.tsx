@@ -1,7 +1,6 @@
 import { IconButton } from '@material-ui/core'
 import { Help } from '@material-ui/icons'
 import { useVisible } from 'figurl/labbox-react'
-import { KeypressMap } from 'figurl/labbox-react/components/CanvasWidget'
 import Splitter from 'figurl/labbox-react/components/Splitter/Splitter'
 import AmplitudeScaleToolbarEntries from 'plugins/sortingview/gui/extensions/common/sharedToolbarSets/AmplitudeScaleToolbarEntries'
 import { ActionItem, DividerItem } from 'plugins/sortingview/gui/extensions/common/Toolbars'
@@ -38,9 +37,9 @@ const AverageWaveformsNumpyView: FunctionComponent<Props> = (props) => {
         return AmplitudeScaleToolbarEntries({selectionDispatch, ampScaleFactor})
     }, [selectionDispatch, ampScaleFactor])
 
-    const keypressMap: KeypressMap = useMemo(() => {
-        return Object.assign({}, ...amplitudeScaleControls.map((c) => (c.type === 'button' && c.keyCode ? {[c.keyCode]: c.callback } : {})))
-    }, [amplitudeScaleControls])
+    // const keypressMap: KeypressMap = useMemo(() => {
+    //     return Object.assign({}, ...amplitudeScaleControls.map((c) => (c.type === 'button' && c.keyCode ? {[c.keyCode]: c.callback } : {})))
+    // }, [amplitudeScaleControls])
 
     const unitComponent = useMemo(() => (unitId: number) => (
         <AverageWaveformNumpyView
@@ -52,9 +51,9 @@ const AverageWaveformsNumpyView: FunctionComponent<Props> = (props) => {
             width={boxWidth}
             height={boxHeight}
             noiseLevel={noiseLevel}
-            keypressMap={keypressMap}
+            // keypressMap={keypressMap}
         />
-    ), [electrodeChannels, waveforms, selection, selectionDispatch, noiseLevel, keypressMap])
+    ), [electrodeChannels, waveforms, selection, selectionDispatch, noiseLevel])
 
     const unitIds = useMemo(() => (
         waveforms.map(w => (w.unitId))
@@ -74,14 +73,14 @@ const AverageWaveformsNumpyView: FunctionComponent<Props> = (props) => {
                 callback: _handleScaleAmplitudeUp,
                 title: 'Scale amplitude up [up arrow]',
                 icon: <FaArrowUp />,
-                keyCode: 38
+                // keyCode: 38
             },
             {
                 type: 'button',
                 callback: _handleScaleAmplitudeDown,
                 title: 'Scale amplitude down [down arrow]',
                 icon: <FaArrowDown />,
-                keyCode: 40
+                // keyCode: 40
             }
         ]
         setScalingActions(actions)

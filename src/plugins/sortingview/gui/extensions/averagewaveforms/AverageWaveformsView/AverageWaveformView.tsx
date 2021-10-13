@@ -1,7 +1,6 @@
 import TaskStatusView from 'figurl/kachery-react/components/TaskMonitor/TaskStatusView'
 import useChannel from 'figurl/kachery-react/useChannel'
 import usePureCalculationTask from 'figurl/kachery-react/usePureCalculationTask'
-import { KeypressMap } from 'figurl/labbox-react/components/CanvasWidget'
 import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds'
 import React, { FunctionComponent } from 'react'
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelectionDispatch } from '../../../pluginInterface'
@@ -25,7 +24,6 @@ type Props = {
     width: number
     height: number
     noiseLevel: number
-    keypressMap: KeypressMap
     snippetLen?: [number, number]
     visibleElectrodeIds?: number[]
     selectedElectrodeIds?: number[]
@@ -38,7 +36,7 @@ type Props = {
 
 const defaultPlotData = { channel_ids: [], channel_locations: [], average_waveform: [], sampling_frequency: 1 }
 
-const AverageWaveformView: FunctionComponent<Props> = ({ sorting, curation, recording, unitId, selectionDispatch, width, height, noiseLevel, keypressMap, snippetLen, visibleElectrodeIds, selectedElectrodeIds, ampScaleFactor, applyMerges, waveformsMode }) => {
+const AverageWaveformView: FunctionComponent<Props> = ({ sorting, curation, recording, unitId, selectionDispatch, width, height, noiseLevel, snippetLen, visibleElectrodeIds, selectedElectrodeIds, ampScaleFactor, applyMerges, waveformsMode }) => {
     const {channelName} = useChannel()
 
     const {returnValue: plotData, task} = usePureCalculationTask<PlotData>(
@@ -77,7 +75,6 @@ const AverageWaveformView: FunctionComponent<Props> = ({ sorting, curation, reco
             width={width}
             height={height}
             selectedElectrodeIds={selectedElectrodeIds || []}
-            keypressMap={keypressMap}
             selectionDispatch={selectionDispatch}
             showLabels={true}
             waveformOpts={defaultWaveformOpts}

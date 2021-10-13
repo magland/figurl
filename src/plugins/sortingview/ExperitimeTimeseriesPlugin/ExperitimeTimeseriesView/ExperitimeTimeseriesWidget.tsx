@@ -200,14 +200,14 @@ const ExperitimeTimeseriesWidget = (props: Props) => {
                 callback: _handleScaleAmplitudeUp,
                 title: 'Scale amplitude up [up arrow]',
                 icon: <FaArrowUp />,
-                keyCode: 38
+                // keyCode: 38
             },
             {
                 type: 'button',
                 callback: _handleScaleAmplitudeDown,
                 title: 'Scale amplitude down [down arrow]',
                 icon: <FaArrowDown />,
-                keyCode: 40
+                // keyCode: 40
             },
             {
                 type: 'divider'

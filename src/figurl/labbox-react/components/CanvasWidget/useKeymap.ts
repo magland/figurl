@@ -5,7 +5,7 @@ import { useState } from 'react'
 export const useKeymap = (controls: ToolbarItem[]): KeypressMap => {
     const [keymap, setKeymap] = useState<KeypressMap>({})
 
-    const keysToMap = Object.assign({}, ...controls.map((c) => (c.type === 'button' && c.keyCode ? {[c.keyCode]: c.callback } : {})))
+    const keysToMap = Object.assign({}, ...controls.map((c) => (c.type === 'button' && c.key ? {[c.key]: c.callback } : {})))
     if (Object.entries(keysToMap).length !== Object.entries(keymap).length) {
         setKeymap(keysToMap)
         return keysToMap

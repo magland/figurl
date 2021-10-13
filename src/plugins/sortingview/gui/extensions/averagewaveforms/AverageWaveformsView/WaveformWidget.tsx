@@ -1,4 +1,3 @@
-import { KeypressMap } from 'figurl/labbox-react/components/CanvasWidget'
 import { FunctionComponent, useMemo } from 'react'
 import { RecordingSelectionDispatch } from '../../../pluginInterface'
 import ElectrodeGeometry, { Electrode, LayoutMode } from "../../common/sharedDrawnComponents/ElectrodeGeometry"
@@ -19,7 +18,6 @@ export type WaveformWidgetProps = {
     selectionDispatch: RecordingSelectionDispatch
     colors?: ElectrodeColors
     showLabels?: boolean
-    keypressMap?: KeypressMap
     noiseLevel: number
     samplingFrequency: number
     waveformOpts: {
@@ -70,7 +68,7 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
         height={height}
         layoutMode={layoutMode}
         colors={colors}
-        showLabels={showLabels} // Would we ever not want to show labels for this?
+        showLabels={showLabels}      // Would we ever not want to show labels for this?
         offsetLabels={true}
         maxElectrodePixelRadius={25} // ??
         disableSelection={true}      // ??
@@ -85,8 +83,8 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
     const yScaleFactor = useMemo(() => (ampScaleFactor * amplitudeNormalizationFactor), [ampScaleFactor, amplitudeNormalizationFactor])
 
     // 'waveforms' is a list of lists of points. There's one outer list per channel (so far so good).
-    // The inner list is just a list of numbers, which should be interpreted as pairs of (amplitude, time).
-    // So to get it into something structured, you need to iterate *pairwise* over the inner list.
+    // The inner list is just a list of numbers, but they should be interpreted as pairs of (amplitude, time).
+    // So to get the job result into something structured, you need to iterate *pairwise* over the inner list.
     const baseWaveformPoints: WaveformPoint[][] = waveforms?.map(waveformDataSet => 
         {
             return waveformDataSet.map((amplitude, time) => {
@@ -106,8 +104,6 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
         yScale={yScaleFactor}
         width={width}
         height={height}
-        // method={"electrode"}
-        method={"combined"}
         layoutMode={layoutMode}
     />
 
