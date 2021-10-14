@@ -2,6 +2,7 @@ import CanvasWidget from 'figurl/labbox-react/components/CanvasWidget';
 import { ClickEventModifiers, useLayer, useLayers } from 'figurl/labbox-react/components/CanvasWidget/CanvasWidgetLayer';
 import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import { createClusterViewMainLayer, LayerProps } from './clusterViewMainLayer';
+import { createClusterViewSelectLayer } from './clusterViewSelectLayer';
 
 export type PointGroup = {
     key: string
@@ -61,7 +62,20 @@ const ClusterWidget: FunctionComponent<Props> = ({pointGroups, selectedPointGrou
             }
         }
     }, [xRange, yRange, pointGroups])
-    const layerProps: LayerProps = useMemo(() => ({
+    const handleSelectRect = useCallback((r: {xmin: number, xmax: number, ymin: number, ymax: number}) => {
+        if (setSelectedPointGroups) {
+            const p: {[key: string]: boolean} = {}
+            for (let g of pointGroups) {
+                for (let loc of g.locations) {
+                    if ((r.xmin <= loc.x) && (loc.x <= r.xmax) && (r.ymin <= loc.y) && (loc.y <= r.ymax)) {
+                        p[g.key] = true
+                    }
+                }
+            }
+            setSelectedPointGroups(Object.keys(p))
+        }
+    }, [pointGroups, setSelectedPointGroups])
+    const mainLayerProps: LayerProps = useMemo(() => ({
         pointGroups,
         selectedPointGroups,
         hoveredPointGroup,
@@ -75,12 +89,20 @@ const ClusterWidget: FunctionComponent<Props> = ({pointGroups, selectedPointGrou
         pointRadius,
         useDensityColor
     }), [pointGroups, hoveredPointGroup, setSelectedPointGroups, setHoveredPointGroup, handleClickPointGroup, selectedPointGroups, onClickPoint, xRange2, yRange2, width, height, pointRadius, useDensityColor])
-    const mainLayer = useLayer(createClusterViewMainLayer, layerProps)
-    const layers = useLayers([mainLayer])
+    const selectLayerProps = useMemo(() => ({
+        onSelectRect: handleSelectRect,
+        xRange: xRange2,
+        yRange: yRange2,
+        width,
+        height
+    }), [handleSelectRect, xRange2, yRange2, width, height])
+    const selectLayer = useLayer(createClusterViewSelectLayer, selectLayerProps)
+    const mainLayer = useLayer(createClusterViewMainLayer, mainLayerProps)
+    const layers = useLayers([selectLayer, mainLayer])
     return (
         <CanvasWidget
             layers={layers}
-            {...{width: layerProps.width, height: layerProps.height}}
+            {...{width: width, height: height}}
         />
     )
 }

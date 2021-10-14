@@ -1,4 +1,4 @@
-import { blue, blueGrey, cyan, lightGreen } from '@material-ui/core/colors';
+import { lightGreen } from '@material-ui/core/colors';
 import { createTheme, ThemeOptions } from '@material-ui/core/styles';
 
 

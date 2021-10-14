@@ -17,10 +17,10 @@ type Props = {
     onHome?: () => void
 }
 
-const homeButtonStyle: React.CSSProperties = {
-    paddingBottom: 0, color: 'white', fontFamily: 'sans-serif', fontWeight: 'bold',
-    cursor: 'pointer'
-}
+// const homeButtonStyle: React.CSSProperties = {
+//     paddingBottom: 0, color: 'white', fontFamily: 'sans-serif', fontWeight: 'bold',
+//     cursor: 'pointer'
+// }
 
 export const useModalDialog = () => {
     const [visible, setVisible] = useState<boolean>(false)

@@ -152,10 +152,10 @@ const computeDistanceMatrix = (vectors: number[][]): number[][] => {
     return ret
 }
 
-const vectorNorm = (v: number[]) => {
-    const sumsqr = v.map(a => (a * a)).reduce((sum, current) => (sum + current), 0)
-    return Math.sqrt(sumsqr)
-}
+// const vectorNorm = (v: number[]) => {
+//     const sumsqr = v.map(a => (a * a)).reduce((sum, current) => (sum + current), 0)
+//     return Math.sqrt(sumsqr)
+// }
 
 // const computeNormalizedDistanceMatrix = (vectors: number[][]): number[][] => {
 //     if (vectors.length === 0) return []
