@@ -1,4 +1,5 @@
 import Doc from 'figurl/Doc/Doc'
+import Figure2 from 'figurl/Figure2/Figure2'
 import { RecentFiguresAction } from 'figurl/RecentFigures'
 import Status from 'figurl/Status/Status'
 import React, { FunctionComponent } from 'react'
@@ -43,6 +44,14 @@ const Routes: FunctionComponent<Props> = (props) => {
     else if (routePath === '/doc') {
         return (
             <Doc />
+        )
+    }
+    else if (routePath === '/f') {
+        return (
+            <Figure2
+                width={width}
+                height={height}
+            />
         )
     }
     else {

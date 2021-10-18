@@ -6,4 +6,4 @@ class Altair(Figure):
         data = {
             'spec': chart.to_dict()
         }
-        super().__init__(type='VegaLite.1', data=data)
+        super().__init__(view_url='https://users.flatironinstitute.org/~magland/figurl-views/figurl-vegalite', data=data)
