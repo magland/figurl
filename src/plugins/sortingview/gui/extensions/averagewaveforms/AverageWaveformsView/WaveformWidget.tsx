@@ -1,6 +1,6 @@
 import { FunctionComponent, useMemo } from 'react'
 import { RecordingSelectionDispatch } from '../../../pluginInterface'
-import ElectrodeGeometry, { Electrode, LayoutMode } from "../../common/sharedDrawnComponents/ElectrodeGeometry"
+import ElectrodeGeometry, { defaultMaxPixelRadius, Electrode, LayoutMode } from "../../common/sharedDrawnComponents/ElectrodeGeometry"
 import { computeElectrodeLocations, xMargin as xMarginDefault } from '../../common/sharedDrawnComponents/electrodeGeometryLayout'
 import { ElectrodeColors } from '../../common/sharedDrawnComponents/electrodeGeometryPainting'
 import { getSpikeAmplitudeNormalizationFactor } from '../../common/waveformLogic/waveformLogic'
@@ -70,12 +70,12 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
         colors={colors}
         showLabels={showLabels}      // Would we ever not want to show labels for this?
         offsetLabels={true}
-        maxElectrodePixelRadius={25} // ??
+        maxElectrodePixelRadius={defaultMaxPixelRadius}
         disableSelection={true}      // ??
     />, [electrodes, selectedElectrodeIds, selectionDispatch, width, height, layoutMode, colors, showLabels])
 
     // TODO: Don't do this twice, work it out differently
-    const { convertedElectrodes, pixelRadius, xMargin: xMarginBase } = computeElectrodeLocations(width, height, electrodes, layoutMode, 25)
+    const { convertedElectrodes, pixelRadius, xMargin: xMarginBase } = computeElectrodeLocations(width, height, electrodes, layoutMode, defaultMaxPixelRadius)
     const xMargin = xMarginBase || xMarginDefault
 
     // Spikes are defined as being some factor greater than the baseline noise.

@@ -8,6 +8,8 @@ import SvgElectrodeLayout from './ElectrodeGeometrySvg'
 
 const USE_SVG = false
 
+export const defaultMaxPixelRadius = 25
+
 export type Electrode = {
     id: number
     label: string
@@ -40,7 +42,7 @@ interface WidgetProps {
 
 const defaultElectrodeLayerProps = {
     showLabels: true,
-    maxElectrodePixelRadius: 25
+    maxElectrodePixelRadius: defaultMaxPixelRadius
 }
 
 

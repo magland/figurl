@@ -2,7 +2,7 @@ import { funcToTransform } from 'figurl/labbox-react/components/CanvasWidget'
 import { getBoundingBoxForEllipse, getHeight, getWidth, RectangularRegion, TransformationMatrix, transformPoints, Vec2 } from 'figurl/labbox-react/components/DrawingWidget/Geometry'
 import { min, norm } from "mathjs"
 import { getArrayMax, getArrayMin } from "../utility"
-import { Electrode, PixelSpaceElectrode } from './ElectrodeGeometry'
+import { defaultMaxPixelRadius, Electrode, PixelSpaceElectrode } from './ElectrodeGeometry'
 
 export const xMargin = 10
 const yMargin = 10
@@ -201,7 +201,7 @@ export const getDraggedElectrodeIds = (electrodes: PixelSpaceElectrode[], dragRe
 }
 
 // Consumer cares about overall transform, electrode pixel locations, and pixel radius. That's all. Oh and I guess the x-margin for vertical mode.
-export const computeElectrodeLocations = (canvasWidth: number, canvasHeight: number, electrodes: Electrode[], mode: 'geom' | 'vertical' = 'geom', maxElectrodePixelRadius: number = 25) => {
+export const computeElectrodeLocations = (canvasWidth: number, canvasHeight: number, electrodes: Electrode[], mode: 'geom' | 'vertical' = 'geom', maxElectrodePixelRadius: number = defaultMaxPixelRadius) => {
     if (mode === 'vertical') {
         const transform = computeDataToPixelTransformVerticalLayout(canvasWidth, canvasHeight)
         const convertedElectrodes = convertElectrodesToPixelSpaceVerticalLayout(electrodes, transform)

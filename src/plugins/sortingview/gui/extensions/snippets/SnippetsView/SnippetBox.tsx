@@ -39,12 +39,12 @@ const SnippetBox: FunctionComponent<Props> = ({ timepoint, waveform, currentTime
                 hasBeenVisible && _waveform && _waveform.length > 0 ? (
                     <div className={selected ? "plotSelectedStyle" : ""} onClick={handleClick}>
                         {/* <WaveformWidget
-                            waveform={_waveform}
-                            layoutMode={waveformsMode || 'geom'}
+                            waveforms={_waveform}
                             ampScaleFactor={ampScaleFactor || 1}
+                            layoutMode={waveformsMode || 'geom'}
                             selectedElectrodeIds={_selectedElectrodeIds}
-                            {...{selectionDispatch, noiseLevel, samplingFrequency, electrodeIds, electrodeLocations, width, height}}
-                            electrodeOpts={{disableSelection: true}}
+                            electrodeIds, electrodeLocations,
+                            {...{selectionDispatch, noiseLevel, samplingFrequency, width, height}}
                             waveformOpts={defaultWaveformOpts}
                         /> */}
                         <p>FIXME SnippetBox</p>

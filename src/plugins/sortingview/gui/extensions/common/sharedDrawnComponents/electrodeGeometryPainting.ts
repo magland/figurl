@@ -26,7 +26,6 @@ export const defaultColors: ElectrodeColors = {
     textDark: 'rgb(32, 32, 32)'    
 }
 
-// HANDLE SELECTION STATE DISABLED BY ENSURING SELECTION TOOLS ARE DISABLED
 export type PaintProps = {
     pixelElectrodes: PixelSpaceElectrode[]
     selectedElectrodeIds: number[]
@@ -75,7 +74,7 @@ const paintVertical = (ctxt: CanvasRenderingContext2D, props: PaintProps) => {
 
     if (useLabels) {
         // In vertical mode, we should always use offset labels.
-        // So dark text, aligned right, at set offset from electrode
+        // So dark text, aligned right, at a set offset from electrode
         const textRight = xmin - 0.5*pixelRadius
         ctxt.font = `${pixelRadius-3}px Arial` // Is this the right thing to do?
         ctxt.fillStyle = colors.textDark

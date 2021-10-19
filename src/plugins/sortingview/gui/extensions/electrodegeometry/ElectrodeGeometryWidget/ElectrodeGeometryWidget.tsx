@@ -1,5 +1,5 @@
 import { RecordingSelectionDispatch } from "../../../pluginInterface"
-import ElectrodeGeometry, { Electrode } from '../../common/sharedDrawnComponents/ElectrodeGeometry'
+import ElectrodeGeometry, { defaultMaxPixelRadius, Electrode } from '../../common/sharedDrawnComponents/ElectrodeGeometry'
 
 interface WidgetProps {
     electrodes: Electrode[]
@@ -19,7 +19,7 @@ const ElectrodeGeometryWidget = (props: WidgetProps) => {
             height={props.height}
             layoutMode={'geom'}
             showLabels={true}
-            maxElectrodePixelRadius={25}
+            maxElectrodePixelRadius={defaultMaxPixelRadius}
             disableSelection={false}
             // offsetLabels={true}
         />

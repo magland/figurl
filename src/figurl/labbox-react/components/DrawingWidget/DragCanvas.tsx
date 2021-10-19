@@ -108,7 +108,6 @@ interface DragCanvasProps {
 const DragCanvas = (props: DragCanvasProps) => {
     const { width, height, newState } = props
     const ref = useRef<HTMLCanvasElement | null>(null)
-    paintDragRectangle(ref, newState)
 
     const canvas = useMemo(() => {
         return <canvas
@@ -118,6 +117,7 @@ const DragCanvas = (props: DragCanvasProps) => {
             style={{position: 'absolute', left: 0, top: 0}}
         />
     }, [width, height])
+    paintDragRectangle(ref, newState)
 
     return canvas
 }

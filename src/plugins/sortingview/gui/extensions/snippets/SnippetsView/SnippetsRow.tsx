@@ -1,14 +1,14 @@
 import { GridList, GridListTile } from '@material-ui/core';
-import KacheryNode from 'kacheryInterface/core/KacheryNode';
 import { ChannelName } from 'commonInterface/kacheryTypes';
 import { runPureCalculationTaskAsync, useFetchCache } from 'figurl/kachery-react';
 import useChannel from 'figurl/kachery-react/useChannel';
 import useKacheryNode from 'figurl/kachery-react/useKacheryNode';
+import KacheryNode from 'kacheryInterface/core/KacheryNode';
+import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds';
 import React, { FunctionComponent, useMemo } from 'react';
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelection, SortingSelectionDispatch } from "../../../pluginInterface";
-import SnippetBox from './SnippetBox';
-import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds';
 import { getElectrodesAspectRatio } from '../../common/sharedCanvasLayers/setupElectrodes';
+import SnippetBox from './SnippetBox';
 
 
 type Props = {
@@ -189,6 +189,9 @@ const SnippetsRow: FunctionComponent<Props> = ({ recording, sorting, selection, 
         }
     }, [electrodeLocations, height, selection.waveformsMode])
     const tileStyle = useMemo(() => ({width: boxWidth + 5, height: height + 15}), [boxWidth, height])
+//    const electrodes = info?.channel_ids, info?.channel_locations
+// THIS IS STUFF THAT ALREADY HAPPENS IN THE ELECTRODE GEOMETRY COMPUTATION LOGIC
+// DON'T REPEAT YOURSELF
     return (
         <GridList style={{flexWrap: 'nowrap', height: height + 15}}>
             {
