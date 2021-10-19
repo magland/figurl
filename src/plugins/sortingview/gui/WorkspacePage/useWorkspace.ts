@@ -1,6 +1,6 @@
+import { useSignedIn } from "commonComponents/googleSignIn/GoogleSignIn"
 import { FeedId, sha1OfString, SubfeedHash, TaskFunctionId } from "commonInterface/kacheryTypes"
 import { initiateTask, useChannel, useKacheryNode, useSubfeedReducer } from "figurl/kachery-react"
-import useGoogleSignInClient from "figurl/labbox-react/googleSignIn/useGoogleSignInClient"
 import { useCallback } from "react"
 
 export interface BaseWorkspaceState {
@@ -12,11 +12,9 @@ export interface BaseWorkspaceState {
 }
 
 export const useCurrentUserWorkspacePermissions = (workspace: BaseWorkspaceState) => {
-    const signInClient = useGoogleSignInClient()
-    if (!signInClient) return {}
-    const userId = signInClient.userId
+    const {userId} = useSignedIn()
     if (!userId) return {}
-    const p = workspace.userPermissions[userId]
+    const p = workspace.userPermissions[userId.toString()]
     if (!p) return {}
     return p
 }

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ChannelName } from 'commonInterface/kacheryTypes';
 import randomAlphaString from 'commonInterface/util/randomAlphaString';
-import { useKacheryNode } from 'figurl/kachery-react';
+import { useChannel, useKacheryNode } from 'figurl/kachery-react';
 import QueryString from 'querystring';
 import React, { FunctionComponent, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router';
@@ -50,21 +50,27 @@ const useRoute2 = () => {
 
 const Figure2: FunctionComponent<Props> = ({width, height}) => {
     const {viewUrl, figureDataHash, channelName} = useRoute2()
+    const kacheryNode = useKacheryNode()
+    const {backendId} = useChannel()
     const figureData = useFigureData(figureDataHash, channelName)
     const [figureId, setFigureId] = useState<string>()
     const iframeElement = useRef<HTMLIFrameElement | null>()
     useEffect(() => {
         if (!figureData) return
         if (!viewUrl) return
+        if (!channelName) return
         const id = randomAlphaString(10)
         new FigureInterface({
+            kacheryNode,
+            channelName,
+            backendId,
             figureId: id,
             viewUrl,
             figureData,
             iframeElement
         })
         setFigureId(id)
-    }, [viewUrl, figureData])
+    }, [viewUrl, figureData, kacheryNode, channelName, backendId])
     if (!figureData) {
         return <div>Waiting for figure data</div>
     }

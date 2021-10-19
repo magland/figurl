@@ -1,8 +1,8 @@
+import GoogleSignIn, { useSignedIn } from 'commonComponents/googleSignIn/GoogleSignIn'
+import useGoogleSignInClient from 'commonComponents/googleSignIn/useGoogleSignInClient'
 import React, { useCallback, useEffect, useState } from 'react'
 import { FunctionComponent } from "react"
 import Hyperlink from '../components/Hyperlink/Hyperlink'
-import { GoogleSignIn, useGoogleSignInClient } from '..'
-import { useSignedIn } from '..'
 import hyperlinkStyle from './hyperlinkStyle'
 
 type Props = {

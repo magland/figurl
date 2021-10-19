@@ -1,5 +1,5 @@
 import { FigurlRequest, FigurlResponse } from "./FigurlRequestTypes";
-import { isMessageToChild } from "./MessageToChildTypes";
+import { FigurlResponseMessage } from "./MessageToChildTypes";
 import { FigurlRequestMessage } from "./MessageToParentTypes";
 import sendMessageToParent from "./sendMessageToParent";
 
@@ -11,26 +11,14 @@ const pendingRequests: {[key: string]: {
     onError: (err: any) => void
 }} = {}
 
-window.addEventListener('message', e => {
-    const msgData = e.data
-    let msg
-    try {
-        msg = JSON.parse(msgData)
+export const handleFigurlResponse = (msg: FigurlResponseMessage) => {
+    const requestId = msg.requestId
+    const response = msg.response
+    if (requestId in pendingRequests) {
+        pendingRequests[requestId].onResponse(response)
+        delete pendingRequests[requestId]
     }
-    catch(err) {
-        return
-    }
-    if (isMessageToChild(msg)) {
-        if (msg.type === 'figurlResponse') {
-            const requestId = msg.requestId
-            const response = msg.response
-            if (requestId in pendingRequests) {
-                pendingRequests[requestId].onResponse(response)
-                delete pendingRequests[requestId]
-            }
-        }
-    }
-})
+}
 
 const sendRequestToParent = async (request: FigurlRequest) => {
     return new Promise((resolve, reject) => {

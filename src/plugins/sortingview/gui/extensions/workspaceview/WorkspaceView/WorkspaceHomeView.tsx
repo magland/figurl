@@ -1,5 +1,6 @@
 import { Button } from '@material-ui/core';
-import { useGoogleSignInClient, useVisible } from 'figurl/labbox-react';
+import useGoogleSignInClient from 'commonComponents/googleSignIn/useGoogleSignInClient';
+import { useVisible } from 'figurl/labbox-react';
 import Hyperlink from 'figurl/labbox-react/components/Hyperlink/Hyperlink';
 import MarkdownDialog from 'figurl/labbox-react/components/Markdown/MarkdownDialog';
 import ModalWindow from 'figurl/labbox-react/components/ModalWindow/ModalWindow';
@@ -26,7 +27,7 @@ const WorkspaceHomeView: FunctionComponent<Props> = ({ width, height, workspace,
     const importInstructionsVisible = useVisible()
     const setWorkspacePermissionsVisible = useVisible()
     const setSnippetLengthVisible = useVisible()
-    const loggedInUserEmail = useGoogleSignInClient()?.userId ?? 'user_id@gmail.com'
+    const loggedInUserEmail = useGoogleSignInClient()?.userId?.toString() ?? 'user_id@gmail.com'
     return (
         <span>
             <div>
