@@ -16,7 +16,7 @@ type Props = {
 }
 
 const MainWindow: React.FunctionComponent<Props> = ({packageName, logo, homePageProps, recentFiguresDispatch}) => {
-    const {setRoute} = useRoute()
+    const {setRoute, figureLabel} = useRoute()
     const {width, height} = useWindowDimensions()
     const location = useLocation()
     const history = useHistory()
@@ -32,7 +32,7 @@ const MainWindow: React.FunctionComponent<Props> = ({packageName, logo, homePage
     return (
         <div>
             <ApplicationBar
-                title={homePageProps.packageName}
+                title={figureLabel || ''}
                 onHome={handleHome}
                 logo={logo}
             />

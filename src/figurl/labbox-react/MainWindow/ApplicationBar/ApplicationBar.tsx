@@ -65,7 +65,7 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
                 {
                     logo && (<img src={logo} alt="logo" height={30} style={{paddingBottom: 5, cursor: 'pointer'}} onClick={onHome} />)
                 }
-                {/* &nbsp;&nbsp;&nbsp;<div style={homeButtonStyle} onClick={onHome}>{title}</div> */}
+                <div>&nbsp;&nbsp;&nbsp;{title}</div>
                 {
                     ((routePath === '/fig') && (figureLabel)) && (
                         <span style={{paddingLeft: 20}}>{figureLabel}</span>
