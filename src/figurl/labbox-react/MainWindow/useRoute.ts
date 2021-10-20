@@ -31,7 +31,7 @@ const useRoute = () => {
     }, [query.figureObject])
     const channel = (query.channel as any as ChannelName) || undefined
     const p = location.pathname
-    const figureLabel = p === '/fig' ? (query.label as any as string) || undefined : undefined
+    const figureLabel = (p === '/fig') || (p === '/f') ? (query.label as any as string) || undefined : undefined
     // const documentId = p === '/compose' ? (query.document as any as string) || undefined : undefined
     const wiki = p === '/doc' ? (query.wiki as any as string) || undefined : undefined
     const curationId = p === '/fig' ? (query.curation as any as string) || undefined : undefined
