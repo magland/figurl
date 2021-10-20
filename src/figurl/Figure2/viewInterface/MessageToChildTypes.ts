@@ -1,4 +1,4 @@
-import { ErrorMessage, FeedId, isErrorMessage, isFeedId, isSubfeedHash, isSubfeedMessage, isSubfeedPosition, isTaskId, isTaskStatus, SubfeedHash, SubfeedMessage, SubfeedPosition, TaskId, TaskStatus } from "commonInterface/kacheryTypes";
+import { ErrorMessage, FeedId, isErrorMessage, isFeedId, isSubfeedHash, isSubfeedMessage, isSubfeedPosition, isTaskId, isTaskStatus, isUserId, SubfeedHash, SubfeedMessage, SubfeedPosition, TaskId, TaskStatus, UserId } from "commonInterface/kacheryTypes";
 import { FigurlResponse, isFigurlResponse } from "./FigurlRequestTypes";
 import validateObject, { isArrayOf, isEqualTo, isOneOf, isString, optional } from "./validateObject";
 
@@ -58,17 +58,35 @@ export const isTaskStatusUpdateMessage = (x: any): x is TaskStatusUpdateMessage 
     })
 }
 
+// setCurrentUser
+
+export type SetCurrentUserMessage = {
+    type: 'setCurrentUser',
+    userId?: UserId,
+    googleIdToken?: string
+}
+
+export const isSetCurrentUserMessage = (x: any): x is SetCurrentUserMessage => {
+    return validateObject(x, {
+        type: isEqualTo('setCurrentUser'),
+        userId: optional(isUserId),
+        googleIdToken: optional(isString)
+    })
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 
 export type MessageToChild =
     FigurlResponseMessage |
     NewSubfeedMessagesMessage |
-    TaskStatusUpdateMessage
+    TaskStatusUpdateMessage |
+    SetCurrentUserMessage
 
 export const isMessageToChild = (x: any): x is MessageToChild => {
     return isOneOf([
         isFigurlResponseMessage,
         isNewSubfeedMessagesMessage,
-        isTaskStatusUpdateMessage
+        isTaskStatusUpdateMessage,
+        isSetCurrentUserMessage
     ])(x)
 }

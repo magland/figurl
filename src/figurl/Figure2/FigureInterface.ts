@@ -1,3 +1,4 @@
+import GoogleSignInClient from "commonComponents/googleSignIn/GoogleSignInClient"
 import { ChannelName, DurationMsec, messageCount, subfeedPosition } from "commonInterface/kacheryTypes"
 import { initiateTask } from "figurl/kachery-react"
 import { Task } from "figurl/kachery-react/initiateTask"
@@ -18,7 +19,8 @@ class FigureInterface {
         figureId: string,
         viewUrl: string,
         figureData: any,
-        iframeElement: MutableRefObject<HTMLIFrameElement | null | undefined>
+        iframeElement: MutableRefObject<HTMLIFrameElement | null | undefined>,
+        googleSignInClient: GoogleSignInClient
     }) {
         window.addEventListener('message', e => {
             const msg = e.data
@@ -61,6 +63,17 @@ class FigureInterface {
                 }
             }
         })
+        const updateSignedIn = () => {
+            this._sendMessageToChild({
+                type: 'setCurrentUser',
+                userId: a.googleSignInClient.userId || undefined,
+                googleIdToken: a.googleSignInClient.idToken || undefined
+            })
+        }
+        a.googleSignInClient.onSignedInChanged(() => {
+            updateSignedIn()
+        })
+        updateSignedIn()
     }
     async handleInitiateTaskRequest(request: InitiateTaskRequest): Promise<InitiateTaskResponse> {
         const task = initiateTask({
@@ -127,7 +140,13 @@ class FigureInterface {
         return response
     }
     _sendMessageToChild(msg: MessageToChild) {
-        if (!this.a.iframeElement.current) return
+        if (!this.a.iframeElement.current) {
+            setTimeout(() => {
+                // keep trying until iframe element exists
+                this._sendMessageToChild(msg)
+            }, 1000)
+            return
+        }
         const cw = this.a.iframeElement.current.contentWindow
         if (!cw) return
         cw.postMessage(msg, this.a.viewUrl)

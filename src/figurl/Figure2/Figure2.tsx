@@ -6,6 +6,7 @@ import QueryString from 'querystring';
 import React, { FunctionComponent, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router';
 import FigureInterface from './FigureInterface';
+import useGoogleSignInClient from 'commonComponents/googleSignIn/useGoogleSignInClient'
 
 type Props = {
     width: number
@@ -55,10 +56,12 @@ const Figure2: FunctionComponent<Props> = ({width, height}) => {
     const figureData = useFigureData(figureDataHash, channelName)
     const [figureId, setFigureId] = useState<string>()
     const iframeElement = useRef<HTMLIFrameElement | null>()
+    const googleSignInClient = useGoogleSignInClient()
     useEffect(() => {
         if (!figureData) return
         if (!viewUrl) return
         if (!channelName) return
+        if (!googleSignInClient) return
         const id = randomAlphaString(10)
         new FigureInterface({
             kacheryNode,
@@ -67,10 +70,11 @@ const Figure2: FunctionComponent<Props> = ({width, height}) => {
             figureId: id,
             viewUrl,
             figureData,
-            iframeElement
+            iframeElement,
+            googleSignInClient
         })
         setFigureId(id)
-    }, [viewUrl, figureData, kacheryNode, channelName, backendId])
+    }, [viewUrl, figureData, kacheryNode, channelName, backendId, googleSignInClient])
     if (!figureData) {
         return <div>Waiting for figure data</div>
     }
