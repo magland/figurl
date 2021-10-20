@@ -7,6 +7,7 @@ import React, { FunctionComponent, useEffect, useMemo, useRef, useState } from '
 import { useLocation } from 'react-router';
 import FigureInterface from './FigureInterface';
 import useGoogleSignInClient from 'commonComponents/googleSignIn/useGoogleSignInClient'
+import urlFromUri from 'commonInterface/util/urlFromUri';
 
 type Props = {
     width: number
@@ -43,7 +44,10 @@ const useRoute2 = () => {
     const location = useLocation()
     // const history = useHistory()
     const query = useMemo(() => (QueryString.parse(location.search.slice(1))), [location.search]);
-    const viewUrl = query.v ? query.v as string : undefined
+    let viewUrl = query.v ? query.v as string : undefined
+    if ((viewUrl) && (viewUrl.startsWith('gs://'))) {
+        viewUrl = urlFromUri(viewUrl) + '/index.html'
+    }
     const figureDataHash = query.d ? query.d as string : undefined
     const channelName = query.channel ? query.channel as any as ChannelName : undefined
     return {viewUrl, figureDataHash, channelName}
