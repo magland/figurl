@@ -8,6 +8,7 @@ import { useLocation } from 'react-router';
 import FigureInterface from './FigureInterface';
 import useGoogleSignInClient from 'commonComponents/googleSignIn/useGoogleSignInClient'
 import urlFromUri from 'commonInterface/util/urlFromUri';
+import deserializeReturnValue from 'figurl/kachery-react/deserializeReturnValue';
 
 type Props = {
     width: number
@@ -26,6 +27,7 @@ const useFigureData = (dataHash: string | undefined, channelName: ChannelName | 
             const dataUrl = `${bucketBaseUrl}/${channelName}/sha1/${s[0]}${s[1]}/${s[2]}${s[3]}/${s[4]}${s[5]}/${s}`
             const x = await axios.get(dataUrl, {responseType: 'json'})
             const data = x.data
+            deserializeReturnValue(data)
             setFigureData(data)
         })()
 
