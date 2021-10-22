@@ -7,7 +7,6 @@ import { KeypressMap } from 'figurl/labbox-react/components/CanvasWidget';
 import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds';
 import React, { FunctionComponent, useMemo } from 'react';
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelection, SortingSelectionDispatch } from '../../../pluginInterface';
-import { ElectrodeOpts } from '../../common/sharedCanvasLayers/electrodesLayer';
 
 type PlotData = {
     average_waveform: number[][]
@@ -84,10 +83,10 @@ const PairWaveformView: FunctionComponent<Props> = ({ sorting, curation, recordi
     //     if (test) console.log('test result', test)
     // }, [test])
 
-    const electrodeOpts: ElectrodeOpts = useMemo(() => ({
-        showLabels: true,
-        offsetLabels: true
-    }), [])
+    // const electrodeOpts: ElectrodeOpts = useMemo(() => ({
+    //     showLabels: true,
+    //     offsetLabels: true
+    // }), [])
 
     if (!plotData1) {
         return <TaskStatusView task={task1} label="fetch avg waveform" />

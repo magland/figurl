@@ -16,7 +16,7 @@ const computeRadiusDataSpace = (electrodes: Electrode[]): number => {
     }
     // how big should each electrode dot be? Really depends on how close
     // the dots are to each other. Let's find the closest pair of dots and
-    // set the radius to 40% of the distance between them.
+    // set the radius to 45% of the distance between them.
     let leastNorm = Number.MAX_VALUE
     electrodes.forEach((point) => {
         electrodes.forEach((otherPoint) => {

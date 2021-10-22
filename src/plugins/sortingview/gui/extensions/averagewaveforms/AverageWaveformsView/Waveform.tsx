@@ -111,13 +111,13 @@ const Waveform = (props: WaveformProps) => {
     useEffect(() => {
         if (!waveforms || waveforms.length === 0) return
         const pointsPerWaveform = waveforms[0].length           // assumed constant across snippets
-        const scaleTimes = oneElectrodeWidth/pointsPerWaveform  // converts the frame numbers (1..130 or w/e) to pixel width of electrode
+        const timeScale = oneElectrodeWidth/pointsPerWaveform   // converts the frame numbers (1..130 or w/e) to pixel width of electrode
         const offsetToCenter = -oneElectrodeWidth*(.5 + 1/pointsPerWaveform) // adjusts the waveforms to start at the left of the electrode, not its center
         const finalYScale = (yScale*oneElectrodeHeight)/2       // scales waveform amplitudes to the pixel height of a single electrode
                                                                 // (...roughly. We'll exceed that height if the user dials up the scaling.)
-        const transform = matrix([[scaleTimes,               0,   offsetToCenter],
-                                  [         0,    -finalYScale,                0],
-                                  [         0,               0,                1]]
+        const transform = matrix([[timeScale,               0,   offsetToCenter],
+                                  [        0,    -finalYScale,                0],
+                                  [        0,               0,                1]]
                                 ).toArray() as TransformationMatrix
         const paths = computePaths(transform, waveforms, electrodes)
         const xMargin = layoutMode === 'vertical' ? (width - oneElectrodeWidth)/2 : 0

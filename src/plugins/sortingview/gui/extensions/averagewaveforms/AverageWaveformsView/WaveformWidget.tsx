@@ -1,3 +1,4 @@
+import CanvasFrame from 'figurl/labbox-react/components/DrawingWidget/CanvasFrame'
 import { FunctionComponent, useMemo } from 'react'
 import { RecordingSelectionDispatch } from '../../../pluginInterface'
 import ElectrodeGeometry, { defaultMaxPixelRadius, Electrode, LayoutMode } from "../../common/sharedDrawnComponents/ElectrodeGeometry"
@@ -58,7 +59,7 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
     const showLabels = props.showLabels ?? defaultElectrodeOpts.showLabels
     const colors = props.colors ?? defaultElectrodeOpts.colors
     const waveformOpts = useMemo(() => ({...defaultWaveformOpts, ...props.waveformOpts}), [props.waveformOpts])
-    const {electrodes, selectedElectrodeIds, selectionDispatch, waveforms, ampScaleFactor, layoutMode, width, height} = props
+    const {electrodes, selectedElectrodeIds, selectionDispatch, waveforms, ampScaleFactor: userSpecifiedAmplitudeScaling, layoutMode, width, height} = props
 
     const geometry = useMemo(() => <ElectrodeGeometry
         electrodes={electrodes}
@@ -80,7 +81,7 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
 
     // Spikes are defined as being some factor greater than the baseline noise.
     const amplitudeNormalizationFactor = useMemo(() => getSpikeAmplitudeNormalizationFactor(props.noiseLevel), [props.noiseLevel])
-    const yScaleFactor = useMemo(() => (ampScaleFactor * amplitudeNormalizationFactor), [ampScaleFactor, amplitudeNormalizationFactor])
+    const yScaleFactor = useMemo(() => (userSpecifiedAmplitudeScaling * amplitudeNormalizationFactor), [userSpecifiedAmplitudeScaling, amplitudeNormalizationFactor])
 
     // 'waveforms' is a list of lists of points. There's one outer list per channel (so far so good).
     // The inner list is just a list of numbers, but they should be interpreted as pairs of (amplitude, time).
@@ -107,20 +108,11 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
         layoutMode={layoutMode}
     />
 
-    return (
-        <div
-            style={{
-                width: width,
-                height: height,
-                position: 'relative',
-                left: 0,
-                top: 0
-            }}
-        >
-            {geometry}
-            {waveform}
-        </div>
-    )
+    return <CanvasFrame
+        width={width}
+        height={height}
+        canvases={[geometry, waveform]}
+    />
 }
 
 export default WaveformWidget

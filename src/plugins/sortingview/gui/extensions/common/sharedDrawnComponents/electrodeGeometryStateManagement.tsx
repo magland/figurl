@@ -32,7 +32,7 @@ type UpdateSelectionsElectrodeGeometryAction = {
 type UpdateDragElectrodeGeometryAction = {
     type: 'DRAGUPDATE',
     dragAction: DragAction,
-    selectedElectrodeIds: number[]
+    selectedElectrodeIds?: number[]
 }
 
 type UpdateHoverElectrodeGeometryAction = {
@@ -68,13 +68,12 @@ export const electrodeGeometryReducer = (state: ElectrodeGeometryState, action: 
         }
     } else if (action.type === 'DRAGUPDATE') {
         const newDrag = dragReducer(state.dragState, action.dragAction)
-        // NOTE: This should be equivalent to checking if the drag just ended.
         if (!newDrag.isActive && newDrag.dragRect) {
             // We have a completed drag whose area has not yet been reset. Therefore a drag has just ended.
             // Nothing can be dragged, and anything in the region should be selected.
             const dragRectAsMaxMin = pointSpanToRegion(newDrag.dragRect)
             const selectedByDrag = getDraggedElectrodeIds(state.convertedElectrodes, dragRectAsMaxMin, state.pixelRadius)
-            const finalSelection = action.dragAction.shift ? [...selectedByDrag, ...action.selectedElectrodeIds] : selectedByDrag
+            const finalSelection = action.dragAction.shift ? [...selectedByDrag, ...(action.selectedElectrodeIds || [])] : selectedByDrag
             return {
                 ...state,
                 draggedElectrodeIds: [],

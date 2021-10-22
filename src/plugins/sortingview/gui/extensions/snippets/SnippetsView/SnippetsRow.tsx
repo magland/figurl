@@ -7,7 +7,6 @@ import KacheryNode from 'kacheryInterface/core/KacheryNode';
 import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds';
 import React, { FunctionComponent, useMemo } from 'react';
 import { applyMergesToUnit, Recording, Sorting, SortingCuration, SortingSelection, SortingSelectionDispatch } from "../../../pluginInterface";
-import { getElectrodesAspectRatio } from '../../common/sharedCanvasLayers/setupElectrodes';
 import SnippetBox from './SnippetBox';
 
 
@@ -181,13 +180,14 @@ const SnippetsRow: FunctionComponent<Props> = ({ recording, sorting, selection, 
     const electrodeLocations = info?.channel_locations
     const boxWidth = useMemo(() => {
         if (selection.waveformsMode === 'geom') {
-            const boxAspect = (electrodeLocations ? getElectrodesAspectRatio(electrodeLocations) : 1) || 1
+            // const boxAspect = (electrodeLocations ? getElectrodesAspectRatio(electrodeLocations) : 1) || 1
+            const boxAspect = 1
             return (boxAspect > 1 ? height / boxAspect : height * boxAspect)
         }
         else {
             return 100
         }
-    }, [electrodeLocations, height, selection.waveformsMode])
+    }, [height, selection.waveformsMode])
     const tileStyle = useMemo(() => ({width: boxWidth + 5, height: height + 15}), [boxWidth, height])
 //    const electrodes = info?.channel_ids, info?.channel_locations
 // THIS IS STUFF THAT ALREADY HAPPENS IN THE ELECTRODE GEOMETRY COMPUTATION LOGIC

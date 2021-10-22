@@ -42,15 +42,8 @@ export type PaintProps = {
 
 const circle = 2 * Math.PI
 
-export const paint = (canvasRef: React.MutableRefObject<HTMLCanvasElement | null>, props: PaintProps) => {
+export const paint = (ctxt: CanvasRenderingContext2D, props: PaintProps) => {
     const { layoutMode } = props
-    if (!canvasRef || typeof canvasRef === 'function') return
-    const canvas = canvasRef.current
-    const ctxt = canvas && canvas.getContext('2d')
-    if (!ctxt) {
-        console.log('Error getting 2d context for electrode geometry canvas.')
-        return
-    }
     layoutMode === 'geom' ? paintGeometryView(ctxt, props) : paintVertical(ctxt, props)
 }
 
