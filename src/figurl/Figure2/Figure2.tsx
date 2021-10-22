@@ -26,8 +26,8 @@ const useFigureData = (dataHash: string | undefined, channelName: ChannelName | 
             const s = dataHash.toString()
             const dataUrl = `${bucketBaseUrl}/${channelName}/sha1/${s[0]}${s[1]}/${s[2]}${s[3]}/${s[4]}${s[5]}/${s}`
             const x = await axios.get(dataUrl, {responseType: 'json'})
-            const data = x.data
-            deserializeReturnValue(data)
+            let data = x.data
+            data = deserializeReturnValue(data)
             setFigureData(data)
         })()
 
