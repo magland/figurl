@@ -1,6 +1,7 @@
+import BaseCanvas from 'figurl/labbox-react/components/DrawingWidget/BaseCanvas'
 import { TransformationMatrix, transformPoints, Vec2 } from 'figurl/labbox-react/components/DrawingWidget/Geometry'
-import { matrix, multiply } from "mathjs"
-import { useEffect, useMemo, useRef } from 'react'
+import { matrix } from "mathjs"
+import { useMemo } from 'react'
 import { LayoutMode, PixelSpaceElectrode } from '../../common/sharedDrawnComponents/ElectrodeGeometry'
 import { defaultWaveformOpts } from './WaveformWidget'
 
@@ -38,7 +39,6 @@ type PixelSpacePath = {
 }
 
 type PaintProps = {
-    canvasRef: React.MutableRefObject<HTMLCanvasElement | null>
     waveformOpts: {
         colors?: WaveformColors
         waveformWidth: number
@@ -64,14 +64,9 @@ const computePaths = (transform: TransformationMatrix, waveforms: WaveformPoint[
     })
 }
 
-const paint = (props: PaintProps) => {
-    const { canvasRef, waveformOpts, pixelSpacePaths, xMargin } = props
-
+const paint = (ctxt: CanvasRenderingContext2D, props: PaintProps) => {
+    const { waveformOpts, pixelSpacePaths, xMargin } = props
     if (!pixelSpacePaths || pixelSpacePaths.length === 0) return
-    if (!canvasRef || typeof canvasRef === 'function') return
-    const canvas = canvasRef.current
-    const ctxt = canvas && canvas.getContext('2d')
-    if (!ctxt) return  // Should we log when this happens?
 
     const colors = waveformOpts?.colors || defaultWaveformColors
     ctxt.strokeStyle = colors.base
@@ -92,24 +87,17 @@ const paint = (props: PaintProps) => {
         ctxt.stroke()
         ctxt.setTransform(baseTransform)
     })
+    // Might be a good idea to do another ctxt.resetTransform() here to clear out any junk state
 }
+
 
 const Waveform = (props: WaveformProps) => {
     const { electrodes, waveforms, waveformOpts, oneElectrodeHeight, oneElectrodeWidth, yScale, width, height, layoutMode } = props
     const opts = waveformOpts ?? defaultWaveformOpts
-    const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
     const canvas = useMemo(() => {
-        return <canvas
-            ref={canvasRef}
-            width={width}
-            height={height}
-            style={{position: 'absolute', left: 0, top: 0}}
-        />
-    }, [width, height])
+        if (!waveforms || waveforms.length === 0) return <div /> // Should not happen
 
-    useEffect(() => {
-        if (!waveforms || waveforms.length === 0) return
         const pointsPerWaveform = waveforms[0].length           // assumed constant across snippets
         const timeScale = oneElectrodeWidth/pointsPerWaveform   // converts the frame numbers (1..130 or w/e) to pixel width of electrode
         const offsetToCenter = -oneElectrodeWidth*(.5 + 1/pointsPerWaveform) // adjusts the waveforms to start at the left of the electrode, not its center
@@ -121,7 +109,19 @@ const Waveform = (props: WaveformProps) => {
                                 ).toArray() as TransformationMatrix
         const paths = computePaths(transform, waveforms, electrodes)
         const xMargin = layoutMode === 'vertical' ? (width - oneElectrodeWidth)/2 : 0
-        paint({canvasRef, waveformOpts: opts, pixelSpacePaths: paths, xMargin })
+
+        const paintProps: PaintProps = {
+            waveformOpts: opts,
+            pixelSpacePaths: paths,
+            xMargin: xMargin
+        }
+
+        return <BaseCanvas<PaintProps>
+            width={width}
+            height={height}
+            draw={paint}
+            drawData={paintProps}
+        />
     }, [waveforms, electrodes, yScale, opts, width, height, oneElectrodeWidth, oneElectrodeHeight, layoutMode])
 
     return canvas
@@ -163,52 +163,52 @@ const Waveform = (props: WaveformProps) => {
 
 // Note: This code is left as an example of the prior way of doing things, but it's not needed for anything
 // (and also doesn't work properly for vertical-layout.)
-const computePathsViaElectrodeTransforms = (waveforms: WaveformPoint[][], electrodes: PixelSpaceElectrode[], yScale: number): PixelSpacePath[] => {
-    // Each electrode's transform maps the unit square into pixelspace. So we need to normalize the waveform's time (x) dimension
-    // into unit distance. (The y dimension will already be accounted for by noise-scaling factors.)
-    const xrange = waveforms[0].length
-    const wavesToUnits = matrix([[1/xrange,  0,        -1/xrange],
-                                 [ 0,       -yScale/2,       0.5],
-                                 [ 0,        0,                1]])
-    // (The funcToTransform equivalent):
-    // const wavesToUnits = funcToTransform(p => {
-    //     return [p[0] / xrange, 0.5 - (p[1] /2) * yScale]
-    // })
+// const computePathsViaElectrodeTransforms = (waveforms: WaveformPoint[][], electrodes: PixelSpaceElectrode[], yScale: number): PixelSpacePath[] => {
+//     // Each electrode's transform maps the unit square into pixelspace. So we need to normalize the waveform's time (x) dimension
+//     // into unit distance. (The y dimension will already be accounted for by noise-scaling factors.)
+//     const xrange = waveforms[0].length
+//     const wavesToUnits = matrix([[1/xrange,  0,        -1/xrange],
+//                                  [ 0,       -yScale/2,       0.5],
+//                                  [ 0,        0,                1]])
+//     // (The funcToTransform equivalent):
+//     // const wavesToUnits = funcToTransform(p => {
+//     //     return [p[0] / xrange, 0.5 - (p[1] /2) * yScale]
+//     // })
     
-    return electrodes.map((e, ii) => {
-        const rawPoints = waveforms[ii].map(pt => [pt.time, pt.amplitude])
-        const electrodeBaseTransform = matrix(e.transform)
-        const newTransform = multiply(electrodeBaseTransform, wavesToUnits).toArray() as TransformationMatrix
+//     return electrodes.map((e, ii) => {
+//         const rawPoints = waveforms[ii].map(pt => [pt.time, pt.amplitude])
+//         const electrodeBaseTransform = matrix(e.transform)
+//         const newTransform = multiply(electrodeBaseTransform, wavesToUnits).toArray() as TransformationMatrix
 
-        const points = transformPoints(newTransform, rawPoints)
-        return {
-            pointsInPaintBox: points,
-            offsetFromParentCenter: [e.pixelX, e.pixelY]
-        }
-    })
-}
+//         const points = transformPoints(newTransform, rawPoints)
+//         return {
+//             pointsInPaintBox: points,
+//             offsetFromParentCenter: [e.pixelX, e.pixelY]
+//         }
+//     })
+// }
 
-const paintViaElectrodeTransforms = (props: PaintProps) => {
-    const { canvasRef, waveformOpts, pixelSpacePaths } = props
+// const paintViaElectrodeTransforms = (props: PaintProps) => {
+//     const { canvasRef, waveformOpts, pixelSpacePaths } = props
 
-    if (!pixelSpacePaths || pixelSpacePaths.length === 0) return
-    if (!canvasRef || typeof canvasRef === 'function') return
-    const canvas = canvasRef.current
-    const ctxt = canvas && canvas.getContext('2d')
-    if (!ctxt) return
+//     if (!pixelSpacePaths || pixelSpacePaths.length === 0) return
+//     if (!canvasRef || typeof canvasRef === 'function') return
+//     const canvas = canvasRef.current
+//     const ctxt = canvas && canvas.getContext('2d')
+//     if (!ctxt) return
 
-    const colors = waveformOpts?.colors || defaultWaveformColors
-    ctxt.strokeStyle = colors.base
-    ctxt.lineWidth = waveformOpts?.waveformWidth ?? 1
-    ctxt.clearRect(0, 0, ctxt.canvas.width, ctxt.canvas.height)
-    pixelSpacePaths.forEach((p) => {
-        ctxt.beginPath()
-        ctxt.moveTo(p.pointsInPaintBox[0][0], p.pointsInPaintBox[0][1])
-        p.pointsInPaintBox.forEach((pt) => {
-            ctxt.lineTo(pt[0], pt[1])
-        })
-        ctxt.stroke()
-    })
-}
+//     const colors = waveformOpts?.colors || defaultWaveformColors
+//     ctxt.strokeStyle = colors.base
+//     ctxt.lineWidth = waveformOpts?.waveformWidth ?? 1
+//     ctxt.clearRect(0, 0, ctxt.canvas.width, ctxt.canvas.height)
+//     pixelSpacePaths.forEach((p) => {
+//         ctxt.beginPath()
+//         ctxt.moveTo(p.pointsInPaintBox[0][0], p.pointsInPaintBox[0][1])
+//         p.pointsInPaintBox.forEach((pt) => {
+//             ctxt.lineTo(pt[0], pt[1])
+//         })
+//         ctxt.stroke()
+//     })
+// }
 
 export default Waveform
