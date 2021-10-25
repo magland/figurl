@@ -1,4 +1,4 @@
-import { ErrorMessage, FeedId, isArrayOf, isErrorMessage, isFeedId, isSubfeedHash, isSubfeedMessage, isTaskFunctionId, isTaskFunctionType, isTaskId, isTaskStatus, SubfeedHash, SubfeedMessage, TaskFunctionId, TaskFunctionType, TaskId, TaskStatus } from "commonInterface/kacheryTypes"
+import { ErrorMessage, FeedId, isArrayOf, isErrorMessage, isFeedId, isSha1Hash, isSubfeedHash, isSubfeedMessage, isTaskFunctionId, isTaskFunctionType, isTaskId, isTaskStatus, Sha1Hash, SubfeedHash, SubfeedMessage, TaskFunctionId, TaskFunctionType, TaskId, TaskStatus } from "./kacheryTypes"
 import validateObject, { isBoolean, isEqualTo, isOneOf, optional } from "./validateObject"
 
 // getFigureData
@@ -22,6 +22,32 @@ export const isGetFigureDataResponse = (x: any): x is GetFigureDataResponse => {
     return validateObject(x, {
         type: isEqualTo('getFigureData'),
         figureData: () => (true)
+    })
+}
+
+// getFileData
+
+export type GetFileDataRequest = {
+    type: 'getFileData'
+    sha1: Sha1Hash
+}
+
+export const isGetFileDataRequest = (x: any): x is GetFileDataRequest => {
+    return validateObject(x, {
+        type: isEqualTo('getFileData'),
+        sha1: isSha1Hash
+    })
+}
+
+export type GetFileDataResponse = {
+    type: 'getFileData'
+    fileData: any
+}
+
+export const isGetFileDataResponse = (x: any): x is GetFileDataResponse => {
+    return validateObject(x, {
+        type: isEqualTo('getFileData'),
+        fileData: () => (true)
     })
 }
 
@@ -97,12 +123,14 @@ export const isSubscribeToSubfeedResponse = (x: any): x is SubscribeToSubfeedRes
 
 export type FigurlRequest =
     GetFigureDataRequest |
+    GetFileDataRequest |
     InitiateTaskRequest |
     SubscribeToSubfeedRequest
 
 export const isFigurlRequest = (x: any): x is FigurlRequest => {
     return isOneOf([
         isGetFigureDataRequest,
+        isGetFileDataRequest,
         isInitiateTaskRequest,
         isSubscribeToSubfeedRequest
     ])(x)
@@ -110,12 +138,14 @@ export const isFigurlRequest = (x: any): x is FigurlRequest => {
 
 export type FigurlResponse =
     GetFigureDataResponse |
+    GetFileDataResponse |
     InitiateTaskResponse |
     SubscribeToSubfeedResponse
 
 export const isFigurlResponse = (x: any): x is FigurlResponse => {
     return isOneOf([
         isGetFigureDataResponse,
+        isGetFileDataResponse,
         isInitiateTaskResponse,
         isSubscribeToSubfeedResponse
     ])(x)

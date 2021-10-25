@@ -1,11 +1,13 @@
+import axios from 'axios'
 import GoogleSignInClient from "commonComponents/googleSignIn/GoogleSignInClient"
 import { ChannelName, DurationMsec, messageCount, subfeedPosition } from "commonInterface/kacheryTypes"
 import { initiateTask } from "figurl/kachery-react"
+import deserializeReturnValue from 'figurl/kachery-react/deserializeReturnValue'
 import { Task } from "figurl/kachery-react/initiateTask"
 import KacheryNode from "kacheryInterface/core/KacheryNode"
 import Subfeed from "kacheryInterface/feeds/Subfeed"
 import { MutableRefObject } from "react"
-import { GetFigureDataResponse, InitiateTaskRequest, InitiateTaskResponse, isFigurlRequest, SubscribeToSubfeedRequest, SubscribeToSubfeedResponse } from "./viewInterface/FigurlRequestTypes"
+import { GetFigureDataResponse, GetFileDataRequest, GetFileDataResponse, InitiateTaskRequest, InitiateTaskResponse, isFigurlRequest, SubscribeToSubfeedRequest, SubscribeToSubfeedResponse } from "./viewInterface/FigurlRequestTypes"
 import { MessageToChild, NewSubfeedMessagesMessage, TaskStatusUpdateMessage } from "./viewInterface/MessageToChildTypes"
 import { isMessageToParent } from "./viewInterface/MessageToParentTypes"
 
@@ -41,6 +43,15 @@ class FigureInterface {
                                 response
                             })
                         }
+                        else if (request.type === 'getFileData') {
+                            this.handleGetFileDataRequest(request).then(response => {
+                                this._sendMessageToChild({
+                                    type: 'figurlResponse',
+                                    requestId,
+                                    response
+                                })
+                            })
+                        }
                         else if (request.type === 'initiateTask') {
                             this.handleInitiateTaskRequest(request).then(response => {
                                 this._sendMessageToChild({
@@ -74,6 +85,18 @@ class FigureInterface {
             updateSignedIn()
         })
         updateSignedIn()
+    }
+    async handleGetFileDataRequest(request: GetFileDataRequest): Promise<GetFileDataResponse> {
+        const bucketBaseUrl = await this.a.kacheryNode.kacheryHubInterface().getChannelBucketBaseUrl(this.a.channelName)
+        const s = request.sha1.toString()
+        const dataUrl = `${bucketBaseUrl}/${this.a.channelName}/sha1/${s[0]}${s[1]}/${s[2]}${s[3]}/${s[4]}${s[5]}/${s}`
+        const x = await axios.get(dataUrl, {responseType: 'json'})
+        let data = x.data
+        data = deserializeReturnValue(data)
+        return {
+            type: 'getFileData',
+            fileData: data
+        }
     }
     async handleInitiateTaskRequest(request: InitiateTaskRequest): Promise<InitiateTaskResponse> {
         const task = initiateTask({

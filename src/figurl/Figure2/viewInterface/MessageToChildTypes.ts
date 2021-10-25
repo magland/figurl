@@ -1,4 +1,4 @@
-import { ErrorMessage, FeedId, isErrorMessage, isFeedId, isSubfeedHash, isSubfeedMessage, isSubfeedPosition, isTaskId, isTaskStatus, isUserId, SubfeedHash, SubfeedMessage, SubfeedPosition, TaskId, TaskStatus, UserId } from "commonInterface/kacheryTypes";
+import { ErrorMessage, FeedId, isErrorMessage, isFeedId, isSubfeedHash, isSubfeedMessage, isSubfeedPosition, isTaskId, isTaskStatus, isUserId, SubfeedHash, SubfeedMessage, SubfeedPosition, TaskId, TaskStatus, UserId } from "./kacheryTypes";
 import { FigurlResponse, isFigurlResponse } from "./FigurlRequestTypes";
 import validateObject, { isArrayOf, isEqualTo, isOneOf, isString, optional } from "./validateObject";
 
