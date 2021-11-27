@@ -15,7 +15,7 @@ type Props = {
     height: number
 }
 
-const useFigureData = (dataHash: string | undefined, channelName: ChannelName | undefined) => {
+export const useFigureData = (dataHash: string | undefined, channelName: ChannelName | undefined) => {
     const [figureData, setFigureData] = useState<any>()
     const node = useKacheryNode()
     useEffect(() => {
@@ -54,7 +54,8 @@ export const useRoute2 = () => {
     }
     const figureDataHash = query.d ? query.d as string : undefined
     const channelName = query.channel ? query.channel as any as ChannelName : undefined
-    return {viewUrl, viewUrlBase, figureDataHash, channelName}
+    const label = query.label ? query.label as any as string : 'untitled'
+    return {viewUrl, viewUrlBase, figureDataHash, channelName, label}
 }
 
 const Figure2: FunctionComponent<Props> = ({width, height}) => {
