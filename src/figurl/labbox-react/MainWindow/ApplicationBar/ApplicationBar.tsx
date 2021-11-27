@@ -2,12 +2,14 @@ import { AppBar, Button, Toolbar } from '@material-ui/core';
 import { useSignedIn } from 'commonComponents/googleSignIn/GoogleSignIn';
 import { useChannel } from 'figurl/kachery-react';
 import ChannelControl from 'figurl/kachery-react/components/SelectChannel/ChannelControl';
+import ExportControl from 'figurl/kachery-react/components/SelectChannel/ExportControl';
 import SelectChannel from 'figurl/kachery-react/components/SelectChannel/SelectChannel';
 import TaskMonitor from 'figurl/kachery-react/components/TaskMonitor/TaskMonitor';
 import TaskMonitorControl from 'figurl/kachery-react/components/TaskMonitor/TaskMonitorControl';
 import ModalWindow from 'figurl/labbox-react/components/ModalWindow/ModalWindow';
 import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import useRoute from '../useRoute';
+import ExportDialog from './ExportDialog';
 
 const appBarHeight = 50
 
@@ -38,6 +40,7 @@ export const useModalDialog = () => {
 }
 
 const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
+    const {visible: exportVisible, handleOpen: openExport, handleClose: closeExport} = useModalDialog()
     const {visible: channelVisible, handleOpen: openChannel, handleClose: closeChannel} = useModalDialog()
     const {visible: taskMonitorVisible, handleOpen: openTaskMonitor, handleClose: closeTaskMonitor} = useModalDialog()
 
@@ -57,6 +60,7 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
 
     const {backendId} = useChannel()
     const channelControlColor = backendId ? 'orange' : 'white'
+    const exportControlColor = 'white'
 
     return (
         <span>
@@ -88,6 +92,9 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
                 <span style={{paddingBottom: 0, color: 'white'}}>
                     <TaskMonitorControl onOpen={openTaskMonitor} color="white" />
                 </span>
+                <span style={{paddingBottom: 0, color: 'white'}}>
+                    <ExportControl onClick={openExport} color={exportControlColor} />
+                </span>
                 {
                     signedIn ? (
                         <Button color="inherit" onClick={handleLogout}>Sign out</Button>
@@ -97,6 +104,14 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
                 }
                 </Toolbar>
             </AppBar>
+            <ModalWindow
+                open={exportVisible}
+                onClose={closeExport}
+            >
+                <ExportDialog
+                    onClose={closeExport}
+                />
+            </ModalWindow>
             <ModalWindow
                 open={channelVisible}
                 onClose={closeChannel}
