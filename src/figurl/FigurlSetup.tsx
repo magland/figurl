@@ -1,9 +1,7 @@
 import React, { FunctionComponent, useCallback, useState } from 'react';
 import FigurlContext from './FigurlContext';
-import { FigurlPlugin } from './types';
 
 type Props = {
-    plugins: FigurlPlugin[]
 }
 
 const getBackendIdObjectFromLocalStorage = (): {[key: string]: string | null} | null => {
@@ -22,7 +20,7 @@ const setBackendIdObjectToLocalStorage = (obj: {[key: string]: string | null}) =
     localStorage.setItem('backend-ids', JSON.stringify(obj))
 }
 
-const FigurlSetup: FunctionComponent<Props> = ({plugins, children}) => {
+const FigurlSetup: FunctionComponent<Props> = ({children}) => {
     const [backendIdObject, setBackendIdObject] = useState<null | {[key: string]: string | null} | undefined>(getBackendIdObjectFromLocalStorage())
     const backendId = useCallback((channel: string): string | null => {
         return (backendIdObject || {})[channel] || null
@@ -34,7 +32,7 @@ const FigurlSetup: FunctionComponent<Props> = ({plugins, children}) => {
         setBackendIdObjectToLocalStorage(a)
     }, [backendIdObject])
     return (
-        <FigurlContext.Provider value={{plugins, backendId: backendId || null, setBackendId}}>
+        <FigurlContext.Provider value={{backendId: backendId || null, setBackendId}}>
             {children}
         </FigurlContext.Provider>
     )

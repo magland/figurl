@@ -46,7 +46,7 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
 
     // const client = useGoogleSignInClient()
     // const gapi = client?.gapi
-    const {setRoute, figureLabel, wiki, routePath} = useRoute()
+    const {setRoute, wiki, routePath} = useRoute()
 
     // const signedIn = useSignedIn()
     const {signedIn, userId, gapi} = useSignedIn()
@@ -70,11 +70,11 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
                     logo && (<img src={logo} alt="logo" height={30} style={{paddingBottom: 5, cursor: 'pointer'}} onClick={onHome} />)
                 }
                 <div>&nbsp;&nbsp;&nbsp;{title}</div>
-                {
+                {/* {
                     ((routePath === '/fig') && (figureLabel)) && (
                         <span style={{paddingLeft: 20}}>{figureLabel}</span>
                     )
-                }
+                } */}
                 {
                     ((routePath === '/doc') && (wiki)) && (
                         <span style={{paddingLeft: 20}}>{fileNameFromWiki(wiki)}</span>

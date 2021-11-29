@@ -1,7 +1,6 @@
 import Markdown from 'commonComponents/Markdown/Markdown';
 import { ChannelName, isSha1Hash } from 'commonInterface/kacheryTypes';
 import { useChannel } from 'figurl/kachery-react';
-import Figure from 'figurl/labbox-react/MainWindow/Figure';
 import QueryString from 'querystring';
 import React, { FunctionComponent, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -32,7 +31,7 @@ const DocView: FunctionComponent<Props> = ({source, width, height}) => {
     const customRenderers: ReactMarkdown.Renderers = useMemo(() => ({
         link: (props: any) => {
             const href: string = props.href
-            const {figureObject, channel: hrefChannel, height} = parseFigurl(href)
+            const {figureObject, channel: hrefChannel} = parseFigurl(href)
             // detect whether it is just a normal link
             if (props.children[0].props.children !== href) {
                 return <a href={props.href} target={props.target}>{props.children}</a>
@@ -42,18 +41,19 @@ const DocView: FunctionComponent<Props> = ({source, width, height}) => {
             }
             else if ((figureObject) && (isSha1Hash(figureObject))) {
                 return (
-                    <Figure
-                        width={width}
-                        height={height || 800}
-                        figureObjectOrHash={figureObject}
-                    />
+                    <div>Figure not implemented</div>
+                    // <Figure
+                    //     width={width}
+                    //     height={height || 800}
+                    //     figureObjectOrHash={figureObject}
+                    // />
                 )
             }
             else {
                 return <a href={props.href} target={props.target}>{props.children}</a>
             }
         }
-    }), [width, channelName])
+    }), [channelName])
     return (
         <div>
             <Markdown

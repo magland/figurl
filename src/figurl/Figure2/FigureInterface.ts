@@ -11,6 +11,8 @@ import { GetFigureDataResponse, GetFileDataRequest, GetFileDataResponse, Initiat
 import { MessageToChild, NewSubfeedMessagesMessage, TaskStatusUpdateMessage } from "./viewInterface/MessageToChildTypes"
 import { isMessageToParent } from "./viewInterface/MessageToParentTypes"
 
+;(window as any).figurlFileData = {}
+
 class FigureInterface {
     #tasks: {[key: string]: Task<any>} = {}
     #subfeeds: {[key: string]: Subfeed} = {}
@@ -93,6 +95,7 @@ class FigureInterface {
         const x = await axios.get(dataUrl, {responseType: 'json'})
         let data = x.data
         data = deserializeReturnValue(data)
+        ;(window as any).figurlFileData[request.sha1.toString()] = data
         return {
             type: 'getFileData',
             fileData: data

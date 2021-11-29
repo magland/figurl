@@ -1,11 +1,9 @@
 import { ChannelName, TaskFunctionId } from 'commonInterface/kacheryTypes'
 import { useChannel } from 'figurl/kachery-react'
 import RecentlyUsedBackends from 'figurl/kachery-react/components/SelectChannel/RecentlyUsedChannels'
-import sortingviewTaskFunctionIds from 'plugins/sortingview/sortingviewTaskFunctionIds'
 import React, { FunctionComponent, useCallback } from 'react'
 import Hyperlink from '../components/Hyperlink/Hyperlink'
 import useRoute from '../MainWindow/useRoute'
-import CheckBackend from './CheckBackendPythonPackageVersion'
 import hyperlinkStyle from './hyperlinkStyle'
 
 type Props = {
@@ -50,12 +48,12 @@ const ChannelSection: FunctionComponent<Props> = ({onSelectChannel, taskFunction
                             backendId={backendId}
                             taskFunctionIds={taskFunctionIds}
                         /> */}
-                        <CheckBackend
+                        {/* <CheckBackend
                             packageName="sortingview"
                             taskFunctionIds={Object.values(sortingviewTaskFunctionIds)}
                             getPythonPackageVersionTaskFunctionId={sortingviewTaskFunctionIds.getPythonPackageVersion}
                             expectedPythonPackageVersion="0.5.0"
-                        />
+                        /> */}
                     </span>
                 ) : (
                     <span>

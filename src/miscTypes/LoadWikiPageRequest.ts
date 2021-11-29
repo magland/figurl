@@ -1,5 +1,4 @@
-import { isEqualTo, _validateObject } from "../commonInterface/kacheryTypes"
-import { isString } from "vega"
+import { isEqualTo, isString, _validateObject } from "../commonInterface/kacheryTypes"
 
 export type LoadWikiPageRequest = {
     type: 'loadWikiPage'

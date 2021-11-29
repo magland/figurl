@@ -2,18 +2,10 @@ import FigurlApp from 'figurl/FigurlApp';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import taskFunctionIds from 'taskFunctionIds';
-import winston from 'winston';
 import logo from './logo.png';
 import packageName from './packageName';
-import figurlPlugins from './plugins/plugins';
 import reportWebVitals from './reportWebVitals';
 import { pythonProjectVersion, webAppProjectVersion } from './version';
-
-winston.add(
-  new winston.transports.Console({
-      level: 'info'
-  })
-)
 
 // async function test1() {
 //   const resp = await axios.get(`http://localhost:20431/probe`, {responseType: 'text'})
@@ -27,7 +19,6 @@ ReactDOM.render(
   (
   // <React.StrictMode>
     <FigurlApp
-      plugins={figurlPlugins}
       taskFunctionIds={taskFunctionIds}
       packageName={packageName}
       pythonProjectVersion={pythonProjectVersion}

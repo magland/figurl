@@ -11,14 +11,12 @@ import './index.css';
 import { initialRecentFigures, recentFiguresReducer } from './RecentFigures';
 // import logo from './logo.svg';
 import theme from './theme';
-import { FigurlPlugin } from './types';
 import GoogleSignInSetup from 'commonComponents/googleSignIn/GoogleSignInSetup';
 
 testSignatures()
 
 type Props = {
   taskFunctionIds: TaskFunctionId[]
-  plugins: FigurlPlugin[]
   packageName: string
   pythonProjectVersion: string
   webAppProjectVersion: string
@@ -27,19 +25,19 @@ type Props = {
 }
 
 const FigurlApp: FunctionComponent<Props> = ({
-  plugins, taskFunctionIds, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, logo
+  taskFunctionIds, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, logo
 }) => {
   const [recentFigures, recentFiguresDispatch] = useReducer(recentFiguresReducer, initialRecentFigures)
   const homePageProps = useMemo(() => ({
-    taskFunctionIds, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, recentFigures, plugins
-  }), [taskFunctionIds, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, recentFigures, plugins])
+    taskFunctionIds, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, recentFigures
+  }), [taskFunctionIds, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, recentFigures])
   return (
     <div className="App">
       <MuiThemeProvider theme={theme}>
         <BrowserRouter>
           <GoogleSignInSetup>
             <KacheryNodeSetup nodeLabel={nodeLabel("figurl")}>
-              <FigurlSetup plugins={plugins}>
+              <FigurlSetup>
                 <MainWindow
                   packageName={packageName}
                   logo={logo}

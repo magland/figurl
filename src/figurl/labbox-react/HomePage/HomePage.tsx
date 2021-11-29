@@ -1,7 +1,6 @@
 import { ChannelName, TaskFunctionId } from 'commonInterface/kacheryTypes'
 import SelectChannelDialog from 'figurl/kachery-react/components/SelectChannel/SelectChannelDialog'
 import { RecentFigure, RecentFigures } from 'figurl/RecentFigures'
-import { FigurlPlugin } from 'figurl/types'
 import React, { FunctionComponent } from 'react'
 import { useVisible } from '..'
 import ChannelSection from './ChannelSection'
@@ -9,7 +8,6 @@ import DocumentSection from './DocumentSection'
 import './Home.css'
 import IntroSection from './IntroSection'
 import './localStyles.css'
-import RecentFiguresSection from './RecentFiguresSection'
 
 export type HomePageProps = {
     taskFunctionIds: TaskFunctionId[]
@@ -18,13 +16,12 @@ export type HomePageProps = {
     webAppProjectVersion: string
     repoUrl: string
     recentFigures: RecentFigures
-    plugins: FigurlPlugin[]
     onOpenFigure?: (recentFigure: RecentFigure) => void
 }
 
 const hardCodedChannels = [] as any as ChannelName[]
 
-const HomePage: FunctionComponent<HomePageProps> = ({taskFunctionIds, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, recentFigures, plugins, onOpenFigure}) => {
+const HomePage: FunctionComponent<HomePageProps> = ({taskFunctionIds, packageName, pythonProjectVersion, webAppProjectVersion, repoUrl, recentFigures, onOpenFigure}) => {
     const selectChannelVisibility = useVisible()
 
     return (
@@ -33,7 +30,6 @@ const HomePage: FunctionComponent<HomePageProps> = ({taskFunctionIds, packageNam
             <IntroSection />
             <ChannelSection onSelectChannel={selectChannelVisibility.show} taskFunctionIds={taskFunctionIds} packageName={packageName} />
             <DocumentSection />
-            <RecentFiguresSection recentFigures={recentFigures} plugins={plugins} onOpenFigure={onOpenFigure} />
             <span>
                 <hr />
                 <p style={{fontFamily: 'courier', color: 'gray'}}>Python package version: {packageName} {pythonProjectVersion} | GUI version: {webAppProjectVersion}</p>

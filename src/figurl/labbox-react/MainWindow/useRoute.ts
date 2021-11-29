@@ -31,10 +31,10 @@ const useRoute = () => {
     }, [query.figureObject])
     const channel = (query.channel as any as ChannelName) || undefined
     const p = location.pathname
-    const figureLabel = (p === '/fig') || (p === '/f') ? (query.label as any as string) || undefined : undefined
+    const figureLabel = (p === '/f') ? (query.label as any as string) || undefined : undefined
     // const documentId = p === '/compose' ? (query.document as any as string) || undefined : undefined
     const wiki = p === '/doc' ? (query.wiki as any as string) || undefined : undefined
-    const curationId = p === '/fig' ? (query.curation as any as string) || undefined : undefined
+    const curationId = undefined
     const routePath: RoutePath = isRoutePath(p) ? p : '/home'
 
     const setRoute = useCallback((o: {routePath?: RoutePath, figureObjectOrHash?: FigureObject | Sha1Hash, channel?: ChannelName, figureLabel?: string, wiki?: string, curationId?: string}) => {
@@ -62,12 +62,12 @@ const useRoute = () => {
         if (o.wiki) {
             query2.wiki = o.wiki
         }
-        if (pathname2 !== '/fig') {
-            delete query2['figureObject']
-            delete query2['curation']
-            delete query2['label']
-            delete query2['state']
-        }
+        // if (pathname2 !== '/fig') {
+        //     delete query2['figureObject']
+        //     delete query2['curation']
+        //     delete query2['label']
+        //     delete query2['state']
+        // }
         // if (o.routePath !== '/compose') {
         //     delete query2['document']
         // }
