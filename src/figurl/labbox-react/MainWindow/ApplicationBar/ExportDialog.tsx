@@ -1,10 +1,11 @@
-import Hyperlink from 'commonComponents/Hyperlink/Hyperlink';
 import { useFigureData, useRoute2 } from 'figurl/Figure2/Figure2';
-import React, { FunctionComponent, useCallback } from 'react';
+import React, { FunctionComponent, useCallback, useState } from 'react';
 import axios from 'axios'
 import {saveAs} from 'file-saver'
 import ADMZip from 'adm-zip'
 import randomAlphaString from 'commonInterface/util/randomAlphaString';
+import { Button } from '@material-ui/core';
+import { sleepMsecNum } from 'commonInterface/util/util';
 
 type Props = {
     onClose: () => void
@@ -14,9 +15,14 @@ const ExportDialog: FunctionComponent<Props> = () => {
     const {viewUrlBase, figureDataHash, channelName, label} = useRoute2()
     const figureData = useFigureData(figureDataHash, channelName)
     const label2 = label.split(' ').join('-')
+    const [status, setStatus] = useState<'ready' | 'downloading-bundle' | 'preparing-data' | 'saving-file'>('ready')
     const handleExportBundle = useCallback(() => {
+        if (status !== 'ready') return
+        setStatus('downloading-bundle')
         ;(async () => {
             const resp = await axios.get(`${viewUrlBase}/bundle.zip?cb=${randomAlphaString(8)}`, {responseType: 'blob'})
+            setStatus('preparing-data')
+            await sleepMsecNum(100)
             const data = resp.data as Blob
             const data2 = Buffer.from(await data.arrayBuffer())
             const zip = new ADMZip(data2)
@@ -39,14 +45,37 @@ const ExportDialog: FunctionComponent<Props> = () => {
             newZip.addFile(`${label2}/figurlData.js`, Buffer.from(figurlDataJsContent))
 
             const buffer = newZip.toBuffer()
+            setStatus('saving-file')
+            await sleepMsecNum(100)
             saveAs(new Blob([buffer]), `${label2}.zip`)
+            setStatus('ready')
         })()
-    }, [viewUrlBase, figureData, label2])
+    }, [viewUrlBase, figureData, label2, status])
+    if (!figureData) {
+        return (
+            <div>Waiting for figure data</div>
+        )
+    }
+    if (status === 'downloading-bundle') {
+        return (
+            <div>Downloading HTML bundle...</div>
+        )
+    }
+    if (status === 'preparing-data') {
+        return (
+            <div>Preparing data...</div>
+        )
+    }
+    if (status === 'saving-file') {
+        return (
+            <div>Saving file...</div>
+        )
+    }
     return (
         <div>
-            <Hyperlink onClick={handleExportBundle}>
+            <Button onClick={handleExportBundle}>
                 Export figure as stand-alone HTML bundle
-            </Hyperlink>
+            </Button>
         </div>
     )
 }
