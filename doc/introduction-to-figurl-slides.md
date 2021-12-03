@@ -25,12 +25,7 @@ datasets in the cloud.
 
 # What is Figurl?
 
-Figurl provides
-* Python interface for publishing data objects
-* Visualization components that render the data
-* Web application to display the resulting views.
-
-Diagram goes here
+<img src="https://docs.google.com/drawings/d/e/2PACX-1vS2291R99JidHQd3AU9oa-DaIPXUgWUt7VW4WC872FrqeP0GQBYvhJccyZrBAiihZTVocl3JBO-AHuZ/pub?w=963&h=735" width=800>
 
 ---
 
