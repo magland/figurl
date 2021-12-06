@@ -116,6 +116,27 @@ print(url)
 
 ---
 
+# Vector Field Explorer Example Code
+
+```python
+import numpy as np
+import volumeview as vv
+
+a = np.zeros((3, 90, 60, 45), dtype=np.float32)
+ix, iy, iz = np.meshgrid(*[np.linspace(-1, 1, n) for n in a.shape[1:]], indexing='ij')
+a[0, :, :, :] = np.sin((ix + iy - iz) * 4 * np.pi) * np.exp(-3 * (ix**2 + iy**2 + iz**2))
+a[1, :, :, :] = np.sin((iy + iz - ix) * 4 * np.pi) * np.exp(-3 * (ix**2 + iy**2 + iz**2))
+a[2, :, :, :] = np.sin((ix + iz - iy) * 4 * np.pi) * np.exp(-3 * (ix**2 + iy**2 + iz**2))
+
+F = vv.create_vector_field_view(a)
+url = F.url(label='Test vector field view')
+print(url)
+```
+
+As this code shows, the VolumeView visualizer can render arbitrary numpy array data.
+
+---
+
 # Example: Composite view - spike sorting
 
 <img src="https://user-images.githubusercontent.com/3679296/144639565-46c16c52-dc4a-4c7f-80fd-b409900ac771.png" width=70% height=70%>
