@@ -136,7 +136,7 @@ export class Task<ReturnType> {
                     this._reportStatusChanged()
                     return
                 }
-                this.#result = deserializeReturnValue(result)
+                this.#result = await deserializeReturnValue(result)
                 this.#status = 'finished'
                 this.#timestampCompleted = nowTimestamp()
                 this._reportStatusChanged()

@@ -1,22 +1,46 @@
-const deserializeReturnValue = (x: any): any => {
+import zlib from 'zlib'
+
+const deserializeReturnValue = async (x: any): Promise<any> => {
     if (!x) return x
     else if (typeof (x) === 'object') {
         if (Array.isArray(x)) {
-            return x.map(a => deserializeReturnValue(a))
+            const ret = []
+            for (let a of x) {
+                ret.push(await deserializeReturnValue(a))
+            }
+            return ret
         }
         else if (x._type === 'ndarray') {
             const shape = x.shape as number[]
             const dtype = x.dtype as string
-            const data_b64 = x.data_b64 as string
-            const dataBuffer = _base64ToArrayBuffer(data_b64)
+            let dataBuffer: Buffer
+            if (x.data_b64) {
+                const data_b64 = x.data_b64 as string
+                // dataBuffer = _base64ToArrayBuffer(data_b64)
+                dataBuffer = Buffer.from(data_b64, 'base64')
+            }
+            else if (x.data_gzip_b64) {
+                const data_gzip_b64 = x.data_gzip_b64 as string
+                // const aa = _base64ToArrayBuffer(data_gzip_b64)
+                const aa = Buffer.from(data_gzip_b64, 'base64')
+                dataBuffer = await gunzipAsync(aa)
+            }
+            else {
+                throw Error('Missing data_b64 or data_gzip_b64')
+            }
+            // const data_b64 = x.data_b64 as string
+            // const dataBuffer = _base64ToArrayBuffer(data_b64)
             if (dtype === 'float32') {
-                return applyShape(new Float32Array(dataBuffer), shape)
+                return applyShape(new Float32Array(dataBuffer.buffer), shape)
             }
             else if (dtype === 'int32') {
-                return applyShape(new Int32Array(dataBuffer), shape)
+                return applyShape(new Int32Array(dataBuffer.buffer), shape)
             }
             else if (dtype === 'int16') {
-                return applyShape(new Int16Array(dataBuffer), shape)
+                return applyShape(new Int16Array(dataBuffer.buffer), shape)
+            }
+            else if (dtype === 'uint8') {
+                return applyShape(new Uint8Array(dataBuffer.buffer), shape)
             }
             else {
                 throw Error(`Datatype not yet implemented for ndarray: ${dtype}`)
@@ -25,7 +49,7 @@ const deserializeReturnValue = (x: any): any => {
         else {
             const ret: { [key: string]: any } = {}
             for (let k in x) {
-                ret[k] = deserializeReturnValue(x[k])
+                ret[k] = await deserializeReturnValue(x[k])
             }
             return ret
         }
@@ -33,7 +57,19 @@ const deserializeReturnValue = (x: any): any => {
     else return x
 }
 
-const applyShape = (x: Float32Array | Int32Array | Int16Array, shape: number[]): number[] | number[][] | number[][][] | number[][][][] | number[][][][][] => {
+const gunzipAsync = async (x: ArrayBuffer): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        zlib.inflate(x, (err, y) => {
+            if (err) {
+                reject(err)
+                return
+            }
+            resolve(y)
+        })
+    })
+}
+
+const applyShape = (x: Float32Array | Int32Array | Int16Array | Uint8Array, shape: number[]): number[] | number[][] | number[][][] | number[][][][] | number[][][][][] => {
     if (shape.length === 1) {
         if (shape[0] !== x.length) throw Error('Unexpected length of array')
         return Array.from(x)
@@ -41,7 +77,7 @@ const applyShape = (x: Float32Array | Int32Array | Int16Array, shape: number[]):
     else if (shape.length === 2) {
         const n1 = shape[0]
         const n2 = shape[1]
-        if (n1 * n2 !== x.length) throw Error('Unexpected length of array')
+        if (n1 * n2 !== x.length) throw Error(`Unexpected length of array ${n1} x ${n2} <> ${x.length}`)
         const ret: number[][] = []
         for (let i1 = 0; i1 < n1; i1++) {
             ret.push(Array.from(x.slice(i1 * n2, (i1 + 1) * n2)))
@@ -113,14 +149,14 @@ const applyShape = (x: Float32Array | Int32Array | Int16Array, shape: number[]):
     }
 }
 
-const _base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-    var binary_string = window.atob(base64)
-    var len = binary_string.length
-    var bytes = new Uint8Array(len)
-    for (var i = 0; i < len; i++) {
-        bytes[i] = binary_string.charCodeAt(i)
-    }
-    return bytes.buffer
-}
+// const _base64ToArrayBuffer = (base64: string): ArrayBuffer => {
+//     var binary_string = window.atob(base64)
+//     var len = binary_string.length
+//     var bytes = new Uint8Array(len)
+//     for (var i = 0; i < len; i++) {
+//         bytes[i] = binary_string.charCodeAt(i)
+//     }
+//     return bytes.buffer
+// }
 
 export default deserializeReturnValue

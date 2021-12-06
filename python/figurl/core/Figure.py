@@ -46,7 +46,7 @@ def _enc(x: str):
     return urllib.parse.quote(x)
 
 def store_json(x: dict):
-    return kc.store_json(_serialize(x))
+    return kc.store_json(_serialize(x, compress_npy=True))
 
 def _replace_sync_objects(x: Any):
     if isinstance(x, Sync):

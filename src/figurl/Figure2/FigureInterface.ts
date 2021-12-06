@@ -94,7 +94,7 @@ class FigureInterface {
         const dataUrl = `${bucketBaseUrl}/${this.a.channelName}/sha1/${s[0]}${s[1]}/${s[2]}${s[3]}/${s[4]}${s[5]}/${s}`
         const x = await axios.get(dataUrl, {responseType: 'json'})
         let data = x.data
-        data = deserializeReturnValue(data)
+        data = await deserializeReturnValue(data)
         ;(window as any).figurlFileData[request.sha1.toString()] = data
         return {
             type: 'getFileData',
