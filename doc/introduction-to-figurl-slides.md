@@ -13,13 +13,17 @@ Center for Computational Mathematics, Flatiron Institute
 
 # What is Figurl?
 
-Figurl offers **shareable**, **interactive**, **computation-backed** views of scientific
-datasets in the cloud.
+Figurl is a framework for making **shareable**, **interactive**, **computation-backed**
+views of scientific datasets in the cloud.
+
+Figurl allows users to:
 
 * Share domain-specific views into potentially large and complex datasets
 * View a data snapshot or evolving data
 * Curate datasets
-* Export figures backing data to stand-alone HTML bundles
+* Export figures (with backing data) to stand-alone HTML bundles
+
+([Long-form introduction: https://github.com/magland/figurl/wiki/Introduction-to-Figurl](https://github.com/magland/figurl/wiki/Introduction-to-Figurl))
 
 ---
 
@@ -31,7 +35,7 @@ datasets in the cloud.
 
 # What is a FigURL?
 
-A figURL = a permanent link to a data-backed figure
+A figURL = a canonical link to a data-backed figure
 
 An example: https://www.figurl.org/f?v=gs://figurl/spikesortingview-1&d=79f878acca63c2527d2e5d99189852047b5af2c2&channel=flatiron1&label=despereaux20191125
 
@@ -124,10 +128,13 @@ print(url)
 
 Within Figurl, we make a distinction between "static" and "live" figures.
 
-* **Static figures** are backed by data whose size is small enough that it
-can be completely precomputed and cached when the figure is generated. Data are served directly from cloud storage cache, whether or not the original source is online.
+* **Static figures**:
+  * Backed by data that can be completely precomputed and cached in advance
+  * Data served directly from cloud storage cache (not the original source)
 
-* **Live** figures are backed by data that cannot be computed exhaustively in advance. The main examples are data streams and large datasets.
+* **Live figures**:
+  * Backing data is not computed or uploaded exhaustively in advance
+  * Use cases: **data streams** and **large datasets**
 
 ---
 
@@ -146,6 +153,12 @@ can be completely precomputed and cached when the figure is generated. Data are 
 [Cross-correlograms view](https://www.figurl.org/f?v=gs://figurl/spikesortingview-1&d=79f878acca63c2527d2e5d99189852047b5af2c2&channel=flatiron1&label=despereaux20191125)
 
 ---
+# Data flow for live figures
+
+<img src="https://camo.githubusercontent.com/9b0688592f01172e0ff092ff4b0b0f93239fb2d05b17c5c46d1055c4dbe1ea96/68747470733a2f2f646f63732e676f6f676c652e636f6d2f64726177696e67732f642f652f32504143582d3176516976524733457a494f486474476b6b667a756a43503746665f7361575a535a536d6745422d655f73597256447a31616e34515367567045696546514f634332654137703337366c394f4a4d2d322f7075623f773d36373526683d343534"
+alt="Diagram of elements supporting a live figure." width="675" height="454">
+
+---
 
 # Example: Curation of underlying datasets
 
@@ -155,26 +168,30 @@ can be completely precomputed and cached when the figure is generated. Data are 
 
 # Role of kachery
 
-<img src="https://docs.google.com/drawings/d/e/2PACX-1vQUnokzwrFHdIO-LjloBjHGbOHE7uaLEh9frzx-WrJbn_z0lIScFhyNWCBYZfj6ofjNHRoJbzjJbFlS/pub?w=960&h=720" width=70%>
+* *Mediated peer-to-peer* network for sharing scientific data
+* Distributes the data objects that back Figurl figures
+* Minimal barrier to entry for sharing data
+* Canonical file locations for reliable consistent retrieval
+* Cloud cache makes data access fast and reliable
+* Supports **files** (static data) and **feeds** (append-only ledger in JSON)
+* Provides access to other compute through **tasks**
 
 ---
 
 # Distributing the visualization module code
 
-* Visualizations are written in Javascript (we highly the [React framework](https://reactjs.org/)).
+* Visualizations written in Javascript (we highly recommend the [React framework](https://reactjs.org/))
 * We offer an expanding array of basic components
-* Visualization code must be made available at a public location (the `v` parameter of the FigURL).
-* The Figurl web application loads the JavaScript code in the
-view component into an iframe, and feeds it the associated data so that it can
-render the view.
+* Visualization code must be available at a public location (FigURL `v` parameter)
 * Cloud storage works well for this purpose
+* The Figurl web application loads the view component code into an iframe, and passes the associated data to render
 
 ---
 
 # Versioning visualization modules
 
 * Creators of custom views should version visualization modules, leaving older versions of code accessible
-* Allows older FigURLs to continue working as expected.
+* Allows older FigURLs to continue working as expected
 * Making viewer code accessible at a stable storage location is essential
 to ensure visualizations remain accessible long into the future
 
@@ -183,11 +200,23 @@ to ensure visualizations remain accessible long into the future
 # Future-proofing visualizations
 
 * Figurl offers an 'export' feature for static figures
-* All visualization code plus necessary data is automatically wrapped in an HTML bundle
+* All visualization code + necessary data is wrapped in an HTML bundle
 * Downloaded as a .zip file (no external dependencies)
+* Live figures are not supported by this process
+
+---
+
+# Questions?
 
 ---
 
 # Getting started
 
-[Step-by-step example of getting started with Figurl.](https://github.com/magland/figurl/wiki/Getting-Started-with-Figurl)
+[Step-by-step example of getting started with Figurl](https://github.com/magland/figurl/wiki/Getting-Started-with-Figurl)
+
+---
+
+# More about kachery structure
+
+<img src="https://docs.google.com/drawings/d/e/2PACX-1vQUnokzwrFHdIO-LjloBjHGbOHE7uaLEh9frzx-WrJbn_z0lIScFhyNWCBYZfj6ofjNHRoJbzjJbFlS/pub?w=960&h=720" width=70%>
+
