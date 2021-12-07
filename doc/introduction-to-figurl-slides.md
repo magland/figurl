@@ -241,3 +241,14 @@ to ensure visualizations remain accessible long into the future
 
 <img src="https://docs.google.com/drawings/d/e/2PACX-1vQUnokzwrFHdIO-LjloBjHGbOHE7uaLEh9frzx-WrJbn_z0lIScFhyNWCBYZfj6ofjNHRoJbzjJbFlS/pub?w=960&h=720" width=70%>
 
+---
+
+# Video of Curation Interface in Action
+
+<img src="https://user-images.githubusercontent.com/3679296/145096981-23ee32dd-22cc-433a-b3c7-a09488e03f93.gif" width="539" height="369">
+
+---
+
+# Video of Vector Field Viewer in Action
+
+<img src="https://user-images.githubusercontent.com/3679296/145098290-d22b5705-194f-4397-a087-56f9053beafe.gif" width="640" height="402">
