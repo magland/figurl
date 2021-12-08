@@ -1,9 +1,9 @@
 import { AppBar, Button, Toolbar } from '@material-ui/core';
 import { useSignedIn } from 'commonComponents/googleSignIn/GoogleSignIn';
 import { useChannel } from 'figurl/kachery-react';
+import ConfigureChannel from 'figurl/kachery-react/components/ConfigureChannel/ConfigureChannel';
 import ChannelControl from 'figurl/kachery-react/components/SelectChannel/ChannelControl';
 import ExportControl from 'figurl/kachery-react/components/SelectChannel/ExportControl';
-import SelectChannel from 'figurl/kachery-react/components/SelectChannel/SelectChannel';
 import TaskMonitor from 'figurl/kachery-react/components/TaskMonitor/TaskMonitor';
 import TaskMonitorControl from 'figurl/kachery-react/components/TaskMonitor/TaskMonitorControl';
 import ModalWindow from 'figurl/labbox-react/components/ModalWindow/ModalWindow';
@@ -41,7 +41,7 @@ export const useModalDialog = () => {
 
 const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
     const {visible: exportVisible, handleOpen: openExport, handleClose: closeExport} = useModalDialog()
-    const {visible: channelVisible, handleOpen: openChannel, handleClose: closeChannel} = useModalDialog()
+    const {visible: configureChannelVisible, handleOpen: openConfigureChannel, handleClose: closeConfigureChannel} = useModalDialog()
     const {visible: taskMonitorVisible, handleOpen: openTaskMonitor, handleClose: closeTaskMonitor} = useModalDialog()
 
     // const client = useGoogleSignInClient()
@@ -87,7 +87,7 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
                     )
                 }
                 <span style={{paddingBottom: 0, color: 'white'}}>
-                    <ChannelControl onOpen={openChannel} color={channelControlColor} />
+                    <ChannelControl onOpen={openConfigureChannel} color={channelControlColor} />
                 </span>
                 <span style={{paddingBottom: 0, color: 'white'}}>
                     <TaskMonitorControl onOpen={openTaskMonitor} color="white" />
@@ -113,11 +113,11 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
                 />
             </ModalWindow>
             <ModalWindow
-                open={channelVisible}
-                onClose={closeChannel}
+                open={configureChannelVisible}
+                onClose={closeConfigureChannel}
             >
-                <SelectChannel
-                    onClose={closeChannel}
+                <ConfigureChannel
+                    onClose={closeConfigureChannel}
                 />
             </ModalWindow>
             <ModalWindow

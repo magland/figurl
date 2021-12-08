@@ -2,7 +2,7 @@
 
 <img src="./figurl.png" width="200px" />
 
-Shareable, interactive, data-backed figures generated using Python
+Shareable, interactive, computation-backed figures
 
 ## Introduction
 

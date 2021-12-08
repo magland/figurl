@@ -3,8 +3,6 @@ import SelectChannelDialog from 'figurl/kachery-react/components/SelectChannel/S
 import { RecentFigure, RecentFigures } from 'figurl/RecentFigures'
 import React, { FunctionComponent } from 'react'
 import { useVisible } from '..'
-import ChannelSection from './ChannelSection'
-import DocumentSection from './DocumentSection'
 import './Home.css'
 import IntroSection from './IntroSection'
 import './localStyles.css'
@@ -28,11 +26,12 @@ const HomePage: FunctionComponent<HomePageProps> = ({taskFunctionIds, packageNam
         <div style={{margin: 'auto', maxWidth: 1200, paddingLeft: 10, paddingRight: 10}}>
             
             <IntroSection />
-            <ChannelSection onSelectChannel={selectChannelVisibility.show} taskFunctionIds={taskFunctionIds} packageName={packageName} />
-            <DocumentSection />
+            {/* <ChannelSection onSelectChannel={selectChannelVisibility.show} taskFunctionIds={taskFunctionIds} packageName={packageName} />
+            <DocumentSection /> */}
             <span>
                 <hr />
-                <p style={{fontFamily: 'courier', color: 'gray'}}>Python package version: {packageName} {pythonProjectVersion} | GUI version: {webAppProjectVersion}</p>
+                {/* <p style={{fontFamily: 'courier', color: 'gray'}}>Python package version: {packageName} {pythonProjectVersion} | GUI version: {webAppProjectVersion}</p> */}
+                <p style={{fontFamily: 'courier', color: 'gray'}}>Figurl web application version: {webAppProjectVersion}</p>
             </span>
             
             <SelectChannelDialog

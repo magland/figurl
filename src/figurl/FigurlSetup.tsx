@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useCallback, useState } from 'react';
+import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import FigurlContext from './FigurlContext';
 
 type Props = {
@@ -21,7 +21,10 @@ const setBackendIdObjectToLocalStorage = (obj: {[key: string]: string | null}) =
 }
 
 const FigurlSetup: FunctionComponent<Props> = ({children}) => {
-    const [backendIdObject, setBackendIdObject] = useState<null | {[key: string]: string | null} | undefined>(getBackendIdObjectFromLocalStorage())
+    const [backendIdObject, setBackendIdObject] = useState<null | {[key: string]: string | null} | undefined>(undefined)
+    useEffect(() => {
+        setBackendIdObject(getBackendIdObjectFromLocalStorage())
+    }, [])
     const backendId = useCallback((channel: string): string | null => {
         return (backendIdObject || {})[channel] || null
     }, [backendIdObject])
@@ -31,8 +34,12 @@ const FigurlSetup: FunctionComponent<Props> = ({children}) => {
         setBackendIdObject(a)
         setBackendIdObjectToLocalStorage(a)
     }, [backendIdObject])
+    const value = useMemo(() => ({
+        backendId: backendId || null,
+        setBackendId
+    }), [backendId, setBackendId])
     return (
-        <FigurlContext.Provider value={{backendId: backendId || null, setBackendId}}>
+        <FigurlContext.Provider value={value}>
             {children}
         </FigurlContext.Provider>
     )
