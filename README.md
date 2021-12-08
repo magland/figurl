@@ -6,7 +6,11 @@ Shareable, interactive, computation-backed figures
 
 ## Introduction
 
-[Introduction to figurl](https://github.com/magland/figurl/wiki/Introduction-to-Figurl)
+[Introduction to Figurl](https://github.com/magland/figurl/wiki/Introduction-to-Figurl)
+
+## Getting started
+
+[Getting started with Figurl](https://github.com/magland/figurl/wiki/Getting-Started-with-Figurl)
 
 ## Projects that use figurl
 
