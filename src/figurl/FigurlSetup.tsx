@@ -29,7 +29,7 @@ const FigurlSetup: FunctionComponent<Props> = ({children}) => {
         return (backendIdObject || {})[channel] || null
     }, [backendIdObject])
     const setBackendId = useCallback((channel: string, id: string | null) => {
-        const a = backendIdObject || {}
+        const a = JSON.parse(JSON.stringify(backendIdObject || {}))
         a[channel] = id
         setBackendIdObject(a)
         setBackendIdObjectToLocalStorage(a)
