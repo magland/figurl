@@ -2,12 +2,17 @@
 marp: true
 ---
 
-# Introduction to Figurl
+Introduction to Figurl
+======================
 
 8 December 2021
 
 Jeremy Magland and Jeff Soules
 Center for Computational Mathematics, Flatiron Institute
+
+<hr>
+
+<img src="https://github.com/magland/figurl/raw/main/figurl.png" width=20%>
 
 ---
 
