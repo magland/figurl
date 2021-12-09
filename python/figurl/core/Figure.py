@@ -1,4 +1,5 @@
 import os
+import json
 from typing import Any, Union
 import urllib.parse
 import kachery_client as kc
@@ -7,9 +8,17 @@ from .Sync import Sync
 
 class Figure:
     def __init__(self, *, data: Any, view_url: Union[str, None]=None):
-        self._view_url = view_url # new system
+        self._view_url = view_url
         self._data = _replace_sync_objects(data)
-        if view_url is not None: # new system
+        self._serialized_data = _serialize(self._data, compress_npy=True)
+
+        # check up front whether figure data is too large
+        max_data_size = 30 * 1000 * 1000
+        data_size = len(json.dumps(self._serialized_data))
+        if data_size > max_data_size:
+            raise Exception(f'Figure data is too large ({data_size} > {max_data_size} bytes). A live view is probably in order for this figure.')
+
+        if view_url is not None:
             self._object = None
         else:
             raise Exception('Missing view_url')
@@ -32,7 +41,7 @@ class Figure:
             channel = default_channel
         if self._view_url is not None: # new system:
             if self._data_uri is None:
-                self._data_uri = store_json(self._data)
+                self._data_uri = kc.store_json(self._serialized_data)
             data_hash = self._data_uri.split('/')[2]
             kc.upload_file(self._data_uri, channel=channel)
             if view_url is None:
@@ -44,9 +53,6 @@ class Figure:
 
 def _enc(x: str):
     return urllib.parse.quote(x)
-
-def store_json(x: dict):
-    return kc.store_json(_serialize(x, compress_npy=True))
 
 def _replace_sync_objects(x: Any):
     if isinstance(x, Sync):
