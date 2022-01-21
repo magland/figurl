@@ -10,7 +10,7 @@ setup(
         'click',
         'altair',
         'hither>=0.7.0',
-        'kachery-client>=1.0.15',
+        'kachery-client>=1.1.0',
         'pyyaml',
         'google-auth',
         'cachecontrol'

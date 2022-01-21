@@ -43,7 +43,7 @@ class Figure:
             if self._data_uri is None:
                 self._data_uri = kc.store_json(self._serialized_data)
             data_hash = self._data_uri.split('/')[2]
-            kc.upload_file(self._data_uri, channel=channel)
+            kc.upload_file(self._data_uri, channel=channel, single_chunk=True)
             if view_url is None:
                 view_url = self._view_url
             url = f'{base_url}/f?v={view_url}&d={data_hash}&channel={channel}&label={_enc(label)}'
