@@ -164,10 +164,14 @@ class KacheryNode {
         const x = await this.#kacheryStorageManager.findFile(args.fileKey)
         if (x.found) {
             this.#kacheryHubInterface.sendUploadFileStatusMessage({channelName: args.channelName, fileKey: args.fileKey, status: 'started'})
-            // todo: use pending status and only upload certain number at a time
-            await this.#fileUploader.uploadFileToBucket({channelName: args.channelName, fileKey: args.fileKey, fileSize: x.size})
+            await this.uploadFile({channelName: args.channelName, fileKey: args.fileKey, fileSize: x.size})
             this.#kacheryHubInterface.sendUploadFileStatusMessage({channelName: args.channelName, fileKey: args.fileKey, status: 'finished'})
         }
+    }
+    async uploadFile(args: {fileKey: FileKey, channelName: ChannelName, fileSize: ByteCount}) {
+        const {fileKey, channelName, fileSize} = args
+        // todo: use pending status and only upload certain number at a time
+        await this.#fileUploader.uploadFileToBucket({channelName, fileKey, fileSize})
     }
 }
 

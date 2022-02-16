@@ -121,7 +121,7 @@ export default class IncomingTaskManager {
         for (let x of this.#pendingTaskRequests) {
             let remove = false
             const elapsed = elapsedSince(x.timestamp)
-            if (elapsed < 1000 * 4) {
+            if (elapsed < 1000 * 10) {
                 const g = this._findRegisteredTaskFunctionGroupForTaskFunction(x.requestedTask.taskFunctionId, x.requestedTask.channelName, x.requestedTask.backendId)
                 if (g) {
                     g.internalRequestedTaskList.push(x.requestedTask)

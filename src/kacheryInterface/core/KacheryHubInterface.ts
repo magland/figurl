@@ -115,6 +115,24 @@ class KacheryHubInterface {
         }
         return options
     }
+    async checkForFileInChannelBucket(sha1: Sha1Hash, channelName: ChannelName): Promise<boolean> {
+        logger.debug(`KacheryHubInterface: checkForFileInChannelBucket ${channelName} ${sha1}`)
+        await this.initialize()
+        if (!this.#channelMemberships) return false
+        // const checkedBucketUrls = new Set<string>()
+        for (let cm of (this.#channelMemberships || [])) {
+            if (channelName === cm.channelName) {
+                const bucketBaseUrl = cm.channelBucketBaseUrl
+                if (bucketBaseUrl) {
+                    const s = sha1
+                    const filePath = `sha1/${s[0]}${s[1]}/${s[2]}${s[3]}/${s[4]}${s[5]}/${s}`
+                    const url2 = urlString(`${bucketBaseUrl}/${channelName}/${filePath}`)
+                    return await checkUrlExists(url2)
+                }
+            }
+        }
+        return false
+    }
     async checkForSubfeedInChannelBucket(feedId: FeedId, subfeedHash: SubfeedHash, channelName: ChannelName): Promise<MessageCount | null> {
         logger.debug(`KacheryHubInterface: checkForSubfeedInChannelBucket ${channelName} ${feedId}/${subfeedHash}`)
         await this.initialize()

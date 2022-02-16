@@ -6,4 +6,4 @@ class Markdown(Figure):
         data = {
             'source': source
         }
-        super().__init__(type='Markdown.1', data=data)
+        super().__init__(view_url='gs://figurl/markdown-1', data=data)
