@@ -42,6 +42,12 @@ const deserializeReturnValue = async (x: any): Promise<any> => {
             else if (dtype === 'uint8') {
                 return applyShape(new Uint8Array(dataBuffer.buffer), shape)
             }
+            else if (dtype === 'float64') {
+                if (shapeProduct(shape) > 100) {
+                    console.info('WARNING: Using float64 array. It may be a good idea to cast the array to float32 if you do not need the full precision', shape)
+                }
+                return applyShape(new Float64Array(dataBuffer.buffer), shape)
+            }
             else {
                 throw Error(`Datatype not yet implemented for ndarray: ${dtype}`)
             }
@@ -57,6 +63,12 @@ const deserializeReturnValue = async (x: any): Promise<any> => {
     else return x
 }
 
+const shapeProduct = (shape: number[]) => {
+    let ret = 1
+    for (let a of shape) ret *= a
+    return ret
+}
+
 const gunzipAsync = async (x: ArrayBuffer): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
         zlib.inflate(x, (err, y) => {
@@ -69,7 +81,7 @@ const gunzipAsync = async (x: ArrayBuffer): Promise<Buffer> => {
     })
 }
 
-const applyShape = (x: Float32Array | Int32Array | Int16Array | Uint8Array, shape: number[]): number[] | number[][] | number[][][] | number[][][][] | number[][][][][] => {
+const applyShape = (x: Float32Array | Int32Array | Int16Array | Uint8Array | Float64Array, shape: number[]): number[] | number[][] | number[][][] | number[][][][] | number[][][][][] => {
     if (shape.length === 1) {
         if (shape[0] !== x.length) throw Error('Unexpected length of array')
         return Array.from(x)
