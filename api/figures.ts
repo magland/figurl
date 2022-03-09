@@ -1,12 +1,9 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import verifyReCaptcha, { VerifiedReCaptchaInfo } from '../apiHelpers/common/verifyReCaptcha'
-import createCurationHandler from '../apiHelpers/createCurationHandler'
-import { JSONValue } from '../src/commonInterface/kacheryTypes'
-import {Auth, isCurationRequest} from '../src/miscTypes/CurationRequest'
+import addFigureHandler from '../apiHelpers/addFigureHandler'
+import {Auth, isFigureRequest} from '../src/miscTypes/FigureRequest'
 import googleVerifyIdToken from '../apiHelpers/common/googleVerifyIdToken'
-import addCurationMessageHandler from '../apiHelpers/addCurationMessageHandler'
-import getCurationMessagesHandler from '../apiHelpers/getCurationMessagesHandler'
-import getCurationInfoHandler from '../apiHelpers/getCurationInfoHandler'
+import getFiguresHandler from '../apiHelpers/getFiguresHandler'
 
 const verifyAuth = async (auth: Auth) => {
     const {userId, googleIdToken, reCaptchaToken} = auth
@@ -18,28 +15,21 @@ const verifyAuth = async (auth: Auth) => {
 
 module.exports = (req: VercelRequest, res: VercelResponse) => {
     const {body: requestBody} = req
-    if (!isCurationRequest(requestBody)) {
+    if (!isFigureRequest(requestBody)) {
         console.warn('Invalid request body', requestBody)
         res.status(400).send(`Invalid request body: ${JSON.stringify(requestBody)}`)
         return
     }
     ;(async () => {
-        if (requestBody.type === 'createCuration') {
+        if (requestBody.type === 'addFigure') {
             const {verifiedUserId, verifiedReCaptchaInfo} = await verifyAuth(requestBody.auth)
-            return await createCurationHandler(requestBody, verifiedUserId, verifiedReCaptchaInfo)
+            return await addFigureHandler(requestBody, verifiedUserId, verifiedReCaptchaInfo)
         }
-        else if (requestBody.type === 'addCurationMessage') {
-            const {verifiedUserId, verifiedReCaptchaInfo} = await verifyAuth(requestBody.auth)
-            return await addCurationMessageHandler(requestBody, verifiedUserId, verifiedReCaptchaInfo)
-        }
-        else if (requestBody.type === 'getCurationMessages') {
-            return await getCurationMessagesHandler(requestBody)
-        }
-        else if (requestBody.type === 'getCurationInfo') {
-            return await getCurationInfoHandler(requestBody)
+        else if (requestBody.type === 'getFigures') {
+            return await getFiguresHandler(requestBody)
         }
         else {
-            throw Error(`Unexpected curation request: ${requestBody.type}`)
+            throw Error(`Unexpected figure request: ${requestBody.type}`)
         }
     })().then((result) => {
         res.json(result)

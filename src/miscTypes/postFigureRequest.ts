@@ -1,18 +1,18 @@
 import axios from "axios"
-import { CurationRequest, CurationResponse } from "./CurationRequest"
+import { FigureRequest, FigureResponse } from "./FigureRequest"
 import { getReCaptchaToken } from "./reCaptcha"
 
-const postCurationRequest = async (request: CurationRequest, opts: {reCaptcha: boolean}): Promise<CurationResponse> => {
-    let request2: CurationRequest = request
+const postFigureRequest = async (request: FigureRequest, opts: {reCaptcha: boolean}): Promise<FigureResponse> => {
+    let request2: FigureRequest = request
     if (opts.reCaptcha) {
-        if ((request.type === 'createCuration') || (request.type === 'addCurationMessage')) {
+        if (request.type === 'addFigure') {
             const reCaptchaToken = await getReCaptchaToken()
             request2 = {...request, auth: {...request.auth, reCaptchaToken}}
         }
         else throw Error(`No reCaptcha needed for request of type ${request.type}`)
     }
     try {
-        const x = await axios.post('/api/curation', request2)
+        const x = await axios.post('/api/figures', request2)
         return x.data
     }
     catch(err: any) {
@@ -24,4 +24,4 @@ const postCurationRequest = async (request: CurationRequest, opts: {reCaptcha: b
     }
 }
 
-export default postCurationRequest
+export default postFigureRequest
