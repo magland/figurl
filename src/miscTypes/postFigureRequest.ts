@@ -5,7 +5,7 @@ import { getReCaptchaToken } from "./reCaptcha"
 const postFigureRequest = async (request: FigureRequest, opts: {reCaptcha: boolean}): Promise<FigureResponse> => {
     let request2: FigureRequest = request
     if (opts.reCaptcha) {
-        if (request.type === 'addFigure') {
+        if ((request.type === 'addFigure') || (request.type === 'deleteFigure')) {
             const reCaptchaToken = await getReCaptchaToken()
             request2 = {...request, auth: {...request.auth, reCaptchaToken}}
         }

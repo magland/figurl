@@ -43,10 +43,13 @@ export const useFigureData = (dataHash: string | undefined, channelName: Channel
 }
 
 export const useRoute2 = () => {
+    const url = window.location.href
     const location = useLocation()
     // const history = useHistory()
-    const query = useMemo(() => (QueryString.parse(location.search.slice(1))), [location.search]);
-    let viewUrl = query.v ? query.v as string : undefined
+    const queryString = location.search.slice(1)
+    const query = useMemo(() => (QueryString.parse(queryString)), [queryString]);
+    const viewUri = query.v ? query.v as string : undefined
+    let viewUrl = viewUri
     let viewUrlBase = viewUrl
     if ((viewUrl) && (viewUrl.startsWith('gs://'))) {
         viewUrlBase = urlFromUri(viewUrl)
@@ -55,7 +58,7 @@ export const useRoute2 = () => {
     const figureDataHash = query.d ? query.d as string : undefined
     const channelName = query.channel ? query.channel as any as ChannelName : undefined
     const label = query.label ? query.label as any as string : 'untitled'
-    return {viewUrl, viewUrlBase, figureDataHash, channelName, label}
+    return {url, queryString, viewUri, viewUrl, viewUrlBase, figureDataHash, channelName, label}
 }
 
 const Figure2: FunctionComponent<Props> = ({width, height}) => {

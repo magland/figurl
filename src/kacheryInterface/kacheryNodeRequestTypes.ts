@@ -1,6 +1,6 @@
 import BitwooderDelegationCert, { isBitwooderDelegationCertificate } from "../bitwooderInterface/BitwooderDelegationCert"
-import { AblyTokenRequest, ChannelConfig, isAblyTokenRequest, isChannelConfig, isNodeConfig, NodeConfig } from "./kacheryHubTypes"
-import { ByteCount, ChannelName, FeedId, isArrayOf, isBoolean, isByteCount, isChannelName, isEqualTo, isFeedId, isNodeId, isNodeLabel, isNumber, isOneOf, isPrivateKeyHex, isSha1Hash, isSignature, isSubfeedHash, isTaskId, isUrlString, isUserId, NodeId, NodeLabel, optional, PrivateKeyHex, Sha1Hash, Signature, SubfeedHash, TaskId, UrlString, UserId, _validateObject } from "../commonInterface/kacheryTypes"
+import { ChannelName, isBoolean, isChannelName, isEqualTo, isNodeId, isNodeLabel, isOneOf, isPrivateKeyHex, isSignature, isUserId, NodeId, NodeLabel, optional, PrivateKeyHex, Signature, UserId, _validateObject } from "../commonInterface/kacheryTypes"
+import { ChannelConfig, isChannelConfig, isNodeConfig, NodeConfig } from "./kacheryHubTypes"
 
 export type ReportRequestBody = {
     type: 'report'

@@ -19,7 +19,7 @@ export type Figure = {
     creationDate?: number
     ownerId: string
     folder: string
-    url: string
+    queryString: string
     channel: string
     dataHash: string
     viewUri: string
@@ -33,7 +33,7 @@ export const isFigure = (y: any): y is Figure => {
         creationDate: optional(isNumber),
         ownerId: isString,
         folder: isString,
-        url: isString,
+        queryString: isString,
         channel: isString,
         dataHash: isString,
         viewUri: isString,
@@ -70,6 +70,34 @@ export const isAddFigureResponse = (x: any): x is AddFigureResponse => {
     })
 }
 
+// DeleteFigure
+
+export type DeleteFigureRequest = {
+    type: 'deleteFigure'
+    ownerId: string,
+    figureId: string,
+    auth: Auth
+}
+
+export const isDeleteFigureRequest = (x: any): x is DeleteFigureRequest => {
+    return _validateObject(x, {
+        type: isEqualTo('deleteFigure'),
+        ownerId: isString,
+        figureId: isString,
+        auth: isAuth
+    })
+}
+
+export type DeleteFigureResponse = {
+    type: 'deleteFigure'
+}
+
+export const isDeleteFigureResponse = (x: any): x is DeleteFigureResponse => {
+    return _validateObject(x, {
+        type: isEqualTo('deleteFigure')
+    })
+}
+
 // GetFigures
 
 export type GetFiguresRequest = {
@@ -100,22 +128,26 @@ export const isGetFiguresResponse = (x: any): x is GetFiguresResponse => {
 
 export type FigureRequest =
     AddFigureRequest |
+    DeleteFigureRequest |
     GetFiguresRequest
 
 export const isFigureRequest = (x: any): x is FigureRequest => {
     return isOneOf([
         isAddFigureRequest,
+        isDeleteFigureRequest,
         isGetFiguresRequest
     ])(x)
 }
 
 export type FigureResponse =
     AddFigureResponse |
+    DeleteFigureResponse |
     GetFiguresResponse
 
 export const isFigureResponse = (x: any): x is FigureResponse => {
     return isOneOf([
         isAddFigureResponse,
+        isDeleteFigureResponse,
         isGetFiguresResponse
     ])(x)
 }

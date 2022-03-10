@@ -4,12 +4,14 @@ import { useChannel } from 'figurl/kachery-react';
 import ConfigureChannel from 'figurl/kachery-react/components/ConfigureChannel/ConfigureChannel';
 import ChannelControl from 'figurl/kachery-react/components/SelectChannel/ChannelControl';
 import ExportControl from 'figurl/kachery-react/components/SelectChannel/ExportControl';
+import SaveFigureControl from 'figurl/kachery-react/components/SelectChannel/SaveFigureControl'
 import TaskMonitor from 'figurl/kachery-react/components/TaskMonitor/TaskMonitor';
 import TaskMonitorControl from 'figurl/kachery-react/components/TaskMonitor/TaskMonitorControl';
 import ModalWindow from 'figurl/labbox-react/components/ModalWindow/ModalWindow';
 import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import useRoute from '../useRoute';
 import ExportDialog from './ExportDialog';
+import SaveFigureDialog from './SaveFigureDialog';
 
 const appBarHeight = 50
 
@@ -41,6 +43,7 @@ export const useModalDialog = () => {
 
 const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
     const {visible: exportVisible, handleOpen: openExport, handleClose: closeExport} = useModalDialog()
+    const {visible: saveFigureVisible, handleOpen: openSaveFigure, handleClose: closeSaveFigure} = useModalDialog()
     const {visible: configureChannelVisible, handleOpen: openConfigureChannel, handleClose: closeConfigureChannel} = useModalDialog()
     const {visible: taskMonitorVisible, handleOpen: openTaskMonitor, handleClose: closeTaskMonitor} = useModalDialog()
 
@@ -92,9 +95,20 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
                 <span style={{paddingBottom: 0, color: 'white'}}>
                     <TaskMonitorControl onOpen={openTaskMonitor} color="white" />
                 </span>
-                <span style={{paddingBottom: 0, color: 'white'}}>
-                    <ExportControl onClick={openExport} color={exportControlColor} />
-                </span>
+                {
+                    routePath === '/f' && (
+                        <span style={{paddingBottom: 0, color: 'white'}}>
+                            <ExportControl onClick={openExport} color={exportControlColor} />
+                        </span>
+                    )
+                }
+                {
+                    routePath === '/f' && (
+                        <span style={{paddingBottom: 0, color: 'white'}}>
+                            <SaveFigureControl onClick={openSaveFigure} color="white" />
+                        </span>
+                    )
+                }
                 {
                     signedIn ? (
                         <Button color="inherit" onClick={handleLogout}>Sign out</Button>
@@ -110,6 +124,14 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
             >
                 <ExportDialog
                     onClose={closeExport}
+                />
+            </ModalWindow>
+            <ModalWindow
+                open={saveFigureVisible}
+                onClose={closeSaveFigure}
+            >
+                <SaveFigureDialog
+                    onClose={closeSaveFigure}
                 />
             </ModalWindow>
             <ModalWindow

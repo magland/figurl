@@ -11,7 +11,7 @@ const addFigureHandler = async (request: AddFigureRequest, verifiedUserId: strin
     }
     const figure: Figure = request.figure
     if (figure.ownerId !== verifiedUserId) {
-        throw Error('Not authorized to add figure.')
+        throw Error(`Not authorized to add figure: ${figure.ownerId} <> ${verifiedUserId}`)
     }
     figure.figureId = randomAlphaString(12)
     figure.creationDate = Date.now()

@@ -14,7 +14,7 @@ const getFiguresHandler = async (request: GetFiguresRequest): Promise<GetFigures
         else {
             console.warn(x)
             console.warn('Invalid figure in database (getFiguresHandler)')
-            // await doc.ref.delete() // only delete if we are sure we want to -- don't risk losing data!
+            // await doc.ref.delete() // only delete if we are sure we want to (during development) -- don't risk losing data!
         }
     }
     return {

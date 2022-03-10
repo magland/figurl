@@ -1,9 +1,10 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
-import verifyReCaptcha, { VerifiedReCaptchaInfo } from '../apiHelpers/common/verifyReCaptcha'
 import addFigureHandler from '../apiHelpers/addFigureHandler'
-import {Auth, isFigureRequest} from '../src/miscTypes/FigureRequest'
 import googleVerifyIdToken from '../apiHelpers/common/googleVerifyIdToken'
+import verifyReCaptcha, { VerifiedReCaptchaInfo } from '../apiHelpers/common/verifyReCaptcha'
+import deleteFigureHandler from '../apiHelpers/deleteFigureHandler'
 import getFiguresHandler from '../apiHelpers/getFiguresHandler'
+import { Auth, isFigureRequest } from '../src/miscTypes/FigureRequest'
 
 const verifyAuth = async (auth: Auth) => {
     const {userId, googleIdToken, reCaptchaToken} = auth
@@ -24,6 +25,10 @@ module.exports = (req: VercelRequest, res: VercelResponse) => {
         if (requestBody.type === 'addFigure') {
             const {verifiedUserId, verifiedReCaptchaInfo} = await verifyAuth(requestBody.auth)
             return await addFigureHandler(requestBody, verifiedUserId, verifiedReCaptchaInfo)
+        }
+        else if (requestBody.type === 'deleteFigure') {
+            const {verifiedUserId, verifiedReCaptchaInfo} = await verifyAuth(requestBody.auth)
+            return await deleteFigureHandler(requestBody, verifiedUserId, verifiedReCaptchaInfo)
         }
         else if (requestBody.type === 'getFigures') {
             return await getFiguresHandler(requestBody)
