@@ -58,8 +58,8 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
     }, [gapi])
     const handleLogout = useCallback(() => {
         gapi.auth2.getAuthInstance().signOut()
-        setRoute({routePath: '/home'})
-    }, [gapi, setRoute])
+        // setRoute({routePath: '/home'})
+    }, [gapi])
 
     const {backendId} = useChannel()
     const channelControlColor = backendId ? 'orange' : 'white'
