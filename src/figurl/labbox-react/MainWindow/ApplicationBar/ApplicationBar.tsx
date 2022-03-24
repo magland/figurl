@@ -4,7 +4,7 @@ import { useChannel } from 'figurl/kachery-react';
 import ConfigureChannel from 'figurl/kachery-react/components/ConfigureChannel/ConfigureChannel';
 import ChannelControl from 'figurl/kachery-react/components/SelectChannel/ChannelControl';
 import ExportControl from 'figurl/kachery-react/components/SelectChannel/ExportControl';
-import SaveFigureControl from 'figurl/kachery-react/components/SelectChannel/SaveFigureControl'
+import SaveFigureControl from 'figurl/kachery-react/components/SelectChannel/SaveFigureControl';
 import TaskMonitor from 'figurl/kachery-react/components/TaskMonitor/TaskMonitor';
 import TaskMonitorControl from 'figurl/kachery-react/components/TaskMonitor/TaskMonitorControl';
 import ModalWindow from 'figurl/labbox-react/components/ModalWindow/ModalWindow';
@@ -49,7 +49,7 @@ const ApplicationBar: FunctionComponent<Props> = ({ title, logo, onHome }) => {
 
     // const client = useGoogleSignInClient()
     // const gapi = client?.gapi
-    const {setRoute, wiki, routePath} = useRoute()
+    const {wiki, routePath} = useRoute()
 
     // const signedIn = useSignedIn()
     const {signedIn, userId, gapi} = useSignedIn()

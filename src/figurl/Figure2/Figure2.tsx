@@ -21,10 +21,17 @@ export const useFigureData = (dataHash: string | undefined, channelName: Channel
     useEffect(() => {
         ;(async () => {
             if (!dataHash) return
-            if (!channelName) return
-            const bucketBaseUrl = await node.kacheryHubInterface().getChannelBucketBaseUrl(channelName)
-            const s = dataHash.toString()
-            const dataUrl = `${bucketBaseUrl}/${channelName}/sha1/${s[0]}${s[1]}/${s[2]}${s[3]}/${s[4]}${s[5]}/${s}`
+            let dataUrl: string
+            if (dataHash.startsWith('ipfs://')) {
+                const a = dataHash.split('/')
+                dataUrl = `https://cloudflare-ipfs.com/${a[2]}`
+            }
+            else {
+                if (!channelName) return
+                const bucketBaseUrl = await node.kacheryHubInterface().getChannelBucketBaseUrl(channelName)
+                const s = dataHash.toString()
+                dataUrl = `${bucketBaseUrl}/${channelName}/sha1/${s[0]}${s[1]}/${s[2]}${s[3]}/${s[4]}${s[5]}/${s}`
+            }
             const x = await axios.get(dataUrl, {responseType: 'json'})
             let data = x.data
             data = await deserializeReturnValue(data)
@@ -72,7 +79,6 @@ const Figure2: FunctionComponent<Props> = ({width, height}) => {
     useEffect(() => {
         if (!figureData) return
         if (!viewUrl) return
-        if (!channelName) return
         if (!googleSignInClient) return
         const id = randomAlphaString(10)
         new FigureInterface({

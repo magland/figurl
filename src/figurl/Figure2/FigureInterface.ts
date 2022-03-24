@@ -18,7 +18,7 @@ class FigureInterface {
     #subfeeds: {[key: string]: Subfeed} = {}
     constructor(private a: {
         kacheryNode: KacheryNode,
-        channelName: ChannelName,
+        channelName: ChannelName | undefined,
         backendId: string | null,
         figureId: string,
         viewUrl: string,
@@ -89,19 +89,42 @@ class FigureInterface {
         updateSignedIn()
     }
     async handleGetFileDataRequest(request: GetFileDataRequest): Promise<GetFileDataResponse> {
-        const bucketBaseUrl = await this.a.kacheryNode.kacheryHubInterface().getChannelBucketBaseUrl(this.a.channelName)
-        const s = request.sha1.toString()
-        const dataUrl = `${bucketBaseUrl}/${this.a.channelName}/sha1/${s[0]}${s[1]}/${s[2]}${s[3]}/${s[4]}${s[5]}/${s}`
+        const bucketBaseUrl = this.a.channelName ? await this.a.kacheryNode.kacheryHubInterface().getChannelBucketBaseUrl(this.a.channelName) : undefined
+        let {sha1, uri} = request
+        if (sha1) { // old
+            uri = `sha1://${sha1}`
+        }
+        if (!uri) {
+            throw Error('Missing sha1 and uri in get file data request')
+        }
+        let dataUrl: string
+        if (uri.startsWith('sha1://')) {
+            if (!bucketBaseUrl) {
+                throw Error('channelName cannot be undefined for sha1:// data')
+            }
+            const s = uri.split('/')[2]
+            dataUrl = `${bucketBaseUrl}/${this.a.channelName}/sha1/${s[0]}${s[1]}/${s[2]}${s[3]}/${s[4]}${s[5]}/${s}`
+        }
+        else if (uri.startsWith('ipfs://')) {
+            const a = uri.split('/')
+            dataUrl = `https://${a[2]}.ipfs.dweb.link`
+        }
+        else {
+            throw Error(`Invalid uri: ${uri}`)
+        }
         const x = await axios.get(dataUrl, {responseType: 'json'})
         let data = x.data
         data = await deserializeReturnValue(data)
-        ;(window as any).figurlFileData[request.sha1.toString()] = data
+        ;(window as any).figurlFileData[uri.toString()] = data
         return {
             type: 'getFileData',
             fileData: data
         }
     }
     async handleInitiateTaskRequest(request: InitiateTaskRequest): Promise<InitiateTaskResponse> {
+        if (!this.a.channelName) {
+            throw Error('channelName cannot be undefined for initiating a task request')
+        }
         const task = initiateTask({
             kacheryNode: this.a.kacheryNode,
             channelName: this.a.channelName,
@@ -137,6 +160,9 @@ class FigureInterface {
         return response
     }
     async handleSubscribeToSubfeedRequest(request: SubscribeToSubfeedRequest): Promise<SubscribeToSubfeedResponse> {
+        if (!this.a.channelName) {
+            throw Error('channelName cannot be undefined for subscribing to a subfeed')
+        }
         const subfeed = await this.a.kacheryNode.feedManager()._loadSubfeed(request.feedId, request.subfeedHash, this.a.channelName)
         const code = `${request.feedId}:${request.subfeedHash}`
         if (!(code in this.#subfeeds)) {

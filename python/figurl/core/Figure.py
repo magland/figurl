@@ -2,7 +2,7 @@ import os
 import json
 from typing import Any, Union
 import urllib.parse
-import kachery_client as kc
+import hashio as ha
 from .serialize_wrapper import _serialize
 from .Sync import Sync
 
@@ -32,21 +32,25 @@ class Figure:
     @property
     def data(self):
         return self._data
-    def url(self, *, label: str, channel: Union[str, None]=None, base_url: Union[str, None]=None, view_url: Union[str, None] = None):
+    def url(self, *, label: str, channel: Union[str, None]='', base_url: Union[str, None]=None, view_url: Union[str, None] = None):
         if base_url is None:
             base_url = default_base_url
-        if channel is None:
-            if default_channel is None:
-                raise Exception('No channel specified and FIGURL_CHANNEL is not set.')
-            channel = default_channel
+        if channel == '':
+            if default_channel is not None:
+                channel = default_channel
         if self._view_url is not None: # new system:
-            if self._data_uri is None:
-                self._data_uri = kc.store_json(self._serialized_data)
-            data_hash = self._data_uri.split('/')[2]
-            kc.upload_file(self._data_uri, channel=channel, single_chunk=True)
+            # if self._data_uri is None:
+            #     self._data_uri = kc.store_json(self._serialized_data)
+            # data_hash = self._data_uri.split('/')[2]
+            # kc.upload_file(self._data_uri, channel=channel, single_chunk=True)
+            self._data_uri = ha.store_json(self._serialized_data)
+            data_hash = self._data_uri
             if view_url is None:
                 view_url = self._view_url
-            url = f'{base_url}/f?v={view_url}&d={data_hash}&channel={channel}&label={_enc(label)}'
+            url = f'{base_url}/f?v={view_url}&d={data_hash}'
+            if channel:
+                url += f'&channel={channel}'
+            url += f'&label={_enc(label)}'
             return url
         else:
             raise Exception('No self._view_url')

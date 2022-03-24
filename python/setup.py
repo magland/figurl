@@ -10,7 +10,7 @@ setup(
         'click',
         'altair',
         'hither>=0.7.0',
-        'kachery-client>=1.1.0',
+        'hashio @ git+https://github.com/scratchrealm/hashio',
         'pyyaml',
         'google-auth',
         'cachecontrol'

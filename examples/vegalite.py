@@ -11,5 +11,5 @@ chart = alt.Chart(source).mark_bar().encode(
     y='b'
 )
 
-url = fig.Altair(chart).url(label='vegalite')
+url = fig.Altair(chart).url(label='vegalite', channel=None)
 print(url)

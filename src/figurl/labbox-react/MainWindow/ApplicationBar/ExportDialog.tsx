@@ -39,8 +39,8 @@ const ExportDialog: FunctionComponent<Props> = () => {
             figurlDataJsContent += `window.figurlData.figure = JSON.parse(atob("${btoa(JSON.stringify(figureData))}"))\n`
             figurlDataJsContent += `window.figurlData.sha1 = {}\n`
             const figurlFileData: {[key: string]: any} = (window as any).figurlFileData
-            for (let sha1 in figurlFileData) {
-                figurlDataJsContent += `window.figurlData.sha1['${sha1}'] = JSON.parse(atob("${btoa(JSON.stringify(figurlFileData[sha1]))}"))\n`
+            for (let uri in figurlFileData) {
+                figurlDataJsContent += `window.figurlData.uri['${uri}'] = JSON.parse(atob("${btoa(JSON.stringify(figurlFileData[uri]))}"))\n`
             }
             newZip.addFile(`${label2}/figurlData.js`, Buffer.from(figurlDataJsContent))
 
