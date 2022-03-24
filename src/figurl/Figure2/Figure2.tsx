@@ -24,7 +24,7 @@ export const useFigureData = (dataHash: string | undefined, channelName: Channel
             let dataUrl: string
             if (dataHash.startsWith('ipfs://')) {
                 const a = dataHash.split('/')
-                dataUrl = `https://cloudflare-ipfs.com/${a[2]}`
+                dataUrl = `https://cloudflare-ipfs.com/ipfs/${a[2]}`
             }
             else {
                 if (!channelName) return
