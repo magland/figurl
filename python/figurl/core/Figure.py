@@ -2,7 +2,7 @@ import os
 import json
 from typing import Any, Union
 import urllib.parse
-import hashio as ha
+import kachery_cloud as kcl
 from .serialize_wrapper import _serialize
 from .Sync import Sync
 
@@ -43,11 +43,11 @@ class Figure:
             #     self._data_uri = kc.store_json(self._serialized_data)
             # data_hash = self._data_uri.split('/')[2]
             # kc.upload_file(self._data_uri, channel=channel, single_chunk=True)
-            self._data_uri = ha.store_json(self._serialized_data)
-            data_hash = self._data_uri
+            self._data_uri = kcl.store_json(self._serialized_data)
+            data_uri = self._data_uri
             if view_url is None:
                 view_url = self._view_url
-            url = f'{base_url}/f?v={view_url}&d={data_hash}'
+            url = f'{base_url}/f?v={view_url}&d={data_uri}'
             if channel:
                 url += f'&channel={channel}'
             url += f'&label={_enc(label)}'

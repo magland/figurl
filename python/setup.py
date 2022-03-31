@@ -9,8 +9,7 @@ setup(
     install_requires=[
         'click',
         'altair',
-        'hither>=0.7.0',
-        'hashio @ git+https://github.com/scratchrealm/hashio',
+        'kachery_cloud @ git+https://github.com/scratchrealm/kachery-cloud',
         'pyyaml',
         'google-auth',
         'cachecontrol'

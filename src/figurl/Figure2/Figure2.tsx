@@ -1,14 +1,15 @@
 import axios from 'axios';
+import useGoogleSignInClient from 'commonComponents/googleSignIn/useGoogleSignInClient';
 import { ChannelName } from 'commonInterface/kacheryTypes';
 import randomAlphaString from 'commonInterface/util/randomAlphaString';
+import urlFromUri from 'commonInterface/util/urlFromUri';
 import { useChannel, useKacheryNode } from 'figurl/kachery-react';
+import deserializeReturnValue from 'figurl/kachery-react/deserializeReturnValue';
 import QueryString from 'querystring';
 import React, { FunctionComponent, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router';
 import FigureInterface from './FigureInterface';
-import useGoogleSignInClient from 'commonComponents/googleSignIn/useGoogleSignInClient'
-import urlFromUri from 'commonInterface/util/urlFromUri';
-import deserializeReturnValue from 'figurl/kachery-react/deserializeReturnValue';
+import ipfsDownload from './ipfsDownload';
 
 type Props = {
     width: number
@@ -22,18 +23,20 @@ export const useFigureData = (dataHash: string | undefined, channelName: Channel
         ;(async () => {
             if (!dataHash) return
             let dataUrl: string
+            let data
             if (dataHash.startsWith('ipfs://')) {
                 const a = dataHash.split('/')
-                dataUrl = `https://cloudflare-ipfs.com/ipfs/${a[2]}`
+                const cid = a[2]
+                data = await ipfsDownload(cid)
             }
             else {
                 if (!channelName) return
                 const bucketBaseUrl = await node.kacheryHubInterface().getChannelBucketBaseUrl(channelName)
                 const s = dataHash.toString()
                 dataUrl = `${bucketBaseUrl}/${channelName}/sha1/${s[0]}${s[1]}/${s[2]}${s[3]}/${s[4]}${s[5]}/${s}`
+                const x = await axios.get(dataUrl, {responseType: 'json'})
+                data = x.data
             }
-            const x = await axios.get(dataUrl, {responseType: 'json'})
-            let data = x.data
             data = await deserializeReturnValue(data)
             setFigureData(data)
         })()

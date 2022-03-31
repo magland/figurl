@@ -7,6 +7,7 @@ import { Task } from "figurl/kachery-react/initiateTask"
 import KacheryNode from "kacheryInterface/core/KacheryNode"
 import Subfeed from "kacheryInterface/feeds/Subfeed"
 import { MutableRefObject } from "react"
+import ipfsDownload from './ipfsDownload'
 import { GetFigureDataResponse, GetFileDataRequest, GetFileDataResponse, InitiateTaskRequest, InitiateTaskResponse, isFigurlRequest, SubscribeToSubfeedRequest, SubscribeToSubfeedResponse } from "./viewInterface/FigurlRequestTypes"
 import { MessageToChild, NewSubfeedMessagesMessage, TaskStatusUpdateMessage } from "./viewInterface/MessageToChildTypes"
 import { isMessageToParent } from "./viewInterface/MessageToParentTypes"
@@ -97,28 +98,31 @@ class FigureInterface {
         if (!uri) {
             throw Error('Missing sha1 and uri in get file data request')
         }
-        let dataUrl: string
+        let data
         if (uri.startsWith('sha1://')) {
             if (!bucketBaseUrl) {
                 throw Error('channelName cannot be undefined for sha1:// data')
             }
             const s = uri.split('/')[2]
-            dataUrl = `${bucketBaseUrl}/${this.a.channelName}/sha1/${s[0]}${s[1]}/${s[2]}${s[3]}/${s[4]}${s[5]}/${s}`
+            const dataUrl = `${bucketBaseUrl}/${this.a.channelName}/sha1/${s[0]}${s[1]}/${s[2]}${s[3]}/${s[4]}${s[5]}/${s}`
+            const x = await axios.get(dataUrl, {responseType: 'json'})
+            data = x.data
         }
         else if (uri.startsWith('ipfs://')) {
             const a = uri.split('/')
-            dataUrl = `https://${a[2]}.ipfs.dweb.link`
+            const cid = a[2]
+
+            data = await ipfsDownload(cid)
         }
         else {
             throw Error(`Invalid uri: ${uri}`)
         }
-        const x = await axios.get(dataUrl, {responseType: 'json'})
-        let data = x.data
-        data = await deserializeReturnValue(data)
-        ;(window as any).figurlFileData[uri.toString()] = data
+        
+        const dataDeserialized = await deserializeReturnValue(data)
+        ;(window as any).figurlFileData[uri.toString()] = dataDeserialized
         return {
             type: 'getFileData',
-            fileData: data
+            fileData: dataDeserialized
         }
     }
     async handleInitiateTaskRequest(request: InitiateTaskRequest): Promise<InitiateTaskResponse> {
