@@ -6,6 +6,32 @@ Create shareable, interactive, live figures on the distributed web using Python
 
 See also [kachery-cloud](https://github.com/scratchrealm/kachery-cloud)
 
+## Quick example
+
+```python
+# You'll first need to set up and configur kachery-cloud
+
+# pip install altair vega_datasets
+
+import figurl as fig
+
+from vega_datasets import data
+stocks = data.stocks()
+
+import altair as alt
+x = alt.Chart(stocks).mark_line().encode(
+  x='date:T',
+  y='price',
+  color='symbol'
+).interactive(bind_y=False)
+
+url = fig.Altair(x).url(label='scatter')
+print(url)
+
+# Output: 
+# https://figurl.org/f?v=gs://figurl/vegalite-1&d=ipfs://bafkreierzdetqnlhxfczsz6zqg6psvjobzqidtgmhmf7a4z27gjkml32xq&label=scatter
+```
+
 ## Introduction
 
 [Introduction to Figurl](https://github.com/magland/figurl/wiki/Introduction-to-Figurl)
