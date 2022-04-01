@@ -9,7 +9,7 @@ See also [kachery-cloud](https://github.com/scratchrealm/kachery-cloud)
 ## Quick example
 
 ```python
-# You'll first need to set up and configur kachery-cloud
+# You'll first need to set up and configure kachery-cloud
 
 # pip install altair vega_datasets
 
@@ -31,6 +31,8 @@ print(url)
 # Output: 
 # https://figurl.org/f?v=gs://figurl/vegalite-1&d=ipfs://bafkreierzdetqnlhxfczsz6zqg6psvjobzqidtgmhmf7a4z27gjkml32xq&label=scatter
 ```
+
+[Resulting scatter plot](https://figurl.org/f?v=gs://figurl/vegalite-1&d=ipfs://bafkreierzdetqnlhxfczsz6zqg6psvjobzqidtgmhmf7a4z27gjkml32xq&label=scatter) with data stored in [Filebase](https://filebase.com/) and pinned on [IPFS](https://ipfs.io/). 
 
 ## Introduction
 
