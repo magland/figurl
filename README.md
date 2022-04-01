@@ -1,8 +1,10 @@
-# figurl
-
 <img src="./figurl.png" width="200px" />
 
-Shareable, interactive, computation-backed figures
+# figurl
+
+Create shareable, interactive, live figures on the distributed web using Python
+
+See also [kachery-cloud](https://github.com/scratchrealm/kachery-cloud)
 
 ## Introduction
 
@@ -22,6 +24,8 @@ Shareable, interactive, computation-backed figures
 
 ## Authors
 
-Jeremy Magland and Jeff Soules
+Jeremy Magland and Jeff Soules, [Center for Computational Mathematics, Flatiron Institute](https://www.simonsfoundation.org/flatiron/center-for-computational-mathematics)
 
-Center for Computational Mathematics, Flatiron Institute
+## License
+
+Apache 2.0
