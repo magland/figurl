@@ -1,6 +1,10 @@
-<img src="./figurl.png" width="200px" />
+> :warning: This repo is obsolete.
+> 
+> :warning: Please visit the [new home of figurl](https://github.com/scratchrealm/figurl2).
 
-# figurl
+---
+
+# Old figurl README
 
 Create shareable, interactive, live figures on the distributed web using Python
 
